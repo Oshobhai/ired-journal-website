@@ -1,0 +1,2 @@
+import {Header,Footer} from '../components';
+export default function Page(){return <><Header/><section className="pageHero"><div className="container"><h1>Author Guidelines</h1></div></section><main className="container"><div className="contentCard"><p>This page is part of the Phase 1 structure. Final verified content will be inserted here without changing the main layout.</p></div></main><Footer/></>}
