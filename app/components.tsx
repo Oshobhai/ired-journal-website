@@ -4,7 +4,7 @@ export function Header(){
   return <>
     <div className="utilityBar">
       <div className="container utilityInner">
-        <div className="utilityLeft"><span>● Ahmedabad, Gujarat, India</span><span>✉ info@ired.org</span><span>☎ +91 79 1234 5678</span></div>
+        <div className="utilityLeft"><span>● Ahmedabad, Gujarat, India</span><span>✉ ired.foundation@gmail.com</span><span>☎ 7383000930 · 7203998343</span></div>
         <div className="utilityRight"><span>A A A</span><span>◉ English⌄</span><span>f</span><span>in</span><span>▶</span></div>
       </div>
     </div>
@@ -30,7 +30,7 @@ export function Footer(){
       <div className="footerBrand"><img src="/ired-logo.svg" alt="IRED"/><p>Institute of Research Education and Development</p><p>Ahmedabad, Gujarat, India</p></div>
       <div><h3>Quick Links</h3><Link href="/">Home</Link><Link href="/about">About IRED</Link><Link href="/green">GREEN Papers</Link><Link href="/red">RED Books</Link></div>
       <div><h3>Other Links</h3><Link href="/editorial-board">Editorial Board</Link><Link href="/author-guidelines">Author Guidelines</Link><a href="#ethics">Publication Ethics</a><Link href="/contact">Contact Us</Link></div>
-      <div><h3>Contact Us</h3><p>Ahmedabad, Gujarat, India</p><p>☎ +91 79 1234 5678</p><p>✉ info@ired.org</p><div className="socials"><span>f</span><span>in</span><span>▶</span></div></div>
+      <div><h3>Contact Us</h3><p>A-3, 3rd Floor, Gita Apartment,<br/>Nr. Hirabaug Crossing, Ambawadi,<br/>Ahmedabad-380015</p><p>☎ 7383000930 · 7203998343</p><p>✉ ired.foundation@gmail.com</p><div className="socials"><span>f</span><span>in</span><span>▶</span></div></div>
       <div className="footerMotto">Knowledge<br/>for a Better Tomorrow</div>
     </div>
     <div className="copy"><span>© 2026 Institute of Research Education and Development (IRED). All rights reserved.</span><span>Privacy Policy&nbsp;&nbsp;|&nbsp;&nbsp;Terms of Use&nbsp;&nbsp;|&nbsp;&nbsp;Sitemap</span></div>
