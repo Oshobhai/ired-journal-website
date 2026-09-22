@@ -1,0 +1,3 @@
+import {Header,Footer} from '../components';
+import {redBooks} from '@/lib/data';
+export default function Red(){return <><Header/><section className="pageHero"><div className="container"><h1>RED: The Research Journal — Research Books</h1></div></section><main className="container"><div className="contentCard"><p>Complete research books and compiled scholarly volumes are managed and published here.</p><div className="listPanel">{redBooks.map((b,i)=><div className="bookRow" key={i}><div><div className="itemTitle">{b.title}</div><div className="meta">{b.meta} · {b.detail}</div></div><div className="actions"><button className="smallBtn">View Book</button><button className="smallBtn">Download PDF</button></div></div>)}</div></div></main><Footer/></>}
