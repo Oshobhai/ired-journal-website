@@ -1,0 +1,195 @@
+'use client'
+
+import { FormEvent, useCallback, useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+
+type Publication = {
+  id: string
+  title: string
+  status: 'draft' | 'published' | 'archived'
+  pdf_path: string
+  created_at: string
+  authors?: string
+  editors?: string | null
+  publication_year?: number | null
+}
+
+function safeFileName(name: string) {
+  return name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/-+/g, '-')
+}
+
+export default function PublicationManager() {
+  const supabase = createClient()
+  const [green, setGreen] = useState<Publication[]>([])
+  const [red, setRed] = useState<Publication[]>([])
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState('')
+
+  const load = useCallback(async () => {
+    const [{ data: greenRows }, { data: redRows }] = await Promise.all([
+      supabase.from('green_papers').select('id,title,authors,status,pdf_path,publication_year,created_at').order('created_at', { ascending: false }),
+      supabase.from('red_books').select('id,title,editors,status,pdf_path,publication_year,created_at').order('created_at', { ascending: false }),
+    ])
+    setGreen((greenRows || []) as Publication[])
+    setRed((redRows || []) as Publication[])
+  }, [supabase])
+
+  useEffect(() => { void load() }, [load])
+
+  async function uploadGreen(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setBusy(true); setMessage('')
+    const form = new FormData(event.currentTarget)
+    const file = form.get('pdf') as File
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) throw new Error('Admin session expired. Please sign in again.')
+      if (!file || file.type !== 'application/pdf') throw new Error('Please select a PDF file.')
+      if (file.size > 50 * 1024 * 1024) throw new Error('GREEN paper PDF must be 50 MB or less.')
+
+      const path = `${new Date().getFullYear()}/${crypto.randomUUID()}-${safeFileName(file.name)}`
+      const { error: uploadError } = await supabase.storage.from('green-papers').upload(path, file, { contentType: 'application/pdf', upsert: false })
+      if (uploadError) throw uploadError
+
+      const status = String(form.get('status') || 'draft')
+      const { error: insertError } = await supabase.from('green_papers').insert({
+        title: String(form.get('title') || '').trim(),
+        authors: String(form.get('authors') || '').trim(),
+        abstract: String(form.get('abstract') || '').trim() || null,
+        publication_year: Number(form.get('publication_year')) || null,
+        volume: String(form.get('volume') || '').trim() || null,
+        issue: String(form.get('issue') || '').trim() || null,
+        pdf_path: path,
+        pdf_size: file.size,
+        status,
+        published_at: status === 'published' ? new Date().toISOString() : null,
+        created_by: user.id,
+      })
+      if (insertError) {
+        await supabase.storage.from('green-papers').remove([path])
+        throw insertError
+      }
+      event.currentTarget.reset()
+      setMessage('GREEN paper uploaded successfully.')
+      await load()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Upload failed.')
+    } finally { setBusy(false) }
+  }
+
+  async function uploadRed(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setBusy(true); setMessage('')
+    const form = new FormData(event.currentTarget)
+    const file = form.get('pdf') as File
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) throw new Error('Admin session expired. Please sign in again.')
+      if (!file || file.type !== 'application/pdf') throw new Error('Please select a PDF file.')
+      if (file.size > 200 * 1024 * 1024) throw new Error('RED book PDF must be 200 MB or less.')
+
+      const path = `${new Date().getFullYear()}/${crypto.randomUUID()}-${safeFileName(file.name)}`
+      const { error: uploadError } = await supabase.storage.from('red-books').upload(path, file, { contentType: 'application/pdf', upsert: false })
+      if (uploadError) throw uploadError
+
+      const status = String(form.get('status') || 'draft')
+      const { error: insertError } = await supabase.from('red_books').insert({
+        title: String(form.get('title') || '').trim(),
+        subtitle: String(form.get('subtitle') || '').trim() || null,
+        editors: String(form.get('editors') || '').trim() || null,
+        description: String(form.get('description') || '').trim() || null,
+        publication_year: Number(form.get('publication_year')) || null,
+        volume: String(form.get('volume') || '').trim() || null,
+        isbn: String(form.get('isbn') || '').trim() || null,
+        pdf_path: path,
+        pdf_size: file.size,
+        status,
+        published_at: status === 'published' ? new Date().toISOString() : null,
+        created_by: user.id,
+      })
+      if (insertError) {
+        await supabase.storage.from('red-books').remove([path])
+        throw insertError
+      }
+      event.currentTarget.reset()
+      setMessage('RED book uploaded successfully.')
+      await load()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Upload failed.')
+    } finally { setBusy(false) }
+  }
+
+  async function setStatus(kind: 'green' | 'red', item: Publication, status: Publication['status']) {
+    setBusy(true); setMessage('')
+    const table = kind === 'green' ? 'green_papers' : 'red_books'
+    const { error } = await supabase.from(table).update({ status, published_at: status === 'published' ? new Date().toISOString() : null }).eq('id', item.id)
+    setMessage(error ? error.message : `Status changed to ${status}.`)
+    await load(); setBusy(false)
+  }
+
+  async function removeItem(kind: 'green' | 'red', item: Publication) {
+    if (!confirm(`Delete “${item.title}” and its PDF?`)) return
+    setBusy(true); setMessage('')
+    const bucket = kind === 'green' ? 'green-papers' : 'red-books'
+    const table = kind === 'green' ? 'green_papers' : 'red_books'
+    const { error: storageError } = await supabase.storage.from(bucket).remove([item.pdf_path])
+    if (storageError) { setMessage(storageError.message); setBusy(false); return }
+    const { error } = await supabase.from(table).delete().eq('id', item.id)
+    setMessage(error ? error.message : 'Publication deleted.')
+    await load(); setBusy(false)
+  }
+
+  const fieldStyle = { width: '100%', padding: '9px 10px', border: '1px solid #ccd5dd', borderRadius: 5, marginTop: 4, marginBottom: 10 } as const
+  const labelStyle = { display: 'block', fontSize: 12, fontWeight: 700 } as const
+
+  return <div style={{display:'grid',gap:22,marginTop:24}}>
+    {message ? <div style={{padding:'11px 13px',background:'#eef7f2',border:'1px solid #c7e4d2',borderRadius:6,fontSize:13}}>{message}</div> : null}
+
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:18}}>
+      <section className="contentCard">
+        <h2>Add GREEN Research Paper</h2>
+        <form onSubmit={uploadGreen}>
+          <label style={labelStyle}>Title<input name="title" required style={fieldStyle}/></label>
+          <label style={labelStyle}>Author(s)<input name="authors" required style={fieldStyle}/></label>
+          <label style={labelStyle}>Abstract<textarea name="abstract" rows={3} style={fieldStyle}/></label>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+            <label style={labelStyle}>Year<input name="publication_year" type="number" min="1900" max="2100" style={fieldStyle}/></label>
+            <label style={labelStyle}>Volume<input name="volume" style={fieldStyle}/></label>
+            <label style={labelStyle}>Issue<input name="issue" style={fieldStyle}/></label>
+          </div>
+          <label style={labelStyle}>PDF (max 50 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required style={fieldStyle}/></label>
+          <label style={labelStyle}>Initial status<select name="status" defaultValue="draft" style={fieldStyle}><option value="draft">Draft</option><option value="published">Published</option></select></label>
+          <button className="btn btnGreen" disabled={busy} type="submit">{busy ? 'Working…' : 'Upload GREEN Paper'}</button>
+        </form>
+      </section>
+
+      <section className="contentCard">
+        <h2>Add RED Research Book</h2>
+        <form onSubmit={uploadRed}>
+          <label style={labelStyle}>Title<input name="title" required style={fieldStyle}/></label>
+          <label style={labelStyle}>Subtitle<input name="subtitle" style={fieldStyle}/></label>
+          <label style={labelStyle}>Editor(s)<input name="editors" style={fieldStyle}/></label>
+          <label style={labelStyle}>Description<textarea name="description" rows={3} style={fieldStyle}/></label>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+            <label style={labelStyle}>Year<input name="publication_year" type="number" min="1900" max="2100" style={fieldStyle}/></label>
+            <label style={labelStyle}>Volume<input name="volume" style={fieldStyle}/></label>
+            <label style={labelStyle}>ISBN<input name="isbn" style={fieldStyle}/></label>
+          </div>
+          <label style={labelStyle}>PDF (max 200 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required style={fieldStyle}/></label>
+          <label style={labelStyle}>Initial status<select name="status" defaultValue="draft" style={fieldStyle}><option value="draft">Draft</option><option value="published">Published</option></select></label>
+          <button className="btn btnRed" disabled={busy} type="submit">{busy ? 'Working…' : 'Upload RED Book'}</button>
+        </form>
+      </section>
+    </div>
+
+    <section className="contentCard">
+      <h2>GREEN Papers</h2>
+      {green.length === 0 ? <p>No papers uploaded yet.</p> : green.map(item => <div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',padding:'10px 0',borderBottom:'1px solid #e4e9ed'}}><div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.authors} · {item.publication_year || 'Year not set'} · {item.status}</div></div><div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={() => setStatus('green', item, item.status === 'published' ? 'draft' : 'published')}>{item.status === 'published' ? 'Unpublish' : 'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={() => removeItem('green', item)}>Delete</button></div></div>)}
+    </section>
+
+    <section className="contentCard">
+      <h2>RED Books</h2>
+      {red.length === 0 ? <p>No books uploaded yet.</p> : red.map(item => <div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',padding:'10px 0',borderBottom:'1px solid #e4e9ed'}}><div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.editors || 'Editor not set'} · {item.publication_year || 'Year not set'} · {item.status}</div></div><div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={() => setStatus('red', item, item.status === 'published' ? 'draft' : 'published')}>{item.status === 'published' ? 'Unpublish' : 'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={() => removeItem('red', item)}>Delete</button></div></div>)}
+    </section>
+  </div>
+}
