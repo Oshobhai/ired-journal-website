@@ -1,0 +1,2 @@
+import {Header,Footer} from '../components';
+export default function Contact(){return <><Header/><section className="pageHero"><div className="container"><h1>Contact Us</h1></div></section><main className="container"><div className="contentCard"><h2>Institute of Research Education and Development (IRED)</h2><p>A-3, 3rd Floor, Gita Apartment, Nr. Hirabaug Crossing, Ambawadi, Ahmedabad-380015</p><p><strong>Phone:</strong> 7383000930 | 7203998343</p><p><strong>Email:</strong> ired.foundation@gmail.com</p></div></main><Footer/></>}
