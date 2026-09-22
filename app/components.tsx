@@ -4,7 +4,7 @@ export function Header(){
   return <>
     <div className="utilityBar"><div className="container utilityInner"><div className="utilityLeft"><span>● Ahmedabad, Gujarat, India</span><span>✉ ired.foundation@gmail.com</span><span>☎ 7383000930 · 7203998343</span></div><div className="utilityRight"><span>A A A</span><span>◉ English⌄</span><span>f</span><span>in</span><span>▶</span></div></div></div>
     <header className="siteHeader"><div className="container brandRow">
-      <Link href="/" className="brandLogoLink" aria-label="IRED home"><img className="iredLogo" src="/ired-header-logo.jpg?v=3" alt="IRED — Institute of Research Education and Development"/></Link>
+      <Link href="/" className="brandLogoLink" aria-label="IRED home"><img className="iredLogo" src="/ired-header-logo.webp?v=5" alt="IRED — Institute of Research Education and Development"/></Link>
       <div className="headerActions"><div className="search"><input aria-label="Search" placeholder="Search papers, books, authors, keywords..."/><button aria-label="Search">⌕</button></div><Link className="btn btnGold compact" href="/green">↥ Submit a Paper</Link><Link className="btn btnOutline compact" href="/admin">♟ Admin Login</Link></div>
     </div></header>
     <nav className="mainNav"><div className="container navInner"><Link className="active" href="/">Home</Link><Link href="/about">About IRED</Link><Link href="/green">GREEN Papers⌄</Link><Link href="/red">RED Books⌄</Link><Link href="/editorial-board">Editorial Board</Link><Link href="/author-guidelines">Author Guidelines</Link><a href="#ethics">Publication Ethics</a><a href="#archives">Archives</a><Link href="/contact">Contact Us</Link><span className="navTagline">“Knowledge for a Better Tomorrow”</span></div></nav>
@@ -13,7 +13,7 @@ export function Header(){
 
 export function Footer(){
   return <footer className="footer"><div className="container"><div className="footerGrid">
-    <div className="footerBrand"><img src="/ired-header-logo.jpg?v=3" alt="IRED"/><p>Institute of Research Education and Development</p><p>Ahmedabad, Gujarat, India</p></div>
+    <div className="footerBrand"><img src="/ired-header-logo.webp?v=5" alt="IRED"/><p>Institute of Research Education and Development</p><p>Ahmedabad, Gujarat, India</p></div>
     <div><h3>Quick Links</h3><Link href="/">Home</Link><Link href="/about">About IRED</Link><Link href="/green">GREEN Papers</Link><Link href="/red">RED Books</Link></div>
     <div><h3>Other Links</h3><Link href="/editorial-board">Editorial Board</Link><Link href="/author-guidelines">Author Guidelines</Link><a href="#ethics">Publication Ethics</a><Link href="/contact">Contact Us</Link></div>
     <div><h3>Contact Us</h3><p>A-3, 3rd Floor, Gita Apartment,<br/>Nr. Hirabaug Crossing, Ambawadi,<br/>Ahmedabad-380015</p><p>☎ 7383000930 · 7203998343</p><p>✉ ired.foundation@gmail.com</p><div className="socials"><span>f</span><span>in</span><span>▶</span></div></div>
