@@ -146,6 +146,59 @@ export default function PublicationManager() {
     } finally { setBusy(false) }
   }
 
+  async function repairRedFiles(event: FormEvent<HTMLFormElement>, item: Publication) {
+    event.preventDefault()
+    setBusy(true); setMessage('')
+    const formEl = event.currentTarget
+    const form = new FormData(formEl)
+    const pdf = form.get('repair_pdf') as File
+    const cover = form.get('repair_cover') as File
+    let newPdfPath = ''
+    let newCoverPath = ''
+
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) throw new Error('Admin session expired. Please sign in again.')
+      const hasPdf = pdf && pdf.size > 0
+      const hasCover = cover && cover.size > 0
+      if (!hasPdf && !hasCover) throw new Error('Select a PDF or cover image first.')
+
+      if (hasPdf) {
+        if (pdf.type !== 'application/pdf') throw new Error('RED book file must be a PDF.')
+        if (pdf.size > 200 * 1024 * 1024) throw new Error('RED book PDF must be 200 MB or less.')
+        newPdfPath = `${new Date().getFullYear()}/${crypto.randomUUID()}-${safeFileName(pdf.name)}`
+        const { error } = await supabase.storage.from('red-books').upload(newPdfPath, pdf, { contentType: 'application/pdf', upsert: false })
+        if (error) throw error
+      }
+
+      if (hasCover) {
+        if (!['image/jpeg','image/png','image/webp'].includes(cover.type)) throw new Error('Cover must be JPG, PNG, or WebP.')
+        if (cover.size > 5 * 1024 * 1024) throw new Error('Cover image must be 5 MB or less.')
+        newCoverPath = `${new Date().getFullYear()}/${crypto.randomUUID()}-${safeFileName(cover.name)}`
+        const { error } = await supabase.storage.from('red-book-covers').upload(newCoverPath, cover, { contentType: cover.type, upsert: false })
+        if (error) throw error
+      }
+
+      const updates: Record<string, string | number | null> = {}
+      if (newPdfPath) { updates.pdf_path = newPdfPath; updates.pdf_size = pdf.size }
+      if (newCoverPath) updates.cover_path = newCoverPath
+
+      const { error: updateError } = await supabase.from('red_books').update(updates).eq('id', item.id)
+      if (updateError) throw updateError
+
+      if (newPdfPath && item.pdf_path) await supabase.storage.from('red-books').remove([item.pdf_path])
+      if (newCoverPath && item.cover_path) await supabase.storage.from('red-book-covers').remove([item.cover_path])
+
+      formEl.reset()
+      setMessage('RED book files repaired successfully. View Book will now use the new PDF.')
+      await load()
+    } catch (error) {
+      if (newPdfPath) await supabase.storage.from('red-books').remove([newPdfPath])
+      if (newCoverPath) await supabase.storage.from('red-book-covers').remove([newCoverPath])
+      setMessage(error instanceof Error ? error.message : 'File repair failed.')
+    } finally { setBusy(false) }
+  }
+
   async function setStatus(kind: 'green' | 'red', item: Publication, status: Publication['status']) {
     setBusy(true); setMessage('')
     const table = kind === 'green' ? 'green_papers' : 'red_books'
@@ -223,7 +276,20 @@ export default function PublicationManager() {
       {red.length === 0 ? <p>No books uploaded yet.</p> : red.map(item => {
         const coverUrl = item.cover_path ? supabase.storage.from('red-book-covers').getPublicUrl(item.cover_path).data.publicUrl : null
         const dateLabel = [item.publication_month, item.publication_year].filter(Boolean).join(' ') || item.publication_label || 'Date not set'
-        return <div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',padding:'10px 0',borderBottom:'1px solid #e4e9ed'}}><div style={{display:'flex',gap:10,alignItems:'center'}}>{coverUrl ? <img src={coverUrl} alt="" style={{width:46,height:62,objectFit:'cover',borderRadius:3,border:'1px solid #ddd'}}/> : null}<div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.editors || 'Editor not set'} · {dateLabel}{item.issue ? ` · Issue ${item.issue}` : ''} · {item.status}</div></div></div><div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={() => setStatus('red', item, item.status === 'published' ? 'draft' : 'published')}>{item.status === 'published' ? 'Unpublish' : 'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={() => removeItem('red', item)}>Delete</button></div></div>
+        return <div key={item.id} style={{padding:'12px 0',borderBottom:'1px solid #e4e9ed'}}>
+          <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center'}}>
+            <div style={{display:'flex',gap:10,alignItems:'center'}}>{coverUrl ? <img src={coverUrl} alt="" style={{width:46,height:62,objectFit:'cover',borderRadius:3,border:'1px solid #ddd'}}/> : <div style={{width:46,height:62,border:'1px dashed #c8c8c8',borderRadius:3,display:'grid',placeItems:'center',fontSize:9,color:'#777'}}>No cover</div>}<div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.editors || 'Editor not set'} · {dateLabel}{item.issue ? ` · Issue ${item.issue}` : ''} · {item.status}</div></div></div>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={() => setStatus('red', item, item.status === 'published' ? 'draft' : 'published')}>{item.status === 'published' ? 'Unpublish' : 'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={() => removeItem('red', item)}>Delete</button></div>
+          </div>
+          <form onSubmit={(event) => repairRedFiles(event, item)} style={{marginTop:10,padding:10,background:'#f7f9fa',border:'1px solid #e2e7eb',borderRadius:6}}>
+            <div style={{fontSize:12,fontWeight:700,marginBottom:6}}>Repair / Replace RED files</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:8,alignItems:'end'}}>
+              <label style={labelStyle}>PDF<input name="repair_pdf" type="file" accept="application/pdf,.pdf" style={{...fieldStyle,marginBottom:0}}/></label>
+              <label style={labelStyle}>Cover image<input name="repair_cover" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" style={{...fieldStyle,marginBottom:0}}/></label>
+              <button className="btn btnRed" disabled={busy} type="submit">{busy ? 'Working…' : 'Save Files'}</button>
+            </div>
+          </form>
+        </div>
       })}
     </section>
   </div>
