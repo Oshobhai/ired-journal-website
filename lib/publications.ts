@@ -26,7 +26,12 @@ export type PublicRedBook = {
   theme: string | null
   publication_year: number | null
   volume: string | null
+  issue: string | null
+  issn: string | null
+  publication_label: string | null
   isbn: string | null
+  cover_path: string | null
+  cover_url: string | null
   pdf_path: string
   published_at: string | null
   view_url: string | null
@@ -72,7 +77,7 @@ export async function getPublishedRedBooks(limit?: number): Promise<PublicRedBoo
   const supabase = await createClient()
   let query = supabase
     .from('red_books')
-    .select('id,title,subtitle,editors,description,theme,publication_year,volume,isbn,pdf_path,published_at')
+    .select('id,title,subtitle,editors,description,theme,publication_year,volume,issue,issn,publication_label,isbn,cover_path,pdf_path,published_at')
     .eq('status', 'published')
     .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
@@ -83,9 +88,15 @@ export async function getPublishedRedBooks(limit?: number): Promise<PublicRedBoo
   if (error || !data) return []
 
   return Promise.all(
-    data.map(async (book) => ({
-      ...book,
-      ...(await signedUrls('red-books', book.pdf_path)),
-    }))
+    data.map(async (book) => {
+      const cover_url = book.cover_path
+        ? supabase.storage.from('red-book-covers').getPublicUrl(book.cover_path).data.publicUrl
+        : null
+      return {
+        ...book,
+        cover_url,
+        ...(await signedUrls('red-books', book.pdf_path)),
+      }
+    })
   ) as Promise<PublicRedBook[]>
 }
