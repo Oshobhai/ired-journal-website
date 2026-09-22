@@ -8,10 +8,13 @@ type Publication = {
   title: string
   status: 'draft' | 'published' | 'archived'
   pdf_path: string
+  cover_path?: string | null
   created_at: string
   authors?: string
   editors?: string | null
   publication_year?: number | null
+  issue?: string | null
+  publication_label?: string | null
 }
 
 function safeFileName(name: string) {
@@ -28,7 +31,7 @@ export default function PublicationManager() {
   const load = useCallback(async () => {
     const [{ data: greenRows }, { data: redRows }] = await Promise.all([
       supabase.from('green_papers').select('id,title,authors,status,pdf_path,publication_year,created_at').order('created_at', { ascending: false }),
-      supabase.from('red_books').select('id,title,editors,status,pdf_path,publication_year,created_at').order('created_at', { ascending: false }),
+      supabase.from('red_books').select('id,title,editors,status,pdf_path,cover_path,publication_year,issue,publication_label,created_at').order('created_at', { ascending: false }),
     ])
     setGreen((greenRows || []) as Publication[])
     setRed((redRows || []) as Publication[])
@@ -82,14 +85,26 @@ export default function PublicationManager() {
     setBusy(true); setMessage('')
     const form = new FormData(event.currentTarget)
     const file = form.get('pdf') as File
+    const cover = form.get('cover') as File
+    let pdfPath = ''
+    let coverPath = ''
+
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser()
       if (userError || !user) throw new Error('Admin session expired. Please sign in again.')
       if (!file || file.type !== 'application/pdf') throw new Error('Please select a PDF file.')
       if (file.size > 200 * 1024 * 1024) throw new Error('RED book PDF must be 200 MB or less.')
 
-      const path = `${new Date().getFullYear()}/${crypto.randomUUID()}-${safeFileName(file.name)}`
-      const { error: uploadError } = await supabase.storage.from('red-books').upload(path, file, { contentType: 'application/pdf', upsert: false })
+      if (cover && cover.size > 0) {
+        if (!['image/jpeg','image/png','image/webp'].includes(cover.type)) throw new Error('Cover must be JPG, PNG, or WebP.')
+        if (cover.size > 5 * 1024 * 1024) throw new Error('Cover image must be 5 MB or less.')
+        coverPath = `${new Date().getFullYear()}/${crypto.randomUUID()}-${safeFileName(cover.name)}`
+        const { error: coverError } = await supabase.storage.from('red-book-covers').upload(coverPath, cover, { contentType: cover.type, upsert: false })
+        if (coverError) throw coverError
+      }
+
+      pdfPath = `${new Date().getFullYear()}/${crypto.randomUUID()}-${safeFileName(file.name)}`
+      const { error: uploadError } = await supabase.storage.from('red-books').upload(pdfPath, file, { contentType: 'application/pdf', upsert: false })
       if (uploadError) throw uploadError
 
       const status = String(form.get('status') || 'draft')
@@ -100,21 +115,27 @@ export default function PublicationManager() {
         description: String(form.get('description') || '').trim() || null,
         publication_year: Number(form.get('publication_year')) || null,
         volume: String(form.get('volume') || '').trim() || null,
-        isbn: String(form.get('isbn') || '').trim() || null,
-        pdf_path: path,
+        issue: String(form.get('issue') || '').trim() || null,
+        issn: String(form.get('issn') || '').trim() || null,
+        publication_label: String(form.get('publication_label') || '').trim() || null,
+        cover_path: coverPath || null,
+        pdf_path: pdfPath,
         pdf_size: file.size,
         status,
         published_at: status === 'published' ? new Date().toISOString() : null,
         created_by: user.id,
       })
       if (insertError) {
-        await supabase.storage.from('red-books').remove([path])
+        await supabase.storage.from('red-books').remove([pdfPath])
+        if (coverPath) await supabase.storage.from('red-book-covers').remove([coverPath])
         throw insertError
       }
       event.currentTarget.reset()
       setMessage('RED book uploaded successfully.')
       await load()
     } catch (error) {
+      if (pdfPath) await supabase.storage.from('red-books').remove([pdfPath])
+      if (coverPath) await supabase.storage.from('red-book-covers').remove([coverPath])
       setMessage(error instanceof Error ? error.message : 'Upload failed.')
     } finally { setBusy(false) }
   }
@@ -128,12 +149,13 @@ export default function PublicationManager() {
   }
 
   async function removeItem(kind: 'green' | 'red', item: Publication) {
-    if (!confirm(`Delete “${item.title}” and its PDF?`)) return
+    if (!confirm(`Delete “${item.title}” and its files?`)) return
     setBusy(true); setMessage('')
     const bucket = kind === 'green' ? 'green-papers' : 'red-books'
     const table = kind === 'green' ? 'green_papers' : 'red_books'
     const { error: storageError } = await supabase.storage.from(bucket).remove([item.pdf_path])
     if (storageError) { setMessage(storageError.message); setBusy(false); return }
+    if (kind === 'red' && item.cover_path) await supabase.storage.from('red-book-covers').remove([item.cover_path])
     const { error } = await supabase.from(table).delete().eq('id', item.id)
     setMessage(error ? error.message : 'Publication deleted.')
     await load(); setBusy(false)
@@ -164,8 +186,9 @@ export default function PublicationManager() {
       </section>
 
       <section className="contentCard">
-        <h2>Add RED Research Book</h2>
+        <h2>Add RED Research Book / Volume</h2>
         <form onSubmit={uploadRed}>
+          <label style={labelStyle}>Book / Volume Cover (JPG, PNG, WebP · max 5 MB)<input name="cover" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" style={fieldStyle}/></label>
           <label style={labelStyle}>Title<input name="title" required style={fieldStyle}/></label>
           <label style={labelStyle}>Subtitle<input name="subtitle" style={fieldStyle}/></label>
           <label style={labelStyle}>Editor(s)<input name="editors" style={fieldStyle}/></label>
@@ -173,7 +196,11 @@ export default function PublicationManager() {
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
             <label style={labelStyle}>Year<input name="publication_year" type="number" min="1900" max="2100" style={fieldStyle}/></label>
             <label style={labelStyle}>Volume<input name="volume" style={fieldStyle}/></label>
-            <label style={labelStyle}>ISBN<input name="isbn" style={fieldStyle}/></label>
+            <label style={labelStyle}>Issue<input name="issue" style={fieldStyle}/></label>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            <label style={labelStyle}>ISSN<input name="issn" placeholder="XXXX-XXXX" style={fieldStyle}/></label>
+            <label style={labelStyle}>Publication label<input name="publication_label" placeholder="August 2026" style={fieldStyle}/></label>
           </div>
           <label style={labelStyle}>PDF (max 200 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required style={fieldStyle}/></label>
           <label style={labelStyle}>Initial status<select name="status" defaultValue="draft" style={fieldStyle}><option value="draft">Draft</option><option value="published">Published</option></select></label>
@@ -189,7 +216,10 @@ export default function PublicationManager() {
 
     <section className="contentCard">
       <h2>RED Books</h2>
-      {red.length === 0 ? <p>No books uploaded yet.</p> : red.map(item => <div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',padding:'10px 0',borderBottom:'1px solid #e4e9ed'}}><div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.editors || 'Editor not set'} · {item.publication_year || 'Year not set'} · {item.status}</div></div><div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={() => setStatus('red', item, item.status === 'published' ? 'draft' : 'published')}>{item.status === 'published' ? 'Unpublish' : 'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={() => removeItem('red', item)}>Delete</button></div></div>)}
+      {red.length === 0 ? <p>No books uploaded yet.</p> : red.map(item => {
+        const coverUrl = item.cover_path ? supabase.storage.from('red-book-covers').getPublicUrl(item.cover_path).data.publicUrl : null
+        return <div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',padding:'10px 0',borderBottom:'1px solid #e4e9ed'}}><div style={{display:'flex',gap:10,alignItems:'center'}}>{coverUrl ? <img src={coverUrl} alt="" style={{width:46,height:62,objectFit:'cover',borderRadius:3,border:'1px solid #ddd'}}/> : null}<div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.editors || 'Editor not set'} · {item.publication_label || item.publication_year || 'Date not set'}{item.issue ? ` · Issue ${item.issue}` : ''} · {item.status}</div></div></div><div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={() => setStatus('red', item, item.status === 'published' ? 'draft' : 'published')}>{item.status === 'published' ? 'Unpublish' : 'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={() => removeItem('red', item)}>Delete</button></div></div>
+      })}
     </section>
   </div>
 }
