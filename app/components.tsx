@@ -1,3 +1,38 @@
 import Link from 'next/link';
-export function Header(){return <><div className="topbar"><div className="container"><span>Institute of Research Education and Development (IRED)</span><span>Ahmedabad, Gujarat, India · ired.foundation@gmail.com</span></div></div><header><div className="container brandRow"><div className="brand"><img className="brandMark" src="/ired-logo.png" alt="IRED emblem"/><div><div className="brandName">IRED</div><div className="brandTitle">Institute of Research Education and Development</div><div className="brandTag">Research · Education · Academic Development · Knowledge Exchange</div></div></div><div className="headerActions"><div className="search"><input aria-label="Search" placeholder="Search papers, books, authors..."/><button>⌕</button></div><Link className="btn btnGold" href="/green">Submit Paper</Link><Link className="btn btnNavy" href="/admin">Admin Login</Link></div></div></header><nav><div className="container navInner"><Link className="active" href="/">Home</Link><Link href="/about">About IRED</Link><Link href="/green">GREEN Papers</Link><Link href="/red">RED Books</Link><Link href="/editorial-board">Editorial Board</Link><Link href="/author-guidelines">Author Guidelines</Link><Link href="/contact">Contact Us</Link></div></nav></>}
-export function Footer(){return <footer className="footer"><div className="container"><div className="footerGrid"><div><h3>IRED</h3><p>Institute of Research Education and Development</p><p>Ahmedabad, Gujarat, India</p></div><div><h3>Quick Links</h3><Link href="/green">GREEN Papers</Link><Link href="/red">RED Books</Link><Link href="/editorial-board">Editorial Board</Link></div><div><h3>Policies</h3><Link href="/author-guidelines">Author Guidelines</Link><a href="#">Publication Ethics</a><a href="#">Open Access Policy</a></div><div><h3>Contact</h3><p>ired.foundation@gmail.com</p><p>7383000930 · 7203998343</p></div></div><div className="copy"><span>© 2026 Institute of Research Education and Development (IRED).</span><span>Privacy Policy · Terms of Use · Sitemap</span></div></div></footer>}
+
+export function Header(){
+  return <>
+    <div className="utilityBar">
+      <div className="container utilityInner">
+        <div className="utilityLeft"><span>● Ahmedabad, Gujarat, India</span><span>✉ info@ired.org</span><span>☎ +91 79 1234 5678</span></div>
+        <div className="utilityRight"><span>A A A</span><span>◉ English⌄</span><span>f</span><span>in</span><span>▶</span></div>
+      </div>
+    </div>
+    <header className="siteHeader">
+      <div className="container brandRow">
+        <Link href="/" className="brandLogoLink" aria-label="IRED home"><img className="iredLogo" src="/ired-logo.svg" alt="Institute of Research Education and Development"/></Link>
+        <div className="headerActions">
+          <div className="search"><input aria-label="Search" placeholder="Search papers, books, authors, keywords..."/><button aria-label="Search">⌕</button></div>
+          <Link className="btn btnGold compact" href="/green">↥ Submit a Paper</Link>
+          <Link className="btn btnOutline compact" href="/admin">♟ Admin Login</Link>
+        </div>
+      </div>
+    </header>
+    <nav className="mainNav"><div className="container navInner">
+      <Link className="active" href="/">Home</Link><Link href="/about">About IRED</Link><Link href="/green">GREEN Papers⌄</Link><Link href="/red">RED Books⌄</Link><Link href="/editorial-board">Editorial Board</Link><Link href="/author-guidelines">Author Guidelines</Link><a href="#ethics">Publication Ethics</a><a href="#archives">Archives</a><Link href="/contact">Contact Us</Link><span className="navTagline">“Knowledge for a Better Tomorrow”</span>
+    </div></nav>
+  </>
+}
+
+export function Footer(){
+  return <footer className="footer"><div className="container">
+    <div className="footerGrid">
+      <div className="footerBrand"><img src="/ired-logo.svg" alt="IRED"/><p>Institute of Research Education and Development</p><p>Ahmedabad, Gujarat, India</p></div>
+      <div><h3>Quick Links</h3><Link href="/">Home</Link><Link href="/about">About IRED</Link><Link href="/green">GREEN Papers</Link><Link href="/red">RED Books</Link></div>
+      <div><h3>Other Links</h3><Link href="/editorial-board">Editorial Board</Link><Link href="/author-guidelines">Author Guidelines</Link><a href="#ethics">Publication Ethics</a><Link href="/contact">Contact Us</Link></div>
+      <div><h3>Contact Us</h3><p>Ahmedabad, Gujarat, India</p><p>☎ +91 79 1234 5678</p><p>✉ info@ired.org</p><div className="socials"><span>f</span><span>in</span><span>▶</span></div></div>
+      <div className="footerMotto">Knowledge<br/>for a Better Tomorrow</div>
+    </div>
+    <div className="copy"><span>© 2026 Institute of Research Education and Development (IRED). All rights reserved.</span><span>Privacy Policy&nbsp;&nbsp;|&nbsp;&nbsp;Terms of Use&nbsp;&nbsp;|&nbsp;&nbsp;Sitemap</span></div>
+  </div></footer>
+}
