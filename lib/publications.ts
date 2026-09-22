@@ -25,6 +25,7 @@ export type PublicRedBook = {
   description: string | null
   theme: string | null
   publication_year: number | null
+  publication_month: string | null
   volume: string | null
   issue: string | null
   issn: string | null
@@ -77,7 +78,7 @@ export async function getPublishedRedBooks(limit?: number): Promise<PublicRedBoo
   const supabase = await createClient()
   let query = supabase
     .from('red_books')
-    .select('id,title,subtitle,editors,description,theme,publication_year,volume,issue,issn,publication_label,isbn,cover_path,pdf_path,published_at')
+    .select('id,title,subtitle,editors,description,theme,publication_year,publication_month,volume,issue,issn,publication_label,isbn,cover_path,pdf_path,published_at')
     .eq('status', 'published')
     .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
