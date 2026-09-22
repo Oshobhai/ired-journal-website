@@ -10,7 +10,7 @@ export function Header(){
     </div>
     <header className="siteHeader">
       <div className="container brandRow">
-        <Link href="/" className="brandLogoLink" aria-label="IRED home"><img className="iredLogo" src="/ired-logo.svg" alt="Institute of Research Education and Development"/></Link>
+        <Link href="/" className="brandLogoLink" aria-label="IRED home"><img className="iredLogo" src="/ired-logo.png?v=1" alt="Institute of Research Education and Development"/></Link>
         <div className="headerActions">
           <div className="search"><input aria-label="Search" placeholder="Search papers, books, authors, keywords..."/><button aria-label="Search">⌕</button></div>
           <Link className="btn btnGold compact" href="/green">↥ Submit a Paper</Link>
