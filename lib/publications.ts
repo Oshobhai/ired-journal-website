@@ -35,8 +35,7 @@ export type PublicRedBook = {
   cover_url: string | null
   pdf_path: string
   published_at: string | null
-  view_url: string | null
-  download_url: string | null
+  view_url: string
 }
 
 async function signedUrls(bucket: string, path: string) {
@@ -88,16 +87,24 @@ export async function getPublishedRedBooks(limit?: number): Promise<PublicRedBoo
   const { data, error } = await query
   if (error || !data) return []
 
-  return Promise.all(
-    data.map(async (book) => {
-      const cover_url = book.cover_path
-        ? supabase.storage.from('red-book-covers').getPublicUrl(book.cover_path).data.publicUrl
-        : null
-      return {
-        ...book,
-        cover_url,
-        ...(await signedUrls('red-books', book.pdf_path)),
-      }
-    })
-  ) as Promise<PublicRedBook[]>
+  return data.map((book) => ({
+    ...book,
+    cover_url: book.cover_path
+      ? supabase.storage.from('red-book-covers').getPublicUrl(book.cover_path).data.publicUrl
+      : null,
+    view_url: `/red/view/${book.id}`,
+  })) as PublicRedBook[]
+}
+
+export async function getPublishedRedBookById(id: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('red_books')
+    .select('id,title,subtitle,editors,description,publication_year,publication_month,volume,issue,issn,publication_label,cover_path,pdf_path')
+    .eq('id', id)
+    .eq('status', 'published')
+    .maybeSingle()
+
+  if (error || !data) return null
+  return data
 }
