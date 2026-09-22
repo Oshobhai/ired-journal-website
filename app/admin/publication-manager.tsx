@@ -13,9 +13,12 @@ type Publication = {
   authors?: string
   editors?: string | null
   publication_year?: number | null
+  publication_month?: string | null
   issue?: string | null
   publication_label?: string | null
 }
+
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
 function safeFileName(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/-+/g, '-')
@@ -31,7 +34,7 @@ export default function PublicationManager() {
   const load = useCallback(async () => {
     const [{ data: greenRows }, { data: redRows }] = await Promise.all([
       supabase.from('green_papers').select('id,title,authors,status,pdf_path,publication_year,created_at').order('created_at', { ascending: false }),
-      supabase.from('red_books').select('id,title,editors,status,pdf_path,cover_path,publication_year,issue,publication_label,created_at').order('created_at', { ascending: false }),
+      supabase.from('red_books').select('id,title,editors,status,pdf_path,cover_path,publication_year,publication_month,issue,publication_label,created_at').order('created_at', { ascending: false }),
     ])
     setGreen((greenRows || []) as Publication[])
     setRed((redRows || []) as Publication[])
@@ -108,16 +111,19 @@ export default function PublicationManager() {
       if (uploadError) throw uploadError
 
       const status = String(form.get('status') || 'draft')
+      const publicationMonth = String(form.get('publication_month') || '').trim() || null
+      const publicationYear = Number(form.get('publication_year')) || null
       const { error: insertError } = await supabase.from('red_books').insert({
         title: String(form.get('title') || '').trim(),
         subtitle: String(form.get('subtitle') || '').trim() || null,
         editors: String(form.get('editors') || '').trim() || null,
         description: String(form.get('description') || '').trim() || null,
-        publication_year: Number(form.get('publication_year')) || null,
+        publication_year: publicationYear,
+        publication_month: publicationMonth,
         volume: String(form.get('volume') || '').trim() || null,
         issue: String(form.get('issue') || '').trim() || null,
         issn: String(form.get('issn') || '').trim() || null,
-        publication_label: String(form.get('publication_label') || '').trim() || null,
+        publication_label: publicationMonth && publicationYear ? `${publicationMonth} ${publicationYear}` : publicationMonth || (publicationYear ? String(publicationYear) : null),
         cover_path: coverPath || null,
         pdf_path: pdfPath,
         pdf_size: file.size,
@@ -193,15 +199,13 @@ export default function PublicationManager() {
           <label style={labelStyle}>Subtitle<input name="subtitle" style={fieldStyle}/></label>
           <label style={labelStyle}>Editor(s)<input name="editors" style={fieldStyle}/></label>
           <label style={labelStyle}>Description<textarea name="description" rows={3} style={fieldStyle}/></label>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
-            <label style={labelStyle}>Year<input name="publication_year" type="number" min="1900" max="2100" style={fieldStyle}/></label>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:8}}>
+            <label style={labelStyle}>Month<select name="publication_month" defaultValue="August" style={fieldStyle}>{months.map(month => <option key={month} value={month}>{month}</option>)}</select></label>
+            <label style={labelStyle}>Year<input name="publication_year" type="number" min="1900" max="2100" placeholder="2026" style={fieldStyle}/></label>
             <label style={labelStyle}>Volume<input name="volume" style={fieldStyle}/></label>
             <label style={labelStyle}>Issue<input name="issue" style={fieldStyle}/></label>
           </div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-            <label style={labelStyle}>ISSN<input name="issn" placeholder="XXXX-XXXX" style={fieldStyle}/></label>
-            <label style={labelStyle}>Publication label<input name="publication_label" placeholder="August 2026" style={fieldStyle}/></label>
-          </div>
+          <label style={labelStyle}>ISSN<input name="issn" placeholder="XXXX-XXXX" style={fieldStyle}/></label>
           <label style={labelStyle}>PDF (max 200 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required style={fieldStyle}/></label>
           <label style={labelStyle}>Initial status<select name="status" defaultValue="draft" style={fieldStyle}><option value="draft">Draft</option><option value="published">Published</option></select></label>
           <button className="btn btnRed" disabled={busy} type="submit">{busy ? 'Working…' : 'Upload RED Book'}</button>
@@ -218,7 +222,8 @@ export default function PublicationManager() {
       <h2>RED Books</h2>
       {red.length === 0 ? <p>No books uploaded yet.</p> : red.map(item => {
         const coverUrl = item.cover_path ? supabase.storage.from('red-book-covers').getPublicUrl(item.cover_path).data.publicUrl : null
-        return <div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',padding:'10px 0',borderBottom:'1px solid #e4e9ed'}}><div style={{display:'flex',gap:10,alignItems:'center'}}>{coverUrl ? <img src={coverUrl} alt="" style={{width:46,height:62,objectFit:'cover',borderRadius:3,border:'1px solid #ddd'}}/> : null}<div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.editors || 'Editor not set'} · {item.publication_label || item.publication_year || 'Date not set'}{item.issue ? ` · Issue ${item.issue}` : ''} · {item.status}</div></div></div><div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={() => setStatus('red', item, item.status === 'published' ? 'draft' : 'published')}>{item.status === 'published' ? 'Unpublish' : 'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={() => removeItem('red', item)}>Delete</button></div></div>
+        const dateLabel = [item.publication_month, item.publication_year].filter(Boolean).join(' ') || item.publication_label || 'Date not set'
+        return <div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',padding:'10px 0',borderBottom:'1px solid #e4e9ed'}}><div style={{display:'flex',gap:10,alignItems:'center'}}>{coverUrl ? <img src={coverUrl} alt="" style={{width:46,height:62,objectFit:'cover',borderRadius:3,border:'1px solid #ddd'}}/> : null}<div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.editors || 'Editor not set'} · {dateLabel}{item.issue ? ` · Issue ${item.issue}` : ''} · {item.status}</div></div></div><div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={() => setStatus('red', item, item.status === 'published' ? 'draft' : 'published')}>{item.status === 'published' ? 'Unpublish' : 'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={() => removeItem('red', item)}>Delete</button></div></div>
       })}
     </section>
   </div>
