@@ -6,12 +6,12 @@ export default function Home(){
   return <><Header/><main>
     <section className="hero heroVisual"><div className="container heroGrid">
       <div className="heroCopy"><div className="heroKicker">Research · Education · Development</div><h1>Research Knowledge<br/><span>for a Better Tomorrow</span></h1><p>A platform for researchers, academicians, and students to share knowledge and create a positive impact.</p><div className="heroActions"><Link className="btn btnGold" href="/green">Submit a Paper →</Link><Link className="btn btnGhost" href="#publications">Explore Our Publications</Link></div></div>
-      <div className="heroArt" aria-hidden="true"><div className="globe">◎</div><div className="stack"><div className="spine green">Research</div><div className="spine red">Education</div><div className="spine gold">Development</div></div><div className="heroQuote">“Ideas<br/>Research<br/>People<br/>A Better Tomorrow.”</div></div>
+      <div className="heroArt referenceHeroArt" aria-hidden="true"><img src="/hero-reference-art.jpg?v=1" alt=""/></div>
     </div></section>
 
     <section className="publicationStrip" id="publications"><div className="container journalGrid">
       <article className="journalCard green"><img className="journalLogo" src="/green-logo.png?v=2" alt="GREEN: The Research Journal"/><div className="journalCopy"><h2>Research Papers</h2><p>Publish and access individual research papers, articles and scholarly contributions across a wide range of disciplines.</p><Link className="btn btnGreen" href="/green">View All Papers →</Link><div className="featureRow"><span>⚖ Peer-reviewed</span><span>▣ Open access</span><span>◉ Multidisciplinary</span></div></div><div className="journalWatermark">▤</div></article>
-      <article className="journalCard red"><img className="journalLogo" src="/red-logo.png?v=2" alt="RED: The Research Journal"/><div className="journalCopy"><h2>Research Books</h2><p>Access complete research books, compiled volumes and published editions featuring selected research themes.</p><Link className="btn btnRed" href="/red">View All Books →</Link><div className="featureRow"><span>▣ Compiled volumes</span><span>▤ Scholarly publication</span><span>▰ Easy access</span></div></div><div className="journalWatermark">▥</div></article>
+      <article className="journalCard red"><img className="journalLogo" src="/red-logo.png?v=3" alt="RED: The Research Journal"/><div className="journalCopy"><h2>Research Books</h2><p>Access complete research books, compiled volumes and published editions featuring selected research themes.</p><Link className="btn btnRed" href="/red">View All Books →</Link><div className="featureRow"><span>▣ Compiled volumes</span><span>▤ Scholarly publication</span><span>▰ Easy access</span></div></div><div className="journalWatermark">▥</div></article>
     </div></section>
 
     <section className="section compactSection"><div className="container latestGrid">
