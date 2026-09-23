@@ -2,7 +2,6 @@
 
 import { redirect } from 'next/navigation'
 import { createClient, getSupabaseConfig } from '@/lib/supabase/server'
-import { isAdminEmail } from '@/lib/admin-auth'
 
 function encodeMessage(value: string) {
   return encodeURIComponent(value)
@@ -21,15 +20,29 @@ export async function adminLogin(formData: FormData) {
     redirect('/admin/login?error=config')
   }
 
-  if (!isAdminEmail(email)) {
-    redirect('/admin/login?error=unauthorized')
-  }
-
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
     redirect(`/admin/login?error=${encodeMessage('Invalid login details')}`)
+  }
+
+  const { data: userData } = await supabase.auth.getUser()
+  const user = userData.user
+  if (!user) {
+    await supabase.auth.signOut()
+    redirect('/admin/login?error=unauthorized')
+  }
+
+  const { data: access } = await supabase
+    .from('admin_users')
+    .select('role')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!access || !['admin','editorial_board_manager'].includes(access.role)) {
+    await supabase.auth.signOut()
+    redirect('/admin/login?error=unauthorized')
   }
 
   redirect('/admin')
