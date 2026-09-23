@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import {FormEvent,useState} from 'react'
 import {createClient} from '@/lib/supabase/client'
+import styles from '../admin.module.css'
 
 export default function EditorialRegister(){
   const supabase=createClient()
@@ -30,23 +31,32 @@ export default function EditorialRegister(){
     e.currentTarget.reset();setBusy(false)
   }
 
-  return <main style={{minHeight:'100vh',display:'grid',placeItems:'center',background:'#eef3f7',padding:24}}>
-    <section style={{width:'100%',maxWidth:450,background:'#fff',border:'1px solid #d9e1e8',borderRadius:10,padding:28,boxShadow:'0 18px 45px #0b2d4e18'}}>
-      <div style={{fontSize:11,letterSpacing:'.14em',textTransform:'uppercase',color:'#687586',marginBottom:6}}>Invited Staff Access</div>
-      <h1 style={{margin:'0 0 8px',fontFamily:'Georgia,serif',color:'#0b2d4e'}}>Editorial Board Manager Setup</h1>
-      <p style={{margin:'0 0 18px',fontSize:12.5,lineHeight:1.6,color:'#687586'}}>Use the exact email address that the IRED administrator approved. This account receives access only to Editorial Board Management.</p>
-      {error?<div style={{background:'#fff2f2',border:'1px solid #efc4c4',color:'#9c1c1c',padding:'10px 12px',borderRadius:5,fontSize:12,marginBottom:14}}>{error}</div>:null}
-      {message?<div style={{background:'#edf8f1',border:'1px solid #b9dfc7',color:'#1a6a39',padding:'10px 12px',borderRadius:5,fontSize:12,lineHeight:1.55,marginBottom:14}}>{message}</div>:null}
-      <form onSubmit={submit}>
-        <label style={{display:'block',fontSize:12,fontWeight:700,marginBottom:5}}>Approved email</label>
-        <input name="email" type="email" required autoComplete="email" style={{width:'100%',padding:'11px 12px',border:'1px solid #cbd6df',borderRadius:5,marginBottom:14}}/>
-        <label style={{display:'block',fontSize:12,fontWeight:700,marginBottom:5}}>Create password</label>
-        <input name="password" type="password" minLength={8} required autoComplete="new-password" style={{width:'100%',padding:'11px 12px',border:'1px solid #cbd6df',borderRadius:5,marginBottom:14}}/>
-        <label style={{display:'block',fontSize:12,fontWeight:700,marginBottom:5}}>Confirm password</label>
-        <input name="confirm_password" type="password" minLength={8} required autoComplete="new-password" style={{width:'100%',padding:'11px 12px',border:'1px solid #cbd6df',borderRadius:5,marginBottom:16}}/>
-        <button disabled={busy} type="submit" style={{width:'100%',padding:'11px 14px',border:0,borderRadius:5,background:'#0b2d4e',color:'#fff',fontWeight:700,cursor:'pointer'}}>{busy?'Creating account…':'Create Editorial Account'}</button>
-      </form>
-      <Link href="/admin/login" style={{display:'block',textAlign:'center',marginTop:16,fontSize:12,color:'#526577'}}>← Back to Editorial Login</Link>
+  return <main className={styles.loginPage}>
+    <section className={styles.loginBrandPanel}>
+      <img src="/ired-header-logo.webp?v=5" alt="IRED"/>
+      <div className={styles.loginStatement}><span>Invited Academic Staff</span><h1>Editorial Board Manager Account Setup</h1><p>Create a restricted staff account for maintaining Editorial Board and Review Committee records. Publication management and security controls remain unavailable to this role.</p></div>
+      <div className={styles.loginMotto}>Institute of Research Education and Development</div>
+    </section>
+
+    <section className={styles.loginFormPanel}>
+      <div className={styles.loginCard}>
+        <div className={styles.loginKicker}>Invitation Required</div>
+        <h2>Set up your account</h2>
+        <p>Use the exact email address approved by the IRED administrator. Your account will receive only Editorial Board Management access.</p>
+        <div className={styles.registerNote}>An administrator must add your email under <strong>Staff Access</strong> before this form will accept your registration.</div>
+        {error?<div className={styles.errorBox}>{error}</div>:null}
+        {message?<div className={styles.successBox}>{message}</div>:null}
+        <form onSubmit={submit}>
+          <label>Approved email</label>
+          <input name="email" type="email" required autoComplete="email" />
+          <label>Create password</label>
+          <input name="password" type="password" minLength={8} required autoComplete="new-password" />
+          <label>Confirm password</label>
+          <input name="confirm_password" type="password" minLength={8} required autoComplete="new-password" />
+          <button disabled={busy} className={styles.primaryLogin} type="submit">{busy?'Creating account…':'Create Editorial Account'}</button>
+        </form>
+        <Link href="/admin/login" className={styles.backLink}>← Back to Editorial Login</Link>
+      </div>
     </section>
   </main>
 }
