@@ -50,7 +50,7 @@ export default function GreenPaperGenerator(){
         pdf_path:`pending/${id}.pdf`,status:'draft',created_by:user.id
       })
       if(insertErr){await supabase.storage.from('green-manuscripts').remove([manuscriptPath]);throw insertErr}
-      setMessage(`Draft saved as ${id}. The formatted preview is ready for review; final PDF can be uploaded after approval.`)
+      setMessage(`Draft saved as ${id}. GREEN header and footer are part of the standard format and will be kept on every final PDF page.`)
     }catch(err){setMessage(err instanceof Error?err.message:'Could not save draft.')}
     finally{setBusy(false)}
   }
@@ -60,7 +60,7 @@ export default function GreenPaperGenerator(){
 
   return <section id="green-generator" className="contentCard" style={{marginTop:20}}>
     <h2 style={{marginBottom:4}}>GREEN Paper Generator</h2>
-    <p style={{fontSize:12,color:'#657483',marginTop:0}}>Upload the author DOCX, add journal metadata, review the standardized GREEN preview, then save it as a draft.</p>
+    <p style={{fontSize:12,color:'#657483',marginTop:0}}>Upload the author DOCX, add journal metadata, review the standardized GREEN preview, then save it as a draft. The approved GREEN header and footer are retained as part of the journal format.</p>
     {message?<div style={{padding:'9px 11px',background:'#eef7f2',border:'1px solid #cae3d3',borderRadius:6,fontSize:12,marginBottom:12}}>{message}</div>:null}
     <form onSubmit={saveDraft}>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))',gap:10}}>
@@ -83,17 +83,21 @@ export default function GreenPaperGenerator(){
     </form>
 
     <div style={{marginTop:20}}>
-      <div style={{fontSize:12,fontWeight:700,marginBottom:8}}>Standardized preview</div>
+      <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',marginBottom:8,flexWrap:'wrap'}}><div style={{fontSize:12,fontWeight:700}}>Standardized preview</div><div style={{fontSize:11,color:'#14733d',fontWeight:700}}>Header + Footer: repeated on every final PDF page</div></div>
       <div style={{background:'#dfe6e2',padding:14,borderRadius:6,overflowX:'auto'}}>
-        <article style={{width:'794px',minHeight:'1123px',margin:'0 auto',background:'#fff',padding:'34px 38px',boxSizing:'border-box',fontFamily:'Georgia, "Noto Serif Gujarati", serif',color:'#111',boxShadow:'0 2px 10px rgba(0,0,0,.1)'}}>
-          <header style={{display:'grid',gridTemplateColumns:'1fr 270px',gap:20,borderBottom:'2px solid #14733d',paddingBottom:10}}>
+        <article className="green-paper-sheet">
+          <header className="green-paper-header">
             <div><img src="/green-logo.png?v=2" alt="GREEN The Research Journal" style={{width:300,maxHeight:84,objectFit:'contain',objectPosition:'left'}}/><div style={{fontWeight:700,fontSize:14,marginTop:4}}>Institute of Research Education and Development (IRED)</div><div style={{fontStyle:'italic',color:'#14733d',fontSize:13}}>Knowledge for a Better Tomorrow</div></div>
             <div style={{textAlign:'right',fontSize:14,lineHeight:1.5,fontWeight:700}}>Volume {meta.volume||'—'} | Issue {meta.issue||'—'} | {meta.year||'—'}<br/>ISSN: {meta.issn||'—'} (Online)<br/>Article ID: {articleId}<div style={{marginTop:6,display:'inline-block',background:'#16733e',color:'#fff',padding:'5px 12px'}}>{meta.articleType}</div></div>
           </header>
-          <section style={{textAlign:'center',padding:'24px 20px 16px'}}><h1 style={{fontSize:25,lineHeight:1.25,margin:'0 0 14px'}}>{meta.title||'Research Paper Title'}</h1><div style={{fontSize:18,fontWeight:700}}>{meta.authors||'Author Name'}</div>{meta.affiliation?<div style={{fontSize:14,marginTop:5}}>{meta.affiliation}</div>:null}{meta.email?<div style={{fontSize:13,marginTop:3}}>Email: {meta.email}</div>:null}</section>
-          {(meta.abstract||meta.keywords)?<section style={{background:'#eef6f1',padding:'12px 14px',marginBottom:18}}>{meta.abstract?<><h2 style={{color:'#14733d',fontSize:18,margin:'0 0 6px'}}>Abstract</h2><p style={{fontSize:13,lineHeight:1.5,textAlign:'justify',margin:'0 0 9px'}}>{meta.abstract}</p></>:null}{meta.keywords?<div style={{fontSize:13}}><strong style={{color:'#14733d'}}>Keywords:</strong> {meta.keywords}</div>:null}</section>:null}
-          <div className="green-docx-preview" dangerouslySetInnerHTML={{__html:bodyHtml||'<p style="color:#777;text-align:center;padding:50px 0">Upload a DOCX to preview the manuscript body here.</p>'}}/>
-          <footer style={{marginTop:30,borderTop:'2px solid #14733d',paddingTop:8,display:'flex',justifyContent:'space-between',fontSize:11}}><span>© {meta.year||new Date().getFullYear()} IRED. All rights reserved.</span><span>Page numbers are added in the final PDF</span><span>www.ired.org</span></footer>
+
+          <main className="green-paper-content">
+            <section style={{textAlign:'center',padding:'24px 20px 16px'}}><h1 style={{fontSize:25,lineHeight:1.25,margin:'0 0 14px'}}>{meta.title||'Research Paper Title'}</h1><div style={{fontSize:18,fontWeight:700}}>{meta.authors||'Author Name'}</div>{meta.affiliation?<div style={{fontSize:14,marginTop:5}}>{meta.affiliation}</div>:null}{meta.email?<div style={{fontSize:13,marginTop:3}}>Email: {meta.email}</div>:null}</section>
+            {(meta.abstract||meta.keywords)?<section style={{background:'#eef6f1',padding:'12px 14px',marginBottom:18}}>{meta.abstract?<><h2 style={{color:'#14733d',fontSize:18,margin:'0 0 6px'}}>Abstract</h2><p style={{fontSize:13,lineHeight:1.5,textAlign:'justify',margin:'0 0 9px'}}>{meta.abstract}</p></>:null}{meta.keywords?<div style={{fontSize:13}}><strong style={{color:'#14733d'}}>Keywords:</strong> {meta.keywords}</div>:null}</section>:null}
+            <div className="green-docx-preview" dangerouslySetInnerHTML={{__html:bodyHtml||'<p style="color:#777;text-align:center;padding:50px 0">Upload a DOCX to preview the manuscript body here.</p>'}}/>
+          </main>
+
+          <footer className="green-paper-footer"><span>© {meta.year||new Date().getFullYear()} IRED. All rights reserved.</span><span className="green-page-number">Page</span><span>www.ired.org</span></footer>
         </article>
       </div>
     </div>
