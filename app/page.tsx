@@ -12,7 +12,7 @@ export default async function Home(){
 
   return <><Header/><main>
     <section className="hero heroVisual"><div className="container heroGrid">
-      <div className="heroCopy"><div className="heroKicker">Research · Education · Development</div><h1>Research Knowledge<br/><span>for a Better Tomorrow</span></h1><p>A platform for researchers, academicians, and students to share knowledge and create a positive impact.</p><div className="heroActions"><Link className="btn btnGold" href="/green">Submit a Paper →</Link><Link className="btn btnGhost" href="#publications">Explore Our Publications</Link></div></div>
+      <div className="heroCopy"><div className="heroKicker">Research · Education · Development</div><h1>Research Knowledge<br/><span>for a Better Tomorrow</span></h1><p>A platform for researchers, academicians, and students to share knowledge and create a positive impact.</p><div className="heroActions"><Link className="btn btnGold" href="/contact">Contact to Submit →</Link><Link className="btn btnGhost" href="#publications">Explore Our Publications</Link></div></div>
       <div className="heroArt heroGraphic" aria-hidden="true"><div className="heroGlobe">◎</div><div className="heroBooks"><div className="bookSpine research">Research</div><div className="bookSpine education">Education</div><div className="bookSpine development">Development</div></div><div className="heroQuote">“Ideas<br/>Research<br/>People<br/>A Better Tomorrow.”</div></div>
     </div></section>
 
