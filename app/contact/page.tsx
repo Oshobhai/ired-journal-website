@@ -6,6 +6,10 @@ function mailto(subject:string,body:string){
   return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
+function gmailCompose(subject:string,body:string){
+  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
 function Icon({name,color='#496071'}:{name:'institution'|'location'|'phone'|'email'|'paper'|'book'|'check'|'thread',color?:string}){
   const common={width:18,height:18,viewBox:'0 0 24 24',fill:'none',stroke:color,strokeWidth:1.8,strokeLinecap:'round' as const,strokeLinejoin:'round' as const,'aria-hidden':true};
   if(name==='institution') return <svg {...common}><path d="M3 10h18"/><path d="M5 10v8M9 10v8M15 10v8M19 10v8"/><path d="M2 20h20"/><path d="M12 3 3 8h18l-9-5Z"/></svg>;
@@ -41,13 +45,13 @@ export default function Contact(){
           <InfoRow icon="institution" label="Institution">Institute of Research Education and Development (IRED)</InfoRow>
           <InfoRow icon="location" label="Address">A-3, 3rd Floor, Gita Apartment, Nr. Hirabaug Crossing, Ambawadi, Ahmedabad-380015, Gujarat, India</InfoRow>
           <InfoRow icon="phone" label="Telephone">7383000930 &nbsp;|&nbsp; 7203998343</InfoRow>
-          <InfoRow icon="email" label="Editorial Email"><a href={`mailto:${email}`} style={{color:'#0c6298',fontWeight:700}}>ired.foundation@gmail.com</a></InfoRow>
+          <InfoRow icon="email" label="Editorial Email"><a href={mailto('', '')} style={{color:'#0c6298',fontWeight:700}}>ired.foundation@gmail.com</a></InfoRow>
         </section>
 
         <section style={{padding:'22px 0 18px'}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}><Icon name="paper" color="#0b2d4e"/><h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:0}}>Manuscript Submission by Email</h2></div>
           <p style={{fontSize:12.5,lineHeight:1.7,color:'#445565',margin:'0 0 8px',maxWidth:900}}>Authors should send manuscripts directly to the IRED Editorial Office by email. Please attach the research paper in <strong>DOCX or PDF format</strong> and include the information listed below for the appropriate publication.</p>
-          <p style={{fontSize:11,color:'#6a7885',margin:'0'}}>The website opens a prepared email draft; the manuscript attachment must be added by the author in the email application before sending.</p>
+          <p style={{fontSize:11,color:'#6a7885',margin:'0'}}>The GREEN and RED submission links now open Gmail in a new browser tab with the IRED email address, subject and submission details already prepared. Add the manuscript attachment before sending.</p>
         </section>
 
         <section style={{borderTop:'2px solid #0b2d4e',borderBottom:'1px solid #cfd8df'}}>
@@ -63,13 +67,13 @@ export default function Contact(){
                 <td style={td}><div style={{display:'flex',alignItems:'center',gap:7}}><Icon name="paper" color="#148444"/><div><strong style={{fontFamily:'Georgia,serif',fontSize:16,color:'#148444'}}>GREEN</strong><div style={{fontSize:10,color:'#718078',marginTop:2}}>The Research Journal</div></div></div></td>
                 <td style={td}>Individual research papers, research articles, review articles, case studies and scholarly contributions.</td>
                 <td style={td}>Author name, paper title, mobile number, affiliation / institution and email address.</td>
-                <td style={{...td,textAlign:'right'}}><a href={mailto('GREEN Research Paper Submission',greenBody)} style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#126f3a',whiteSpace:'nowrap'}}><Icon name="email" color="#126f3a"/> Email Paper →</a></td>
+                <td style={{...td,textAlign:'right'}}><a href={gmailCompose('GREEN Research Paper Submission',greenBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#126f3a',whiteSpace:'nowrap'}}><Icon name="email" color="#126f3a"/> Email Paper →</a></td>
               </tr>
               <tr>
                 <td style={td}><div style={{display:'flex',alignItems:'center',gap:7}}><Icon name="book" color="#bd2025"/><div><strong style={{fontFamily:'Georgia,serif',fontSize:16,color:'#bd2025'}}>RED</strong><div style={{fontSize:10,color:'#806e6f',marginTop:2}}>The Research Journal</div></div></div></td>
                 <td style={td}>Research papers considered for inclusion in a compiled RED research book / printed volume.</td>
                 <td style={td}>Author details, mobile number, email, affiliation, full postal address, city / district, state and PIN code.</td>
-                <td style={{...td,textAlign:'right'}}><a href={mailto('RED Research Journal Submission',redBody)} style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#a61d22',whiteSpace:'nowrap'}}><Icon name="email" color="#a61d22"/> Email Paper →</a></td>
+                <td style={{...td,textAlign:'right'}}><a href={gmailCompose('RED Research Journal Submission',redBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#a61d22',whiteSpace:'nowrap'}}><Icon name="email" color="#a61d22"/> Email Paper →</a></td>
               </tr>
             </tbody>
           </table>
