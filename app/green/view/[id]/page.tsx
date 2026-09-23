@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import {Header,Footer} from '../../../components';
 import {getPublishedGreenPaperById} from '@/lib/publications';
+import ShareButtons from './share-buttons';
 
 export const dynamic='force-dynamic';
 
@@ -16,6 +17,7 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
         <article className="contentCard">
           {paper.abstract?<section style={{marginBottom:20}}><h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:'0 0 8px'}}>Abstract</h2><p style={{fontSize:12.5,lineHeight:1.75,color:'#465a6a',textAlign:'justify',margin:0}}>{paper.abstract}</p></section>:null}
           {paper.keywords?.length?<section style={{paddingTop:15,borderTop:'1px solid #e0e6ea'}}><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',margin:'0 0 7px'}}>Keywords</h3><div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{paper.keywords.map(k=><span key={k} style={{padding:'4px 8px',border:'1px solid #d8e1e7',borderRadius:999,fontSize:10.5,color:'#536473',background:'#f8fafb'}}>{k}</span>)}</div></section>:null}
+          <ShareButtons title={paper.title} authors={paper.authors}/>
         </article>
         <aside className="contentCard" style={{padding:16}}>
           <h2 style={{fontFamily:'Georgia,serif',fontSize:18,color:'#0b2d4e',margin:'0 0 12px'}}>Publication Details</h2>
