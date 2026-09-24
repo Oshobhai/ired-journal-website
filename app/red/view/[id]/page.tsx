@@ -18,10 +18,10 @@ export default async function RedBookViewer({ params }: { params: Promise<{ id: 
   const dateLabel = [book.publication_month, book.publication_year].filter(Boolean).join(' ') || book.publication_label || ''
 
   return <><Header/><main className="container" style={{paddingTop:20,paddingBottom:30}}>
-    <div className="contentCard" style={{padding:18}}>
+    <div className="contentCard redViewerCard" style={{padding:18}}>
       <div style={{display:'flex',justifyContent:'space-between',gap:16,alignItems:'flex-start',marginBottom:14,flexWrap:'wrap'}}>
-        <div>
-          <h1 style={{margin:'0 0 6px',fontSize:24}}>{book.title}</h1>
+        <div style={{minWidth:0}}>
+          <h1 style={{margin:'0 0 6px',fontSize:24,overflowWrap:'anywhere'}}>{book.title}</h1>
           <div className="meta">{dateLabel}{book.volume ? ` · Volume ${book.volume}` : ''}{book.issue ? ` · Issue ${book.issue}` : ''}</div>
           <div className="meta">{book.editors ? `Edited by ${book.editors}` : ''}</div>
         </div>
@@ -29,6 +29,7 @@ export default async function RedBookViewer({ params }: { params: Promise<{ id: 
       </div>
       <div style={{fontSize:12,color:'#687586',marginBottom:10}}>View-only mode. Download button is hidden.</div>
       {viewerUrl ? <iframe
+        className="redViewerFrame"
         src={viewerUrl}
         title={book.title}
         style={{width:'100%',height:'82vh',border:'1px solid #ccd5dd',borderRadius:6,background:'#fff'}}
