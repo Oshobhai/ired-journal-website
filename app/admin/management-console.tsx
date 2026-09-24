@@ -28,11 +28,17 @@ type Row = {
 const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
 const pageSize = 20
 
-export default function ManagementConsole() {
+type Props = {
+  initialKind?: Kind
+  lockedKind?: Kind
+  showStats?: boolean
+}
+
+export default function ManagementConsole({initialKind='green',lockedKind,showStats=true}:Props) {
   const supabase = createClient()
   const [green, setGreen] = useState<Row[]>([])
   const [red, setRed] = useState<Row[]>([])
-  const [kind, setKind] = useState<Kind>('green')
+  const [kind, setKind] = useState<Kind>(lockedKind || initialKind)
   const [search, setSearch] = useState('')
   const [status, setStatusFilter] = useState<'all' | Status>('all')
   const [year, setYear] = useState('all')
@@ -54,6 +60,7 @@ export default function ManagementConsole() {
   }, [supabase])
 
   useEffect(() => { void load() }, [load])
+  useEffect(() => { if (lockedKind) setKind(lockedKind) }, [lockedKind])
 
   const all = kind === 'green' ? green : red
   const years = useMemo(() => Array.from(new Set(all.map(x => x.publication_year).filter(Boolean) as number[])).sort((a,b)=>b-a), [all])
@@ -149,14 +156,14 @@ export default function ManagementConsole() {
   const danger = {...btn,background:'#fff5f5',borderColor:'#efc5c5',color:'#9d2525'} as const
 
   return <section id="dashboard" style={{display:'grid',gap:18,marginTop:20}}>
-    <div className="stats">
+    {showStats ? <div className="stats">
       <div className="stat"><span>Total Publications</span><strong>{counts.total}</strong></div>
       <div className="stat"><span>GREEN Papers</span><strong>{counts.green}</strong></div>
       <div className="stat"><span>RED Books</span><strong>{counts.red}</strong></div>
       <div className="stat"><span>Published</span><strong>{counts.published}</strong></div>
       <div className="stat"><span>Drafts</span><strong>{counts.draft}</strong></div>
       <div className="stat"><span>Archived</span><strong>{counts.archived}</strong></div>
-    </div>
+    </div> : null}
 
     {message ? <div style={{padding:'10px 12px',background:'#eef6fb',border:'1px solid #c9dce9',borderRadius:6,fontSize:12}}>{message}</div> : null}
 
@@ -164,12 +171,12 @@ export default function ManagementConsole() {
       <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',flexWrap:'wrap',marginBottom:14}}>
         <div>
           <h2 style={{margin:'0 0 4px'}}>{kind === 'green' ? 'GREEN Papers Manager' : 'RED Books Manager'}</h2>
-          <div style={{fontSize:12,color:'#687586'}}>Search, filter, edit, publish, archive and manage large publication collections.</div>
+          <div style={{fontSize:12,color:'#687586'}}>Search, filter, edit, publish, archive and manage publication records.</div>
         </div>
-        <div style={{display:'flex',gap:6}}>
+        {!lockedKind ? <div style={{display:'flex',gap:6}}>
           <button style={kind==='green'?primary:btn} onClick={()=>setKind('green')}>GREEN Papers ({green.length})</button>
           <button style={kind==='red'?{...primary,background:'#bd2025',borderColor:'#bd2025'}:btn} onClick={()=>setKind('red')}>RED Books ({red.length})</button>
-        </div>
+        </div> : <div style={{fontSize:10,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:kind==='green'?'#16723b':'#a8282d'}}>{kind==='green'?`${green.length} GREEN record(s)`:`${red.length} RED record(s)`}</div>}
       </div>
 
       <div style={{display:'grid',gridTemplateColumns:'minmax(180px,2fr) repeat(3,minmax(120px,1fr))',gap:8,marginBottom:10}}>
