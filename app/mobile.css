@@ -1,0 +1,104 @@
+/* Mobile and small-screen refinements for the public IRED website. */
+html,body{max-width:100%;overflow-x:hidden}img{max-width:100%}.mobileNav{display:none}
+
+@media(max-width:760px){
+  .container{width:min(calc(100% - 24px),var(--max))}
+  .siteHeader{border-bottom:1px solid var(--line)}
+  .brandRow{align-items:center!important;gap:10px!important;padding:8px 0!important}
+  .brandLogoLink{width:min(72%,310px)!important;min-width:0!important;flex:1 1 auto}
+  .iredLogo{width:100%!important;height:auto!important;max-height:58px!important;object-fit:contain!important}
+  .headerActions{flex:0 0 auto}
+  .headerActions .search{display:none!important}
+  .headerActions .btnGold{display:inline-flex!important;font-size:9.5px!important;padding:8px 9px!important;white-space:normal!important;text-align:center;line-height:1.2}
+  .mainNav{display:none!important}
+  .mobileNav{display:block;background:#263744;color:#fff;border-bottom:1px solid #172630}
+  .mobileNav summary{list-style:none;cursor:pointer;padding:11px 12px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .mobileNav summary::-webkit-details-marker{display:none}
+  .mobileNav summary:after{content:'Menu';font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#e6bf57}
+  .mobileNav[open] summary:after{content:'Close'}
+  .mobileNavPanel{border-top:1px solid #ffffff1f;padding:8px 12px 13px;background:#1f303d}
+  .mobileNavLinks{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#ffffff18;border:1px solid #ffffff12}
+  .mobileNavLinks a{background:#263744;padding:11px 10px;font-size:11px;line-height:1.25}
+  .mobileNavLinks a:active{background:#314756}
+  .mobileSearch{display:flex;margin-top:10px;border:1px solid #ffffff45;background:#fff;border-radius:3px;overflow:hidden}
+  .mobileSearch input{min-width:0;flex:1;border:0;padding:10px 11px;font-size:12px;outline:0}
+  .mobileSearch button{border:0;background:var(--gold);font-weight:800;padding:0 14px}
+  .mobileEditorial{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:10px;font-size:10.5px;color:#d9e2e8}
+  .mobileEditorial a{font-weight:800;color:#f0c55a}
+
+  .pageHero{padding:27px 0!important}
+  .pageHero h1{font-size:clamp(26px,8vw,34px)!important;line-height:1.13!important;overflow-wrap:anywhere}
+  .pageHero p{font-size:12px!important;line-height:1.6!important}
+  .contentCard{padding:16px!important;margin:14px 0!important;border-radius:5px!important}
+
+  .heroGrid{grid-template-columns:1fr!important;min-height:auto!important;padding:28px 0!important}
+  .heroCopy{padding:0!important}
+  .hero h1{font-size:clamp(30px,9vw,38px)!important;line-height:1.05!important}
+  .hero p{font-size:13px!important;line-height:1.55!important}
+  .heroActions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+  .heroActions .btn{width:100%}
+  .heroArt{display:none!important}
+
+  .publicationStrip{padding:12px 0 4px!important}
+  .journalGrid,.latestGrid,.aboutGrid{grid-template-columns:1fr!important;gap:12px!important}
+  .journalCard{grid-template-columns:1fr!important;gap:10px!important;padding:15px!important;min-height:0!important}
+  .journalLogo{height:auto!important;max-height:92px!important;max-width:260px!important;justify-self:start}
+  .journalCopy h2{font-size:18px!important}
+  .journalCopy p{font-size:11.5px!important;line-height:1.55!important}
+  .featureRow{gap:8px 14px!important;font-size:8.5px!important}
+  .journalWatermark{display:none}
+
+  .section{padding:16px 0!important}.compactSection{padding-top:12px!important;padding-bottom:12px!important}
+  .sectionTitle{align-items:flex-start!important;gap:8px!important}
+  .sectionTitle h2{font-size:15px!important;line-height:1.25!important}
+  .sectionTitle>a{font-size:9px!important;white-space:nowrap;padding-top:3px}
+  .paperRow,.bookRow{grid-template-columns:46px minmax(0,1fr)!important;gap:9px!important;padding:10px!important;align-items:start!important}
+  .paperThumb{height:46px!important;font-size:22px!important}
+  .bookRow>img{width:46px!important;height:64px!important}
+  .itemTitle{font-size:11px!important;overflow-wrap:anywhere}
+  .meta{font-size:9px!important;line-height:1.45!important}
+  .paperRow .actions,.bookRow .actions{grid-column:1/-1!important;justify-content:flex-start!important;flex-wrap:wrap!important;padding-top:2px}
+  .smallBtn{font-size:9px!important;padding:7px 9px!important}
+
+  .audienceGrid{grid-template-columns:1fr!important}
+  .audienceItem{justify-content:flex-start!important;border-right:0!important;border-bottom:1px solid var(--line)!important;padding:10px 12px!important}
+  .audienceItem:last-child{border-bottom:0!important}
+  .quotePanel{min-height:0!important;padding:14px!important}
+  .quote{font-size:16px!important}.openBook{font-size:45px!important}
+
+  .footer{padding-top:20px!important}
+  .footerGrid{grid-template-columns:1fr 1fr!important;gap:18px 14px!important}
+  .footerBrand{grid-column:1/-1}
+  .footerBrand img{width:190px!important;height:auto!important;object-fit:contain!important}
+  .footer a,.footer p{font-size:10px!important;line-height:1.5!important}
+  .footerMotto{display:none!important}
+  .copy{flex-direction:column!important;gap:6px!important;font-size:8.5px!important;line-height:1.5!important}
+
+  .searchPageForm{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:6px!important;max-width:none!important}
+  .searchPageForm input{min-width:0!important;width:100%!important}
+  .searchResultsHeader{align-items:flex-start!important;flex-direction:column!important;gap:4px!important}
+  .searchResultRow{grid-template-columns:60px minmax(0,1fr)!important;gap:10px!important;align-items:start!important}
+  .searchResultRow>a{grid-column:1/-1!important;justify-self:start}
+  .searchResultRow h3{font-size:15px!important;overflow-wrap:anywhere}
+
+  .paperDetailGrid{grid-template-columns:1fr!important;gap:10px!important}
+  .paperDetailGrid .contentCard{margin:0!important}
+  .paperDetailAside{order:-1}
+  .paperDetailAside .btn,.paperDetailAside .smallBtn{width:100%!important;text-align:center!important;justify-content:center!important}
+
+  .redViewerCard{padding:12px!important}
+  .redViewerFrame{height:70vh!important;border-radius:3px!important}
+}
+
+@media(max-width:480px){
+  .container{width:min(calc(100% - 18px),var(--max))}
+  .brandLogoLink{width:68%!important}
+  .headerActions .btnGold{font-size:9px!important;padding:7px 8px!important;max-width:92px}
+  .mobileNavLinks{grid-template-columns:1fr!important}
+  .searchPageForm{grid-template-columns:1fr!important}
+  .searchPageForm .btn{width:100%!important}
+  .footerGrid{grid-template-columns:1fr!important}
+  .footerBrand{grid-column:auto}
+  .journalLogo{max-width:220px!important}
+  .pageHero h1{font-size:27px!important}
+}
