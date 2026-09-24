@@ -1,9 +1,36 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import {Header,Footer} from '../../../components';
 import {getPublishedGreenPaperById} from '@/lib/publications';
 import ShareButtons from './share-buttons';
 
 export const dynamic='force-dynamic';
+
+export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{
+  const {id}=await params;
+  const paper=await getPublishedGreenPaperById(id);
+  if(!paper)return {title:'GREEN Paper'};
+  const description=(paper.abstract||`${paper.title} by ${paper.authors}`).slice(0,220);
+  const authors=paper.authors.split(/,|;|\band\b/i).map(name=>({name:name.trim()})).filter(x=>x.name);
+  return {
+    title:paper.title,
+    description,
+    authors,
+    keywords:paper.keywords||[],
+    alternates:{canonical:`/green/view/${paper.id}`},
+    openGraph:{type:'article',title:paper.title,description,url:`/green/view/${paper.id}`,publishedTime:paper.published_at||undefined,authors:authors.map(x=>x.name)},
+    other:{
+      citation_title:paper.title,
+      citation_author:paper.authors,
+      citation_publication_date:String(paper.publication_year||''),
+      citation_journal_title:'GREEN: The Research Journal',
+      citation_volume:paper.volume||'',
+      citation_issue:paper.issue||'',
+      citation_doi:paper.doi||'',
+      citation_issn:paper.issn&&paper.issn!=='XXXX-XXXX'?paper.issn:'',
+    }
+  };
+}
 
 export default async function GreenPaperDetail({params}:{params:Promise<{id:string}>}){
   const {id}=await params;
