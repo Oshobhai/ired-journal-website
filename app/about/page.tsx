@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import {Header,Footer} from '../components';
 
 export default function About(){
@@ -11,9 +12,10 @@ export default function About(){
         <p>IRED is committed to promoting research, education, academic development, and the exchange of knowledge. It provides a platform where researchers, teachers, academicians, students, and professionals can share ideas, research findings, and scholarly work.</p>
         <p>The Institute encourages meaningful research across social, scientific, educational, economic, cultural, and technological areas, with the aim of supporting the academic community and wider society.</p>
 
-        <h2>Our Publications</h2>
+        <h2>Our Journals</h2>
         <p><strong>GREEN: The Research Journal</strong> is an international, peer-reviewed, open-access research journal for original and unpublished research papers and scholarly articles across multiple disciplines.</p>
-        <p><strong>RED: The Research Journal</strong> is presented on this website as the IRED research-book and compiled-volume publication stream.</p>
+        <p><strong>RED: The Research Journal e-Journal</strong> is an electronic research journal published by IRED to promote the online dissemination of scholarly and research-based knowledge.</p>
+        <p><Link href="/journal-information" style={{fontWeight:700,color:'#0b5f91'}}>View official Journal Information, Publisher and Publishing Body details →</Link></p>
 
         <h2>Our Vision</h2>
         <p>To develop IRED as a meaningful platform for quality research, academic exchange, education, and knowledge development, while encouraging researchers to explore new ideas, address important academic and social issues, and contribute to the advancement of knowledge.</p>
@@ -30,7 +32,7 @@ export default function About(){
         </ul>
 
         <h2>Our Commitment</h2>
-        <p>IRED is committed to creating an academic environment that encourages curiosity, originality, research ethics, knowledge sharing, and continuous learning. Through its research activities and publications, the Institute seeks to connect researchers and academic communities and support the wider dissemination of useful and meaningful research.</p>
+        <p>IRED is committed to creating an academic environment that encourages curiosity, originality, research ethics, knowledge sharing, and continuous learning. Through its research activities and journals, the Institute seeks to connect researchers and academic communities and support the wider dissemination of useful and meaningful research.</p>
       </div>
     </main>
     <Footer/>
