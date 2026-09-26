@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 480" role="img" aria-labelledby="title desc">
+  <title id="title">GREEN: The Research Journal</title>
+  <desc id="desc">Academic GREEN journal logo with globe and laurel emblem, serif GREEN wordmark, ribbon title and research tagline.</desc>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d8a43"/><stop offset="1" stop-color="#075b26"/></linearGradient>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity=".16"/></filter>
+  </defs>
+  <g filter="url(#s)">
+    <circle cx="150" cy="160" r="76" fill="#f3fbf5" stroke="#0f7a38" stroke-width="7"/>
+    <path d="M107 132c18-27 48-42 77-31 26 9 43 33 43 59 0 36-29 65-65 65-34 0-62-26-65-59 8 5 18 8 28 7 15-2 22-10 30-21 8-12 20-19 35-22-13-8-30-11-47-7-13 2-25 6-36 9z" fill="#2e8c4a"/>
+    <path d="M57 207c-24-43-18-93 13-130M66 224c-17-12-31-28-40-47M78 238c-17-5-32-14-45-26M243 207c24-43 18-93-13-130M234 224c17-12 31-28 40-47M222 238c17-5 32-14 45-26" fill="none" stroke="#0d6c31" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <text x="265" y="225" font-family="Georgia, 'Times New Roman', serif" font-size="150" font-weight="900" letter-spacing="-7" fill="url(#g)">GREEN</text>
+  <path d="M45 258h905l-25 82H70L45 258z" fill="url(#g)"/>
+  <text x="500" y="318" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="53" font-weight="700" font-style="italic" fill="#fff">The Research Journal</text>
+  <text x="500" y="399" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" letter-spacing="2.2" fill="#0a6a30">RESEARCH • KNOWLEDGE • DEVELOPMENT</text>
+</svg>
