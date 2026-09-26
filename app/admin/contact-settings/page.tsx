@@ -6,7 +6,7 @@ export const dynamic='force-dynamic'
 
 export default async function ContactSettingsPage(){
   const access=await requireAdmin()
-  return <AdminFrame access={access} active="contact-settings" kicker="Administration" title="Contact Details" description="Manage the public IRED phone numbers, editorial email and registration number without editing source code.">
+  return <AdminFrame access={access} active="contact-settings" kicker="Administration" title="Contact Details" description="Manage the public IRED phone numbers, editorial email, registration number and GREEN/RED ISSN details without editing source code.">
     <ContactSettingsManager/>
   </AdminFrame>
 }
