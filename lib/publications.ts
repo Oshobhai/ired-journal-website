@@ -67,6 +67,14 @@ export type GreenArchiveResult = {
   totalPages: number
 }
 
+export type RedArchiveResult = {
+  publications: PublicRedBook[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 async function signedUrls(bucket: string, path: string) {
   const supabase = await createClient()
   const [{ data: view }, { data: download }] = await Promise.all([
@@ -135,6 +143,43 @@ export async function getPublishedRedBooks(limit?: number): Promise<PublicRedBoo
   const { data, error } = await query
   if (error || !data) return []
   return data.map((book) => ({ ...book, cover_url: book.cover_path ? supabase.storage.from('red-book-covers').getPublicUrl(book.cover_path).data.publicUrl : null, view_url: `/red/view/${book.id}` })) as PublicRedBook[]
+}
+
+export async function getRedArchive(options?: { q?: string; year?: number | null; page?: number; pageSize?: number }): Promise<RedArchiveResult> {
+  const supabase = await createClient()
+  const q = (options?.q || '').trim().slice(0, 100)
+  const year = options?.year && Number.isFinite(options.year) ? Number(options.year) : null
+  const pageSize = Math.min(Math.max(options?.pageSize || 10, 5), 50)
+  const page = Math.max(options?.page || 1, 1)
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  let query = supabase
+    .from('red_books')
+    .select(redSelect, { count: 'exact' })
+    .eq('status', 'published')
+
+  if (year) query = query.eq('publication_year', year)
+  if (q) {
+    const safe = q.replace(/[,%()]/g, ' ').replace(/\s+/g, ' ').trim()
+    if (safe) query = query.or(`title.ilike.%${safe}%,subtitle.ilike.%${safe}%,editors.ilike.%${safe}%,description.ilike.%${safe}%,theme.ilike.%${safe}%,issn.ilike.%${safe}%,isbn.ilike.%${safe}%`)
+  }
+
+  const { data, error, count } = await query
+    .order('publication_year', { ascending: false, nullsFirst: false })
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (error || !data) return { publications: [], total: 0, page, pageSize, totalPages: 0 }
+
+  const publications = data.map((book) => ({
+    ...book,
+    cover_url: book.cover_path ? supabase.storage.from('red-book-covers').getPublicUrl(book.cover_path).data.publicUrl : null,
+    view_url: `/red/view/${book.id}`,
+  })) as PublicRedBook[]
+  const total = count || 0
+  return { publications, total, page, pageSize, totalPages: Math.ceil(total / pageSize) }
 }
 
 export async function getPublishedRedBookById(id: string): Promise<PublicRedBook | null> {
