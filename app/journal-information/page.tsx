@@ -41,7 +41,7 @@ export default function JournalInformation(){
       </section>
 
       <section className="contentCard" style={{borderTop:'4px solid #cb2528'}}>
-        <img src="/red-logo.png?v=4" alt="RED: The Research Journal e-Journal" style={{width:240,maxWidth:'100%',height:75,objectFit:'contain'}}/>
+        <img className="redJournalLogo" src="/red-logo.svg?v=5" alt="RED: The Research Journal e-Journal" style={{width:240,maxWidth:'100%',height:75,objectFit:'contain'}}/>
         <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginTop:8}}>Official Journal Title</div>
         <h2>RED: The Research Journal e-Journal</h2>
         <p>RED: The Research Journal e-Journal is an electronic research journal published by IRED with the objective of promoting the online dissemination of scholarly and research-based knowledge.</p>
