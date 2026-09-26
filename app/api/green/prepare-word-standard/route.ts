@@ -57,7 +57,7 @@ function esc(value:string){return value.replace(/&/g,'&amp;').replace(/</g,'&lt;
 function run(text:string,size=16,bold=false,color='1B2633',italic=false){return `<w:r><w:rPr>${bold?'<w:b/>':''}${italic?'<w:i/>':''}<w:color w:val="${color}"/><w:sz w:val="${size}"/><w:szCs w:val="${size}"/></w:rPr><w:t xml:space="preserve">${esc(text)}</w:t></w:r>`}
 function para(content:string,align:'left'|'right'|'center'='left',after=0){return `<w:p><w:pPr><w:jc w:val="${align}"/><w:spacing w:after="${after}"/></w:pPr>${content}</w:p>`}
 
-function headerMarkup(articleId:string,volume:number,issue:number,year:number){
+function headerMarkup(articleId:string,volume:number,issue:number,year:number,issn:string){
   const left=[
     para(run('◉ ',42,true,'148444')+run('GREEN',48,true,'148444'), 'left', 0),
     para(run('The Research Journal',18,true,'148444',true),'left',15),
@@ -66,7 +66,7 @@ function headerMarkup(articleId:string,volume:number,issue:number,year:number){
   ].join('')
   const right=[
     para(run(`Volume ${volume} | Issue ${issue} | ${year}`,16,true,'1B2633'),'right',0),
-    para(run('ISSN: Not assigned (Online)',13,false,'536779'),'right',0),
+    para(run(`ISSN: ${issn}`,13,false,'536779'),'right',0),
     para(run(`Article ID: ${articleId}`,13,false,'536779'),'right',18),
     `<w:p><w:pPr><w:jc w:val="right"/><w:spacing w:after="0"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="FFFFFF"/><w:sz w:val="13"/><w:shd w:val="clear" w:color="auto" w:fill="148444"/></w:rPr><w:t xml:space="preserve">  Research Article  </w:t></w:r></w:p>`,
   ].join('')
@@ -84,9 +84,9 @@ function replaceRootBody(xml:string,root:'hdr'|'ftr',markup:string){
   return xml.replace(pattern,`$1${markup}$2`)
 }
 
-function formatDocx(input:Buffer,articleId:string,volume:number,issue:number,year:number){
+function formatDocx(input:Buffer,articleId:string,volume:number,issue:number,year:number,issn:string){
   const entries=unzip(input)
-  const header=headerMarkup(articleId,volume,issue,year),footer=footerMarkup(articleId,volume,issue)
+  const header=headerMarkup(articleId,volume,issue,year,issn),footer=footerMarkup(articleId,volume,issue)
   let headers=0,footers=0
   for(const entry of entries){
     if(/^word\/header\d*\.xml$/i.test(entry.name)||entry.name==='word/iredHeader.xml'){
@@ -117,14 +117,16 @@ export async function POST(request:Request){
   const supabase=await createClient()
 
   try{
+    const {data:settings}=await supabase.from('contact_settings').select('green_issn').eq('id',true).maybeSingle()
+    const issn=settings?.green_issn?.trim()||'XXXX-XXXX'
     const {data:file,error:downloadError}=await supabase.storage.from('green-manuscripts').download(processedPath)
     if(downloadError||!file)throw new Error(downloadError?.message||'Could not open the prepared Word file.')
-    const updated=formatDocx(Buffer.from(await file.arrayBuffer()),articleId,volume,issue,year)
+    const updated=formatDocx(Buffer.from(await file.arrayBuffer()),articleId,volume,issue,year,issn)
     const {error:updateError}=await supabase.storage.from('green-manuscripts').update(processedPath,new Blob([updated]),{contentType:DOCX_MIME})
     if(updateError)throw updateError
     const {data:signed,error:signedError}=await supabase.storage.from('green-manuscripts').createSignedUrl(processedPath,3600,{download:`${articleId}.docx`})
     if(signedError)throw signedError
-    return Response.json({...basePayload,downloadUrl:signed?.signedUrl||basePayload.downloadUrl,headerStyle:'GREEN standard journal header'})
+    return Response.json({...basePayload,downloadUrl:signed?.signedUrl||basePayload.downloadUrl,headerStyle:'GREEN standard journal header',issn})
   }catch(error){
     await supabase.from('green_papers').delete().eq('article_id',articleId)
     await supabase.storage.from('green-manuscripts').remove([processedPath])
