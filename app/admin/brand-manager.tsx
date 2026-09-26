@@ -90,7 +90,7 @@ export default function BrandManager(){
         <h3 style={{margin:'0 0 4px',fontFamily:'Georgia,serif',fontSize:15,color:'#0b2d4e'}}>{asset.label}</h3>
         <p style={{margin:'0 0 11px',fontSize:10.5,lineHeight:1.5,color:'#667887'}}>{asset.description}</p>
         <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>
-          <label className="btn btnNavy compact" style={{cursor:busy?'default':'pointer',opacity:busy&&busy!==asset.key?.65:1}}>{busy===asset.key?'Uploading…':'Choose New Logo'}<input hidden disabled={Boolean(busy)} type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" onChange={e=>upload(asset,e)}/></label>
+          <label className="btn btnNavy compact" style={{cursor:busy?'default':'pointer',opacity:busy&&busy!==asset.key?0.65:1}}>{busy===asset.key?'Uploading…':'Choose New Logo'}<input hidden disabled={Boolean(busy)} type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" onChange={e=>upload(asset,e)}/></label>
           <button type="button" className="btn btnOutline compact" disabled={Boolean(busy)||!paths[asset.key]} onClick={()=>restore(asset)}>Restore Default</button>
         </div>
         <div style={{fontSize:9.5,color:paths[asset.key]?'#16723b':'#7a8791',marginTop:9,fontWeight:700}}>{paths[asset.key]?'Custom logo active':'Website default active'}</div>
