@@ -3,9 +3,9 @@ import {Header,Footer} from '../components'
 
 const journalLogoStyle={
   display:'block',
-  width:240,
+  width:260,
   maxWidth:'100%',
-  height:82,
+  height:120,
   objectFit:'contain',
   objectPosition:'left center',
   margin:0,
@@ -35,7 +35,7 @@ export default function JournalInformation(){
       </section>
 
       <section className="contentCard" style={{borderTop:'4px solid #148444'}}>
-        <img src="/green-logo.png?v=2" alt="GREEN: The Research Journal" style={journalLogoStyle}/>
+        <img src="/green-logo-family.svg?v=1" alt="GREEN: The Research Journal" style={journalLogoStyle}/>
         <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#148444',marginTop:8}}>Official Journal Title</div>
         <h2>GREEN: The Research Journal</h2>
         <p>GREEN: The Research Journal is an international, peer-reviewed, open-access research journal that provides a platform for researchers, faculty members, academicians, and students to publish original and unpublished research papers and scholarly articles.</p>
@@ -51,7 +51,7 @@ export default function JournalInformation(){
       </section>
 
       <section className="contentCard" style={{borderTop:'4px solid #cb2528'}}>
-        <img src="/red-logo-official.svg?v=2" alt="RED: The Research Journal e-Journal — Online Scholarly Publication" style={journalLogoStyle}/>
+        <img src="/red-logo-family.svg?v=1" alt="RED: The Research Journal" style={journalLogoStyle}/>
         <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginTop:8}}>Official Journal Title</div>
         <h2>RED: The Research Journal e-Journal</h2>
         <p>RED: The Research Journal e-Journal is an electronic research journal published by IRED with the objective of promoting the online dissemination of scholarly and research-based knowledge.</p>
