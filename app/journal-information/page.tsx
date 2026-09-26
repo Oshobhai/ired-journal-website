@@ -42,6 +42,7 @@ export default async function JournalInformation(){
         <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#148444',marginTop:8}}>Official Journal Title</div>
         <h2>GREEN: The Research Journal</h2>
         <p>GREEN: The Research Journal is an international, peer-reviewed, open-access research journal that provides a platform for researchers, faculty members, academicians, and students to publish original and unpublished research papers and scholarly articles.</p>
+        <p><strong>ISSN:</strong> {contact.green_issn}</p>
         <p><strong>Journal Type:</strong> International · Peer-reviewed · Open-access · Multidisciplinary</p>
         <p><strong>Scope:</strong> Accounting, Archaeology, Biology, Business, Chemistry, Commerce, Economics, Education, Law, Linguistics, Management, Physics, Political Science, Social Work, Arts, Humanities, Sciences, Social Sciences and related academic disciplines.</p>
         <p><strong>Published By:</strong> Institute of Research Education and Development (IRED)</p>
@@ -58,6 +59,7 @@ export default async function JournalInformation(){
         <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginTop:8}}>Official Journal Title</div>
         <h2>RED: The Research Journal e-Journal</h2>
         <p>RED: The Research Journal e-Journal is an electronic research journal published by IRED with the objective of promoting the online dissemination of scholarly and research-based knowledge.</p>
+        <p><strong>e-ISSN:</strong> {contact.red_eissn}</p>
         <p><strong>Publication Mode:</strong> Electronic research journal</p>
         <p><strong>Scope:</strong> Multidisciplinary research across Arts, Humanities, Sciences, Social Sciences, Commerce, Education, Management, Law and other academic disciplines.</p>
         <p><strong>Published By:</strong> Institute of Research Education and Development (IRED)</p>
