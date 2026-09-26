@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import {Header,Footer} from '../components'
+import {getContactSettings} from '@/lib/contact-settings'
 
 const journalLogoStyle={
   display:'block',
@@ -11,7 +12,9 @@ const journalLogoStyle={
   margin:0,
 } as const
 
-export default function JournalInformation(){
+export default async function JournalInformation(){
+  const contact=await getContactSettings()
+  const phones=[contact.phone_primary,contact.phone_secondary].filter(Boolean).join(' | ')
   return <>
     <Header/>
     <section className="pageHero">
@@ -28,10 +31,10 @@ export default function JournalInformation(){
         <p><strong>Publishing Body:</strong> Institute of Research Education and Development (IRED)</p>
         <p><strong>Publisher:</strong> Institute of Research Education and Development (IRED)</p>
         <p><strong>Organization:</strong> Academic and research-oriented organization located in Ahmedabad, Gujarat, India.</p>
-        <p><strong>Registration:</strong> Approved by the Charity Commissioner, Ahmedabad, Government of Gujarat, under the Mumbai Public Trusts Act, 1950, Registration No. GUJ/15856/AHMEDABAD.</p>
+        <p><strong>Registration:</strong> Approved by the Charity Commissioner, Ahmedabad, Government of Gujarat, under the Mumbai Public Trusts Act, 1950, Registration No. {contact.registration_no}.</p>
         <p><strong>Official Address:</strong> A-3, 3rd Floor, Gita Apartment, Nr. Hirabaug Crossing, Ambawadi, Ahmedabad-380015, Gujarat, India.</p>
-        <p><strong>Phone:</strong> 7383000930 | 7203998343</p>
-        <p><strong>Email:</strong> <a href="mailto:ired.foundation@gmail.com">ired.foundation@gmail.com</a></p>
+        <p><strong>Phone:</strong> {phones}</p>
+        <p><strong>Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
       </section>
 
       <section className="contentCard" style={{borderTop:'4px solid #148444'}}>
