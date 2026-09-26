@@ -74,7 +74,7 @@ export default function GreenPaperGenerator(){
       })
       if(uploadError)throw uploadError
 
-      const response=await fetch('/api/green/prepare-word',{
+      const response=await fetch('/api/green/prepare-word-standard',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({sourcePath:incomingPath,originalName:file.name}),
@@ -83,7 +83,7 @@ export default function GreenPaperGenerator(){
       if(!response.ok)throw new Error(payload?.error||'Could not prepare the GREEN Word file.')
 
       setResult(payload as PreparedResult)
-      setMessage('Word file prepared successfully. Header, footer, Article ID, Volume, Issue and publication month/year were added automatically.')
+      setMessage('Prepared successfully with the standard GREEN journal header and footer.')
     }catch(error){
       await supabase.storage.from('green-manuscripts').remove([incomingPath])
       setMessage(error instanceof Error?error.message:'Could not prepare the Word file.')
@@ -96,7 +96,7 @@ export default function GreenPaperGenerator(){
     <div style={{padding:'20px 22px 15px',borderBottom:'1px solid #dfe6ea'}}>
       <div style={{fontSize:10,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:800,color:'#148444'}}>GREEN Publication Workflow</div>
       <h2 style={{margin:'5px 0 5px',fontFamily:'Georgia,serif',color:'#0b2d4e'}}>Prepare GREEN Word File</h2>
-      <p style={{margin:0,fontSize:12,color:'#627483',lineHeight:1.65,maxWidth:850}}>Upload the author&apos;s final Word document. The system keeps the paper content and formatting, adds the GREEN journal publication header and footer, assigns the next Article ID / Volume / Issue, and creates a Draft record.</p>
+      <p style={{margin:0,fontSize:12,color:'#627483',lineHeight:1.65,maxWidth:850}}>Upload the final Word paper. The system preserves the manuscript and applies the standard GREEN journal header: journal identity on the left, Volume / Issue / Year, Article ID and Research Article badge on the right, plus a journal footer with page numbering.</p>
     </div>
 
     <div style={{padding:'20px 22px'}}>
@@ -111,16 +111,16 @@ export default function GreenPaperGenerator(){
 
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:8,marginTop:14}}>
         {[
-          ['Header','GREEN journal name + Volume / Issue + Month / Year'],
+          ['Header','GREEN identity + IRED + Volume / Issue / Year'],
+          ['Article Data','Article ID + Research Article badge'],
           ['Footer','Article ID + Volume / Issue + automatic page number'],
-          ['Numbering','Volume and Issue calculated automatically'],
           ['Paper','Original Word content and formatting preserved'],
         ].map(([title,text])=><div key={title} style={{padding:'10px 11px',border:'1px solid #e0e6ea',background:'#fafcfd'}}><div style={{fontSize:9,textTransform:'uppercase',letterSpacing:'.08em',fontWeight:800,color:'#148444'}}>{title}</div><div style={{fontSize:10.5,color:'#586a78',lineHeight:1.45,marginTop:3}}>{text}</div></div>)}
       </div>
 
       <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',flexWrap:'wrap',marginTop:16,paddingTop:14,borderTop:'1px solid #e2e8ec'}}>
-        <div style={{fontSize:10.5,color:'#6b7b87'}}>No manual Month, Year, Volume or Issue entry is required.</div>
-        <button className="btn btnGreen" type="button" disabled={!file||busy} onClick={prepareWord}>{busy?'Preparing Word…':'Add Header & Footer'}</button>
+        <div style={{fontSize:10.5,color:'#6b7b87'}}>Volume, Issue, Year and Article ID are assigned automatically.</div>
+        <button className="btn btnGreen" type="button" disabled={!file||busy} onClick={prepareWord}>{busy?'Preparing Word…':'Add Standard Header & Footer'}</button>
       </div>
 
       {result?<div style={{marginTop:18,border:'1px solid #c7dfd0',background:'#f5fbf7',padding:14}}>
@@ -133,7 +133,7 @@ export default function GreenPaperGenerator(){
           </div>
           {result.downloadUrl?<a className="btn btnGreen" href={result.downloadUrl}>Download Prepared Word</a>:null}
         </div>
-        <div style={{fontSize:10.5,color:'#687986',marginTop:11,paddingTop:10,borderTop:'1px solid #dce9e1'}}>The publication record is saved as Draft. After checking the prepared Word file, save/export it as PDF and attach the final PDF before publishing.</div>
+        <div style={{fontSize:10.5,color:'#687986',marginTop:11,paddingTop:10,borderTop:'1px solid #dce9e1'}}>Check the prepared Word file, export it as PDF, attach the final PDF and then publish.</div>
       </div>:null}
     </div>
   </section>
