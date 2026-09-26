@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 718 293" role="img" aria-labelledby="title desc">
   <title id="title">RED: The Research Journal e-Journal</title>
-  <desc id="desc">Official RED e-Journal logo with laptop, RED wordmark, journal title and Online Scholarly Publication tagline.</desc>
+  <desc id="desc">RED e-Journal logo styled to visually match the GREEN journal typography.</desc>
   <defs>
     <linearGradient id="redGrad" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#ff2929"/>
@@ -16,12 +16,10 @@
     </filter>
   </defs>
 
-  <!-- laptop / book mark -->
   <g transform="translate(7 50)" filter="url(#shadow)">
     <path d="M21 12h151c8 0 14 6 14 14v94H7V26c0-8 6-14 14-14z" fill="#2b2b2b" stroke="#111" stroke-width="3"/>
     <rect x="19" y="25" width="155" height="83" rx="3" fill="#f5f5f5" stroke="#777" stroke-width="2"/>
     <rect x="34" y="37" width="125" height="60" fill="#fff" stroke="#cfcfcf"/>
-    <!-- open book -->
     <path d="M48 52c18-8 36-7 49 4v31c-15-10-31-11-49-4V52z" fill="none" stroke="#cf1018" stroke-width="5"/>
     <path d="M146 52c-18-8-36-7-49 4v31c15-10 31-11 49-4V52z" fill="none" stroke="#cf1018" stroke-width="5"/>
     <path d="M97 56v31" stroke="#cf1018" stroke-width="3"/>
@@ -29,22 +27,19 @@
     <path d="M0 142h190l-15 12H14L0 142z" fill="#1c1c1c"/>
   </g>
 
-  <!-- broadcast waves -->
   <g fill="none" stroke="#e51a20" stroke-width="7" stroke-linecap="round">
     <path d="M143 31c26 3 47 24 50 50"/>
     <path d="M143 12c37 4 68 34 72 72"/>
     <path d="M143 51c15 2 28 14 30 30"/>
   </g>
 
-  <!-- RED wordmark -->
-  <text x="204" y="176" font-family="Arial Black, Impact, sans-serif" font-size="164" font-weight="900" letter-spacing="-7" fill="url(#redGrad)" stroke="#a9090f" stroke-width="1">RED</text>
+  <!-- Serif display lettering to match GREEN's academic wordmark -->
+  <text x="198" y="176" font-family="Georgia, 'Times New Roman', serif" font-size="154" font-weight="900" letter-spacing="-8" fill="url(#redGrad)" stroke="#a9090f" stroke-width="1">RED</text>
 
-  <!-- black journal-title ribbon -->
   <path d="M0 190h718l-16 58H17L0 190z" fill="url(#barGrad)" stroke="#050505" stroke-width="2"/>
   <path d="M0 190c127 7 251 9 359 9s232-2 359-9" fill="none" stroke="#666" stroke-width="1" opacity=".45"/>
   <path d="M17 248h684" stroke="#df171d" stroke-width="4"/>
-  <text x="359" y="234" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700" font-style="italic" fill="#fff">The Research Journal e-Journal</text>
+  <text x="359" y="234" text-anchor="middle" font-family="'Times New Roman', Georgia, serif" font-size="42" font-weight="700" font-style="italic" fill="#fff">The Research Journal e-Journal</text>
 
-  <!-- tagline -->
   <text x="359" y="284" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="800" letter-spacing="2.2" fill="#cf181e">ONLINE • SCHOLARLY • PUBLICATION</text>
 </svg>
