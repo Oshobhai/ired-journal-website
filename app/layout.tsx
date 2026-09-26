@@ -15,8 +15,9 @@ export const metadata: Metadata = {
   authors:[{name:'Institute of Research Education and Development (IRED)'}],
   creator:'Institute of Research Education and Development (IRED)',
   publisher:'Institute of Research Education and Development (IRED)',
-  openGraph:{type:'website',siteName:'IRED Research Journals',title:'IRED | GREEN: The Research Journal & RED: The Research Journal e-Journal',description:'Official research-journal publication website of the Institute of Research Education and Development (IRED).',url:siteUrl,images:[{url:'/ired-header-logo.webp?v=5',alt:'IRED — Institute of Research Education and Development'}]},
-  twitter:{card:'summary_large_image',title:'IRED Research Journals',description:'GREEN: The Research Journal and RED: The Research Journal e-Journal, published by IRED.',images:['/ired-header-logo.webp?v=5']},
+  icons:{icon:'/api/brand/favicon'},
+  openGraph:{type:'website',siteName:'IRED Research Journals',title:'IRED | GREEN: The Research Journal & RED: The Research Journal e-Journal',description:'Official research-journal publication website of the Institute of Research Education and Development (IRED).',url:siteUrl,images:[{url:'/api/brand/ired_header',alt:'IRED — Institute of Research Education and Development'}]},
+  twitter:{card:'summary_large_image',title:'IRED Research Journals',description:'GREEN: The Research Journal and RED: The Research Journal e-Journal, published by IRED.',images:['/api/brand/ired_header']},
   robots:{index:true,follow:true},
 };
 
