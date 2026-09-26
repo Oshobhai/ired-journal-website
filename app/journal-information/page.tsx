@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import {Header,Footer} from '../components'
 import {getContactSettings} from '@/lib/contact-settings'
+import {getSiteSettings} from '@/lib/site-settings'
 
 const journalLogoStyle={
   display:'block',
@@ -13,7 +14,7 @@ const journalLogoStyle={
 } as const
 
 export default async function JournalInformation(){
-  const contact=await getContactSettings()
+  const [contact,settings]=await Promise.all([getContactSettings(),getSiteSettings()])
   const phones=[contact.phone_primary,contact.phone_secondary].filter(Boolean).join(' | ')
   return <>
     <Header/>
@@ -21,32 +22,32 @@ export default async function JournalInformation(){
       <div className="container">
         <div style={{fontSize:10,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:800,color:'#7b8792',marginBottom:4}}>Official Publication Record</div>
         <h1>Journal Information</h1>
-        <p style={{fontSize:12.5,color:'#607080',margin:'7px 0 0',maxWidth:850}}>Official journal titles, publishing body, publisher details, editorial information and institutional contact details of the Institute of Research Education and Development (IRED).</p>
+        <p style={{fontSize:12.5,color:'#607080',margin:'7px 0 0',maxWidth:850}}>Official journal titles, publishing body, publisher details, editorial information and institutional contact details of the {settings.institution_name} ({settings.institution_short_name}).</p>
       </div>
     </section>
 
     <main className="container" style={{padding:'22px 0 36px'}}>
       <section className="contentCard" style={{borderTop:'4px solid #0b2d4e'}}>
         <h2 style={{marginTop:0}}>Publishing Body & Publisher Details</h2>
-        <p><strong>Publishing Body:</strong> Institute of Research Education and Development (IRED)</p>
-        <p><strong>Publisher:</strong> Institute of Research Education and Development (IRED)</p>
+        <p><strong>Publishing Body:</strong> {settings.publisher_name}</p>
+        <p><strong>Publisher:</strong> {settings.publisher_name}</p>
         <p><strong>Organization:</strong> Academic and research-oriented organization located in Ahmedabad, Gujarat, India.</p>
         <p><strong>Registration:</strong> Approved by the Charity Commissioner, Ahmedabad, Government of Gujarat, under the Mumbai Public Trusts Act, 1950, Registration No. {contact.registration_no}.</p>
-        <p><strong>Official Address:</strong> A-3, 3rd Floor, Gita Apartment, Nr. Hirabaug Crossing, Ambawadi, Ahmedabad-380015, Gujarat, India.</p>
+        <p><strong>Official Address:</strong> {settings.official_address}</p>
         <p><strong>Phone:</strong> {phones}</p>
         <p><strong>Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
       </section>
 
       <section className="contentCard" style={{borderTop:'4px solid #148444'}}>
-        <img src="/api/brand/green_logo" alt="GREEN: The Research Journal" style={journalLogoStyle}/>
+        <img src="/api/brand/green_logo" alt={settings.green_title} style={journalLogoStyle}/>
         <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#148444',marginTop:8}}>Official Journal Title</div>
-        <h2>GREEN: The Research Journal</h2>
-        <p>GREEN: The Research Journal is an international, peer-reviewed, open-access research journal that provides a platform for researchers, faculty members, academicians, and students to publish original and unpublished research papers and scholarly articles.</p>
+        <h2>{settings.green_title}</h2>
+        <p>{settings.green_description}</p>
         <p><strong>ISSN:</strong> {contact.green_issn}</p>
         <p><strong>Journal Type:</strong> International · Peer-reviewed · Open-access · Multidisciplinary</p>
-        <p><strong>Scope:</strong> Accounting, Archaeology, Biology, Business, Chemistry, Commerce, Economics, Education, Law, Linguistics, Management, Physics, Political Science, Social Work, Arts, Humanities, Sciences, Social Sciences and related academic disciplines.</p>
-        <p><strong>Published By:</strong> Institute of Research Education and Development (IRED)</p>
-        <p><strong>Editor in Chief:</strong> Dr. Bhavika Kadikar — Librarian and Assistant Professor, Surendranagar University, Wadhwan</p>
+        <p><strong>Scope:</strong> {settings.green_scope}</p>
+        <p><strong>Published By:</strong> {settings.publisher_name}</p>
+        <p><strong>Editor in Chief:</strong> {settings.green_editor_in_chief}</p>
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:16}}>
           <Link className="btn btnGreen compact" href="/green">View GREEN Publications</Link>
           <Link className="btn btnOutline compact" href="/editorial-board">Editorial Board</Link>
@@ -55,14 +56,14 @@ export default async function JournalInformation(){
       </section>
 
       <section className="contentCard" style={{borderTop:'4px solid #cb2528'}}>
-        <img src="/api/brand/red_logo" alt="RED: The Research Journal" style={journalLogoStyle}/>
+        <img src="/api/brand/red_logo" alt={settings.red_title} style={journalLogoStyle}/>
         <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginTop:8}}>Official Journal Title</div>
-        <h2>RED: The Research Journal e-Journal</h2>
-        <p>RED: The Research Journal e-Journal is an electronic research journal published by IRED with the objective of promoting the online dissemination of scholarly and research-based knowledge.</p>
+        <h2>{settings.red_title}</h2>
+        <p>{settings.red_description}</p>
         <p><strong>e-ISSN:</strong> {contact.red_eissn}</p>
         <p><strong>Publication Mode:</strong> Electronic research journal</p>
-        <p><strong>Scope:</strong> Multidisciplinary research across Arts, Humanities, Sciences, Social Sciences, Commerce, Education, Management, Law and other academic disciplines.</p>
-        <p><strong>Published By:</strong> Institute of Research Education and Development (IRED)</p>
+        <p><strong>Scope:</strong> {settings.red_scope}</p>
+        <p><strong>Published By:</strong> {settings.publisher_name}</p>
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:16}}>
           <Link className="btn btnRed compact" href="/red">View RED Publications</Link>
           <Link className="btn btnOutline compact" href="/editorial-board">Editorial Board</Link>
