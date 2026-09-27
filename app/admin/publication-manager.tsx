@@ -15,7 +15,9 @@ type Publication = {
   editors?: string | null
   publication_year?: number | null
   publication_month?: string | null
+  volume?: string | null
   issue?: string | null
+  article_id?: string | null
   publication_label?: string | null
 }
 
@@ -34,8 +36,8 @@ export default function PublicationManager(){
 
   const load=useCallback(async()=>{
     const [{data:g},{data:r}]=await Promise.all([
-      supabase.from('green_papers').select('id,title,authors,affiliation,status,pdf_path,publication_year,created_at').order('created_at',{ascending:false}),
-      supabase.from('red_books').select('id,title,editors,status,pdf_path,cover_path,publication_year,publication_month,issue,publication_label,created_at').order('created_at',{ascending:false}),
+      supabase.from('green_papers').select('id,title,authors,affiliation,status,pdf_path,publication_year,publication_month,volume,issue,article_id,created_at').order('created_at',{ascending:false}),
+      supabase.from('red_books').select('id,title,editors,status,pdf_path,cover_path,publication_year,publication_month,volume,issue,publication_label,created_at').order('created_at',{ascending:false}),
     ])
     setGreen((g||[]) as Publication[])
     setRed((r||[]) as Publication[])
@@ -84,7 +86,7 @@ export default function PublicationManager(){
       }
 
       formEl.reset()
-      setMessage('GREEN paper uploaded successfully as Draft. Review it in GREEN Papers Manager and publish when ready.')
+      setMessage('GREEN paper uploaded successfully as Draft. Volume, Issue and Article ID were assigned automatically.')
       await load()
     }catch(error){
       if(path)await supabase.storage.from('green-papers').remove([path])
@@ -214,6 +216,7 @@ export default function PublicationManager(){
       <section className="contentCard">
         <h2>Add GREEN Research Paper</h2>
         <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Only essential author details are required. The paper is saved as Draft first.</p>
+        <div style={{padding:'9px 11px',marginBottom:12,background:'#f1f8f3',border:'1px solid #cfe3d5',fontSize:11,color:'#476254',lineHeight:1.55}}>Volume, Issue, Publication Month / Year and Article ID are assigned automatically when the paper is uploaded.</div>
         <form onSubmit={uploadGreen}>
           <label style={labelStyle}>Paper Title<input name="paper_title" required style={fieldStyle}/></label>
           <label style={labelStyle}>Author Name<input name="author_name" required style={fieldStyle}/></label>
@@ -247,7 +250,21 @@ export default function PublicationManager(){
 
     <section className="contentCard">
       <h2>GREEN Papers</h2>
-      {green.length===0?<p>No papers uploaded yet.</p>:green.map(item=><div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',padding:'10px 0',borderBottom:'1px solid #e4e9ed'}}><div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.authors||'—'}{item.affiliation?` · ${item.affiliation}`:''} · {item.publication_year||'Year not set'} · {item.status}</div></div><div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={()=>setStatus('green',item,item.status==='published'?'draft':'published')}>{item.status==='published'?'Unpublish':'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={()=>removeItem('green',item)}>Delete</button></div></div>)}
+      {green.length===0?<p>No papers uploaded yet.</p>:green.map(item=>{
+        const numbering=[item.volume?`Volume ${item.volume}`:null,item.issue?`Issue ${item.issue}`:null,item.publication_month||null,item.publication_year||null].filter(Boolean).join(' · ')
+        return <div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',padding:'10px 0',borderBottom:'1px solid #e4e9ed'}}>
+          <div style={{minWidth:0}}>
+            <strong>{item.title}</strong>
+            <div style={{fontSize:12,color:'#667',marginTop:3}}>{item.authors||'—'}{item.affiliation?` · ${item.affiliation}`:''}</div>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:6}}>
+              {item.article_id?<span style={{fontSize:10.5,padding:'3px 6px',background:'#f4f7f9',border:'1px solid #dce4e9'}}>{item.article_id}</span>:null}
+              <span style={{fontSize:10.5,padding:'3px 6px',background:'#f4f7f9',border:'1px solid #dce4e9'}}>{numbering||'Numbering pending'}</span>
+              <span style={{fontSize:10.5,padding:'3px 6px',background:item.status==='published'?'#eef8f2':'#fff8e9',border:'1px solid #dce4e9'}}>{item.status}</span>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={()=>setStatus('green',item,item.status==='published'?'draft':'published')}>{item.status==='published'?'Unpublish':'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={()=>removeItem('green',item)}>Delete</button></div>
+        </div>
+      })}
     </section>
 
     <section className="contentCard">
@@ -257,7 +274,7 @@ export default function PublicationManager(){
         const dateLabel=[item.publication_month,item.publication_year].filter(Boolean).join(' ')||item.publication_label||'Date not set'
         return <div key={item.id} style={{padding:'12px 0',borderBottom:'1px solid #e4e9ed'}}>
           <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center'}}>
-            <div style={{display:'flex',gap:10,alignItems:'center'}}>{coverUrl?<img src={coverUrl} alt="" style={{width:46,height:62,objectFit:'cover',borderRadius:3,border:'1px solid #ddd'}}/>:<div style={{width:46,height:62,border:'1px dashed #c8c8c8',borderRadius:3,display:'grid',placeItems:'center',fontSize:9,color:'#777'}}>No cover</div>}<div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.editors||'Editor not set'} · {dateLabel}{item.issue?` · Issue ${item.issue}`:''} · {item.status}</div></div></div>
+            <div style={{display:'flex',gap:10,alignItems:'center'}}>{coverUrl?<img src={coverUrl} alt="" style={{width:46,height:62,objectFit:'cover',borderRadius:3,border:'1px solid #ddd'}}/>:<div style={{width:46,height:62,border:'1px dashed #c8c8c8',borderRadius:3,display:'grid',placeItems:'center',fontSize:9,color:'#777'}}>No cover</div>}<div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.editors||'Editor not set'} · {dateLabel}{item.volume?` · Volume ${item.volume}`:''}{item.issue?` · Issue ${item.issue}`:''} · {item.status}</div></div></div>
             <div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={()=>setStatus('red',item,item.status==='published'?'draft':'published')}>{item.status==='published'?'Unpublish':'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={()=>removeItem('red',item)}>Delete</button></div>
           </div>
           <form onSubmit={event=>repairRedFiles(event,item)} style={{marginTop:10,padding:10,background:'#f7f9fa',border:'1px solid #e2e7eb',borderRadius:6}}>
