@@ -4,6 +4,8 @@ import AdminFrame from '../admin-frame'
 
 export const dynamic='force-dynamic'
 
+const STORAGE_CAPACITY_BYTES=1024*1024*1024
+
 type Bucket={id:string;public:boolean;objects:number;bytes:number}
 type Snapshot={
   staff:{full_admins:number;editorial_managers:number;pending_invites:number}
@@ -33,6 +35,13 @@ export default async function SecurityAdmin(){
   const supabase=await createClient()
   const {data,error}=await supabase.rpc('security_dashboard_snapshot')
   const snapshot=(data||null) as Snapshot|null
+  const storageUsed=snapshot?.storage.total_bytes||0
+  const storagePercent=Math.min(100,(storageUsed/STORAGE_CAPACITY_BYTES)*100)
+  const storageRemaining=Math.max(0,STORAGE_CAPACITY_BYTES-storageUsed)
+  const storageLevel=storagePercent>=90?'critical':storagePercent>=80?'high':storagePercent>=70?'warning':'healthy'
+  const storageTone=storageLevel==='critical'?'#9b3434':storageLevel==='high'?'#b5651d':storageLevel==='warning'?'#8b6d2f':'#167843'
+  const storageBg=storageLevel==='critical'?'#fff3f2':storageLevel==='high'?'#fff7ee':storageLevel==='warning'?'#fffaf0':'#f3faf5'
+  const storageMessage=storageLevel==='critical'?'Storage is above 90%. Increase storage capacity or remove/archive unnecessary files immediately.':storageLevel==='high'?'Storage is above 80%. Plan a storage upgrade soon.':storageLevel==='warning'?'Storage is above 70%. Review file growth and prepare for additional capacity.':'Storage usage is within the normal operating range.'
 
   return <AdminFrame access={access} active="security" kicker="Administration" title="Security & Storage" description="Live operational view of staff access, publication protection, storage usage and Supabase security controls.">
     {error||!snapshot?<section style={{background:'#fff7f2',border:'1px solid #efd1c3',padding:'14px 16px',fontSize:12,color:'#87462f'}}>Security dashboard data could not be loaded. {error?.message||'Please refresh the page.'}</section>:<>
@@ -42,12 +51,23 @@ export default async function SecurityAdmin(){
       </section>
 
       <section className="contentCard">
+        <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'end',flexWrap:'wrap',marginBottom:14}}><div><h2 style={{margin:'0 0 4px'}}>Storage Capacity</h2><p style={{margin:0,fontSize:11,color:'#6a7885'}}>Capacity reference: 1 GB · live usage from Supabase Storage</p></div><span style={{fontSize:10,fontWeight:800,color:storageTone,border:`1px solid ${storageTone}55`,background:storageBg,padding:'5px 8px',textTransform:'uppercase'}}>{storageLevel}</span></div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:10,marginBottom:14}}>
+          <StatCard label="Storage Used" value={formatBytes(storageUsed)} detail={`${storagePercent.toFixed(storagePercent<1?2:1)}% of 1 GB`}/>
+          <StatCard label="Storage Remaining" value={formatBytes(storageRemaining)} detail="Estimated remaining capacity before 1 GB"/>
+          <StatCard label="Storage Objects" value={snapshot.storage.total_objects} detail="Files currently stored across all buckets"/>
+        </div>
+        <div style={{height:12,borderRadius:999,background:'#e7edf1',overflow:'hidden',border:'1px solid #d6e0e6'}}><div style={{height:'100%',width:`${Math.max(storagePercent,0.4)}%`,background:storageTone,transition:'width .2s ease'}}/></div>
+        <div style={{marginTop:10,padding:'10px 12px',border:`1px solid ${storageTone}55`,background:storageBg,color:storageTone,fontSize:11,fontWeight:700,lineHeight:1.55}}>{storageMessage}</div>
+        <div style={{display:'flex',justifyContent:'space-between',gap:10,flexWrap:'wrap',fontSize:10,color:'#71808d',marginTop:8}}><span>Warning at 70%</span><span>Plan upgrade at 80%</span><span>Critical at 90%</span></div>
+      </section>
+
+      <section className="contentCard">
         <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'end',flexWrap:'wrap',marginBottom:14}}><div><h2 style={{margin:'0 0 4px'}}>Live Security Status</h2><p style={{margin:0,fontSize:11,color:'#6a7885'}}>Last checked: {new Date(snapshot.security.checked_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})}</p></div><span style={{fontSize:10,fontWeight:800,color:'#167843',border:'1px solid #c9dfd1',background:'#f3faf5',padding:'5px 8px'}}>SUPABASE LIVE</span></div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:10}}>
           <StatCard label="Full Administrators" value={snapshot.staff.full_admins} detail="Accounts with full administrative control"/>
           <StatCard label="Editorial Managers" value={snapshot.staff.editorial_managers} detail="Restricted academic-governance accounts"/>
           <StatCard label="Pending Invites" value={snapshot.staff.pending_invites} detail="Staff invitations awaiting account setup"/>
-          <StatCard label="Storage Objects" value={snapshot.storage.total_objects} detail={`${formatBytes(snapshot.storage.total_bytes)} stored across buckets`}/>
           <StatCard label="Storage Policies" value={snapshot.security.storage_policies} detail="Policies currently attached to storage.objects"/>
           <StatCard label="RLS Tables" value={snapshot.security.rls_tables} detail="Public-schema tables protected by Row Level Security"/>
         </div>
