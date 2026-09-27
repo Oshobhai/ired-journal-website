@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import {Header,Footer} from '../components';
 
-function Icon({type}:{type:'document'|'structure'|'table'|'reference'|'ethics'|'email'|'review'|'check'|'book'}){
+function Icon({type}:{type:'document'|'structure'|'table'|'reference'|'ethics'|'email'|'review'|'check'|'book'|'fee'}){
   const common={width:19,height:19,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,strokeLinecap:'round' as const,strokeLinejoin:'round' as const,'aria-hidden':true};
   if(type==='document') return <svg {...common}><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h6M9 16h6"/></svg>;
   if(type==='structure') return <svg {...common}><path d="M4 5h16M4 12h7M4 19h10"/><circle cx="18" cy="12" r="2"/><circle cx="18" cy="19" r="2"/></svg>;
@@ -11,6 +11,7 @@ function Icon({type}:{type:'document'|'structure'|'table'|'reference'|'ethics'|'
   if(type==='email') return <svg {...common}><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>;
   if(type==='review') return <svg {...common}><path d="M5 4h14v16H5z"/><path d="M8 4V2h8v2M8 9h8M8 13h5"/><path d="m14 17 1.5 1.5L19 15"/></svg>;
   if(type==='book') return <svg {...common}><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H11v18H6.5A2.5 2.5 0 0 0 4 22Z"/><path d="M20 4.5A2.5 2.5 0 0 0 17.5 2H13v18h4.5A2.5 2.5 0 0 1 20 22Z"/></svg>;
+  if(type==='fee') return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="M8 8h8M8 16h8M9 12h6"/><path d="m6 6 12 12"/></svg>;
   return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg>;
 }
 
@@ -72,6 +73,11 @@ export default function AuthorGuidelines(){return <><Header/>
           <p style={{fontSize:11.8,lineHeight:1.65,color:'#526273',margin:'0 0 10px'}}>For research papers considered for inclusion in compiled research books / printed volumes.</p>
           <div style={{fontSize:10.8,color:'#667782'}}><strong>Additional requirement:</strong> Full postal address may be requested for printed-copy dispatch.</div>
         </article>
+      </section>
+
+      <section style={{padding:'16px 18px',border:'1px solid #d7e5dc',borderLeft:'4px solid #167843',background:'#f4faf6',marginBottom:28}}>
+        <div style={{display:'flex',alignItems:'center',gap:9,color:'#167843',marginBottom:6}}><Icon type="fee"/><h2 style={{fontFamily:'Georgia,serif',fontSize:19,color:'#0b2d4e',margin:0}}>No Submission or Publication Fee</h2></div>
+        <p style={{fontSize:12,lineHeight:1.7,color:'#4b5d6d',margin:0}}>Under IRED's current institutional publication policy, authors are not charged a manuscript submission fee or publication fee for GREEN or RED. Authors should not make payment to any individual claiming to collect such a fee on behalf of IRED. Any future policy change would be published officially on this website.</p>
       </section>
 
       <div style={{display:'grid',gridTemplateColumns:'250px minmax(0,1fr)',gap:34,alignItems:'start'}}>
