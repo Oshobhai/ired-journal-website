@@ -21,10 +21,10 @@ export default async function Home(){
   ]);
 
   return <><Header/><main>
-    <section className="hero heroVisual" style={{backgroundImage:"linear-gradient(90deg,rgba(7,20,18,.92) 0%,rgba(10,24,20,.72) 43%,rgba(17,24,18,.33) 72%,rgba(17,17,12,.58) 100%),url('/hero-reference-art.jpg')",backgroundSize:'cover',backgroundPosition:'center'}}><div className="container heroGrid" style={{minHeight:245}}>
-      <div className="heroCopy" style={{maxWidth:560}}><div className="heroKicker">{settings.homepage_kicker}</div><h1 style={{fontSize:43,textShadow:'0 2px 10px rgba(0,0,0,.45)'}}>{settings.homepage_title}<br/><span>{settings.homepage_highlight}</span></h1><p style={{maxWidth:510,textShadow:'0 1px 5px rgba(0,0,0,.7)'}}>{settings.homepage_description}</p><div className="heroActions"><Link className="btn btnGold" href="/contact">Submit a Paper →</Link><Link className="btn btnGhost" href="#publications">Explore Our Publications</Link></div></div>
-      <div className="heroArt" aria-hidden="true" style={{justifyContent:'flex-end',alignItems:'center'}}>
-        <div className="heroQuote" style={{maxWidth:230,marginRight:12,background:'rgba(10,18,15,.36)',padding:'12px 14px',borderLeft:'3px solid #e2ad32',textShadow:'0 1px 5px #000'}}>Ideas<br/>Research<br/>People<br/><strong>A Better Tomorrow.</strong></div>
+    <section className="hero heroVisual" style={{backgroundImage:"linear-gradient(90deg,rgba(6,20,18,.86) 0%,rgba(7,22,18,.67) 38%,rgba(13,21,16,.18) 67%,rgba(12,14,10,.34) 100%),url('/hero-reference-art.jpg')",backgroundSize:'cover',backgroundPosition:'center 47%',backgroundRepeat:'no-repeat'}}><div className="container heroGrid" style={{minHeight:285,gridTemplateColumns:'minmax(0,.9fr) minmax(420px,1.1fr)',gap:24}}>
+      <div className="heroCopy" style={{maxWidth:520,padding:'30px 0'}}><div className="heroKicker">{settings.homepage_kicker}</div><h1 style={{fontSize:43,textShadow:'0 2px 10px rgba(0,0,0,.55)',maxWidth:500}}>{settings.homepage_title}<br/><span>{settings.homepage_highlight}</span></h1><p style={{maxWidth:470,textShadow:'0 1px 5px rgba(0,0,0,.82)'}}>{settings.homepage_description}</p><div className="heroActions"><Link className="btn btnGold" href="/contact">Submit a Paper →</Link><Link className="btn btnGhost" href="#publications">Explore Our Publications</Link></div></div>
+      <div className="heroArt" aria-hidden="true" style={{justifyContent:'flex-end',alignItems:'center',paddingRight:6}}>
+        <div className="heroQuote" style={{maxWidth:220,marginRight:0,background:'linear-gradient(135deg,rgba(9,17,14,.58),rgba(9,17,14,.32))',backdropFilter:'blur(3px)',WebkitBackdropFilter:'blur(3px)',padding:'14px 16px',borderLeft:'3px solid #e2ad32',boxShadow:'0 8px 24px rgba(0,0,0,.18)',textShadow:'0 1px 5px #000'}}>Ideas<br/>Research<br/>People<br/><strong>A Better Tomorrow.</strong></div>
       </div>
     </div></section>
 
