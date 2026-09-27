@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function sitemap():Promise<MetadataRoute.Sitemap>{
-  const base=process.env.NEXT_PUBLIC_SITE_URL||'https://ired-journal-website.vercel.app'
+  const base=process.env.NEXT_PUBLIC_SITE_URL||'https://iredjournal.org'
   const staticPaths=['','/about','/journal-information','/green','/red','/editorial-board','/author-guidelines','/publication-ethics','/archives','/contact','/privacy','/terms']
   const supabase=await createClient()
   const [{data:green},{data:red}]=await Promise.all([
