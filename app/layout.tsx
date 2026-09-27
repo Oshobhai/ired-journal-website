@@ -5,7 +5,7 @@ import './mobile.css';
 import type { Metadata } from 'next';
 import {getSiteSettings} from '@/lib/site-settings';
 
-const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://www.iredjournal.org';
+const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://iredjournal.org';
 
 export async function generateMetadata():Promise<Metadata>{
   const settings=await getSiteSettings();
