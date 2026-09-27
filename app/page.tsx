@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export default async function Home(){
   const [greenPapers, redBooks, settings] = await Promise.all([
     getPublishedGreenPapers(3),
-    getPublishedRedBooks(3),
+    getPublishedRedBooks(2),
     getSiteSettings(),
   ]);
 
