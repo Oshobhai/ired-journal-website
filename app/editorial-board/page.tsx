@@ -2,7 +2,7 @@ import {Header,Footer} from '../components';
 import {createClient} from '@/lib/supabase/server';
 
 type Section='editor'|'editorial'|'review';
-type Member={id:string;name:string;role:string|null;institution:string;location:string|null;section:Section;sort_order:number};
+type Member={id:string;name:string;role:string|null;institution:string;location:string|null;section:Section;sort_order:number;photo_path:string|null;photo_url:string|null};
 
 function AcademicIcon({type}:{type:'board'|'review'|'institution'|'location'}){
   const common={width:18,height:18,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,strokeLinecap:'round' as const,strokeLinejoin:'round' as const,'aria-hidden':true};
@@ -15,7 +15,12 @@ function AcademicIcon({type}:{type:'board'|'review'|'institution'|'location'}){
 function Initials({name}:{name:string}){
   const clean=name.replace(/^Dr\.\s*/,'').trim().split(/\s+/).filter(Boolean);
   const initials=(clean[0]?.[0]||'')+(clean.length>1?(clean[clean.length-1]?.[0]||''):'');
-  return <div style={{width:52,height:52,borderRadius:'50%',display:'grid',placeItems:'center',background:'#eef3f6',border:'1px solid #cfd9e1',color:'#12395c',fontFamily:'Georgia,serif',fontSize:16,fontWeight:700,flex:'0 0 auto'}}>{initials}</div>;
+  return <div style={{width:72,height:72,borderRadius:'50%',display:'grid',placeItems:'center',background:'#eef3f6',border:'1px solid #cfd9e1',color:'#12395c',fontFamily:'Georgia,serif',fontSize:18,fontWeight:700,flex:'0 0 auto'}}>{initials}</div>;
+}
+
+function Portrait({member}:{member:Member}){
+  if(member.photo_url)return <img src={member.photo_url} alt={member.name} style={{width:72,height:72,borderRadius:'50%',objectFit:'cover',objectPosition:'center',border:'2px solid #e3e9ed',boxShadow:'0 1px 4px rgba(12,45,78,.08)',flex:'0 0 auto'}}/>;
+  return <Initials name={member.name}/>;
 }
 
 function sectionLabel(section:Section){
@@ -26,8 +31,8 @@ function sectionLabel(section:Section){
 
 function MemberCard({member,index,tone}:{member:Member;index:number;tone:'gold'|'green'|'navy'}){
   const accent=tone==='gold'?'#8b6d2f':tone==='green'?'#167843':'#173d60';
-  return <article style={{border:'1px solid #dbe3e9',borderTop:`3px solid ${accent}`,background:'#fff',padding:'17px 18px',minHeight:178,display:'flex',flexDirection:'column'}}>
-    <div style={{display:'flex',gap:13,alignItems:'flex-start'}}><Initials name={member.name}/><div style={{minWidth:0}}><div style={{fontSize:9.5,letterSpacing:'.09em',textTransform:'uppercase',fontWeight:800,color:'#7a8792',marginBottom:4}}>{sectionLabel(member.section)} · {String(index+1).padStart(2,'0')}</div><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',lineHeight:1.25,margin:'0 0 5px'}}>{member.name}</h3>{member.role?<div style={{fontSize:11.5,fontWeight:700,color:accent,lineHeight:1.45}}>{member.role}</div>:null}</div></div>
+  return <article style={{border:'1px solid #dbe3e9',borderTop:`3px solid ${accent}`,background:'#fff',padding:'17px 18px',minHeight:190,display:'flex',flexDirection:'column'}}>
+    <div style={{display:'flex',gap:14,alignItems:'flex-start'}}><Portrait member={member}/><div style={{minWidth:0,paddingTop:2}}><div style={{fontSize:9.5,letterSpacing:'.09em',textTransform:'uppercase',fontWeight:800,color:'#7a8792',marginBottom:4}}>{sectionLabel(member.section)} · {String(index+1).padStart(2,'0')}</div><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',lineHeight:1.25,margin:'0 0 5px'}}>{member.name}</h3>{member.role?<div style={{fontSize:11.5,fontWeight:700,color:accent,lineHeight:1.45}}>{member.role}</div>:null}</div></div>
     <div style={{marginTop:14,paddingTop:12,borderTop:'1px solid #edf1f4',display:'grid',gap:7}}><div style={{display:'grid',gridTemplateColumns:'20px 1fr',gap:6,alignItems:'start',fontSize:11.5,lineHeight:1.5,color:'#4e5f6e'}}><span style={{color:'#718290'}}><AcademicIcon type="institution"/></span><span>{member.institution}</span></div>{member.location?<div style={{display:'grid',gridTemplateColumns:'20px 1fr',gap:6,alignItems:'start',fontSize:11.5,lineHeight:1.5,color:'#6a7885'}}><span style={{color:'#8997a2'}}><AcademicIcon type="location"/></span><span>{member.location}</span></div>:null}</div>
   </article>;
 }
@@ -36,8 +41,8 @@ export const dynamic='force-dynamic';
 
 export default async function Editorial(){
   const supabase=await createClient();
-  const {data}=await supabase.from('editorial_members').select('id,name,role,institution,location,section,sort_order').eq('is_visible',true).order('sort_order').order('name');
-  const members=(data||[]) as Member[];
+  const {data}=await supabase.from('editorial_members').select('id,name,role,institution,location,section,sort_order,photo_path').eq('is_visible',true).order('sort_order').order('name');
+  const members=((data||[]) as Omit<Member,'photo_url'>[]).map(member=>({...member,photo_url:member.photo_path?supabase.storage.from('editorial-photos').getPublicUrl(member.photo_path).data.publicUrl:null}));
   const editors=members.filter(m=>m.section==='editor');
   const board=members.filter(m=>m.section==='editorial');
   const review=members.filter(m=>m.section==='review');
