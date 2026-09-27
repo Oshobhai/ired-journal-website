@@ -5,13 +5,14 @@ import './mobile.css';
 import type { Metadata } from 'next';
 import {getSiteSettings} from '@/lib/site-settings';
 
-const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://ired-journal-website.vercel.app';
+const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://www.iredjournal.org';
 
 export async function generateMetadata():Promise<Metadata>{
   const settings=await getSiteSettings();
   const keywords=settings.seo_keywords.split(',').map(x=>x.trim()).filter(Boolean);
   return {
     metadataBase:new URL(siteUrl),
+    alternates:{canonical:'/'},
     title:{default:settings.seo_title,template:`%s | ${settings.institution_short_name}`},
     description:settings.seo_description,
     applicationName:`${settings.institution_short_name} Research Journals`,
