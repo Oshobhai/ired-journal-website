@@ -21,31 +21,10 @@ export default async function Home(){
   ]);
 
   return <><Header/><main>
-    <section className="hero heroVisual"><div className="container heroGrid">
-      <div className="heroCopy"><div className="heroKicker">{settings.homepage_kicker}</div><h1>{settings.homepage_title}<br/><span>{settings.homepage_highlight}</span></h1><p>{settings.homepage_description}</p><div className="heroActions"><Link className="btn btnGold" href="/contact">Contact to Submit →</Link><Link className="btn btnGhost" href="#publications">Explore Our Journals</Link></div></div>
-      <div className="heroArt" aria-hidden="true">
-        <div style={{width:'100%',maxWidth:520,background:'rgba(255,255,255,.96)',border:'1px solid rgba(255,255,255,.35)',borderRadius:10,padding:'16px 18px',boxShadow:'0 12px 30px rgba(0,0,0,.22)',color:'#17324b'}}>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,borderBottom:'1px solid #dbe3e8',paddingBottom:10,marginBottom:11}}>
-            <div><div style={{fontSize:9,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8a6b25'}}>IRED Academic Publications</div><div style={{fontFamily:'Georgia,serif',fontSize:20,fontWeight:700,color:'#0b2d4e',marginTop:2}}>Research · Education · Development</div></div>
-            <div style={{width:44,height:44,borderRadius:'50%',border:'2px solid #d5b04b',display:'grid',placeItems:'center',fontFamily:'Georgia,serif',fontWeight:800,color:'#0b2d4e'}}>IRED</div>
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-            <div style={{background:'#f3fbf5',border:'1px solid #d6eadc',borderLeft:'4px solid #148444',borderRadius:6,padding:'10px 11px'}}>
-              <div style={{fontSize:9,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:'#148444',marginBottom:4}}>GREEN Journal</div>
-              <div style={{fontFamily:'Georgia,serif',fontSize:14,fontWeight:700,color:'#0b2d4e'}}>Research Papers</div>
-              <div style={{fontSize:9.5,color:'#607080',marginTop:3}}>Peer-reviewed · Open access</div>
-            </div>
-            <div style={{background:'#fff5f5',border:'1px solid #efd9d9',borderLeft:'4px solid #cb2528',borderRadius:6,padding:'10px 11px'}}>
-              <div style={{fontSize:9,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:'#b32328',marginBottom:4}}>RED e-Journal</div>
-              <div style={{fontFamily:'Georgia,serif',fontSize:14,fontWeight:700,color:'#0b2d4e'}}>Research Publications</div>
-              <div style={{fontSize:9.5,color:'#607080',marginTop:3}}>Electronic · Multidisciplinary</div>
-            </div>
-          </div>
-          <div style={{marginTop:11,paddingTop:9,borderTop:'1px solid #e2e8ec',display:'flex',justifyContent:'space-between',gap:12,alignItems:'center'}}>
-            <span style={{fontSize:9.5,color:'#617180'}}>Ahmedabad · Gujarat · India</span>
-            <span style={{fontFamily:'Georgia,serif',fontStyle:'italic',fontSize:11,color:'#7d6427'}}>“Knowledge for a Better Tomorrow”</span>
-          </div>
-        </div>
+    <section className="hero heroVisual" style={{backgroundImage:"linear-gradient(90deg,rgba(7,20,18,.92) 0%,rgba(10,24,20,.72) 43%,rgba(17,24,18,.33) 72%,rgba(17,17,12,.58) 100%),url('/hero-reference-art.jpg')",backgroundSize:'cover',backgroundPosition:'center'}}><div className="container heroGrid" style={{minHeight:245}}>
+      <div className="heroCopy" style={{maxWidth:560}}><div className="heroKicker">{settings.homepage_kicker}</div><h1 style={{fontSize:43,textShadow:'0 2px 10px rgba(0,0,0,.45)'}}>{settings.homepage_title}<br/><span>{settings.homepage_highlight}</span></h1><p style={{maxWidth:510,textShadow:'0 1px 5px rgba(0,0,0,.7)'}}>{settings.homepage_description}</p><div className="heroActions"><Link className="btn btnGold" href="/contact">Submit a Paper →</Link><Link className="btn btnGhost" href="#publications">Explore Our Publications</Link></div></div>
+      <div className="heroArt" aria-hidden="true" style={{justifyContent:'flex-end',alignItems:'center'}}>
+        <div className="heroQuote" style={{maxWidth:230,marginRight:12,background:'rgba(10,18,15,.36)',padding:'12px 14px',borderLeft:'3px solid #e2ad32',textShadow:'0 1px 5px #000'}}>Ideas<br/>Research<br/>People<br/><strong>A Better Tomorrow.</strong></div>
       </div>
     </div></section>
 
