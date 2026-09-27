@@ -6,7 +6,7 @@ export const dynamic='force-dynamic'
 
 export default async function StaffAccessAdmin(){
   const access=await requireAdmin()
-  return <AdminFrame access={access} active="access" kicker="Administration" title="Staff Access Control" description="Grant or revoke Editorial Board Manager access while keeping publication and security permissions restricted to full administrators.">
+  return <AdminFrame access={access} active="access" kicker="Administration" title="Staff Access Control" description="Grant or revoke Full Administrator and Editorial Board Manager access from one protected control panel.">
     <EditorialAccessManager/>
   </AdminFrame>
 }
