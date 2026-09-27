@@ -23,7 +23,30 @@ export default async function Home(){
   return <><Header/><main>
     <section className="hero heroVisual"><div className="container heroGrid">
       <div className="heroCopy"><div className="heroKicker">{settings.homepage_kicker}</div><h1>{settings.homepage_title}<br/><span>{settings.homepage_highlight}</span></h1><p>{settings.homepage_description}</p><div className="heroActions"><Link className="btn btnGold" href="/contact">Contact to Submit →</Link><Link className="btn btnGhost" href="#publications">Explore Our Journals</Link></div></div>
-      <div className="heroArt heroGraphic" aria-hidden="true"><div className="heroGlobe">◎</div><div className="heroBooks"><div className="bookSpine research">Research</div><div className="bookSpine education">Education</div><div className="bookSpine development">Development</div></div><div className="heroQuote">“Ideas<br/>Research<br/>People<br/>A Better Tomorrow.”</div></div>
+      <div className="heroArt" aria-hidden="true">
+        <div style={{width:'100%',maxWidth:520,background:'rgba(255,255,255,.96)',border:'1px solid rgba(255,255,255,.35)',borderRadius:10,padding:'16px 18px',boxShadow:'0 12px 30px rgba(0,0,0,.22)',color:'#17324b'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,borderBottom:'1px solid #dbe3e8',paddingBottom:10,marginBottom:11}}>
+            <div><div style={{fontSize:9,letterSpacing:'.14em',textTransform:'uppercase',fontWeight:800,color:'#8a6b25'}}>IRED Academic Publications</div><div style={{fontFamily:'Georgia,serif',fontSize:20,fontWeight:700,color:'#0b2d4e',marginTop:2}}>Research · Education · Development</div></div>
+            <div style={{width:44,height:44,borderRadius:'50%',border:'2px solid #d5b04b',display:'grid',placeItems:'center',fontFamily:'Georgia,serif',fontWeight:800,color:'#0b2d4e'}}>IRED</div>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            <div style={{background:'#f3fbf5',border:'1px solid #d6eadc',borderLeft:'4px solid #148444',borderRadius:6,padding:'10px 11px'}}>
+              <div style={{fontSize:9,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:'#148444',marginBottom:4}}>GREEN Journal</div>
+              <div style={{fontFamily:'Georgia,serif',fontSize:14,fontWeight:700,color:'#0b2d4e'}}>Research Papers</div>
+              <div style={{fontSize:9.5,color:'#607080',marginTop:3}}>Peer-reviewed · Open access</div>
+            </div>
+            <div style={{background:'#fff5f5',border:'1px solid #efd9d9',borderLeft:'4px solid #cb2528',borderRadius:6,padding:'10px 11px'}}>
+              <div style={{fontSize:9,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:'#b32328',marginBottom:4}}>RED e-Journal</div>
+              <div style={{fontFamily:'Georgia,serif',fontSize:14,fontWeight:700,color:'#0b2d4e'}}>Research Publications</div>
+              <div style={{fontSize:9.5,color:'#607080',marginTop:3}}>Electronic · Multidisciplinary</div>
+            </div>
+          </div>
+          <div style={{marginTop:11,paddingTop:9,borderTop:'1px solid #e2e8ec',display:'flex',justifyContent:'space-between',gap:12,alignItems:'center'}}>
+            <span style={{fontSize:9.5,color:'#617180'}}>Ahmedabad · Gujarat · India</span>
+            <span style={{fontFamily:'Georgia,serif',fontStyle:'italic',fontSize:11,color:'#7d6427'}}>“Knowledge for a Better Tomorrow”</span>
+          </div>
+        </div>
+      </div>
     </div></section>
 
     {settings.homepage_notice?<section style={{background:'#fff8df',borderBottom:'1px solid #e5d8a8'}}><div className="container" style={{padding:'10px 0',fontSize:11.5,color:'#5d512a'}}><strong>Notice:</strong> {settings.homepage_notice}</div></section>:null}
