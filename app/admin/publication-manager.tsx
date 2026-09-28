@@ -51,14 +51,20 @@ export default function PublicationManager(){
     const formEl=event.currentTarget
     const form=new FormData(formEl)
     const file=form.get('pdf') as File
+    const certificate=form.get('certificate') as File
     setBusy(true);setMessage('')
     let path=''
+    let certificatePath=''
     try{
       const {data:{user},error:userError}=await supabase.auth.getUser()
       if(userError||!user)throw new Error('Admin session expired. Please sign in again.')
       if(!file||file.size===0)throw new Error('Please select the GREEN paper PDF.')
       if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf'))throw new Error('GREEN paper must be a PDF file.')
       if(file.size>50*1024*1024)throw new Error('GREEN paper PDF must be 50 MB or less.')
+      if(certificate&&certificate.size>0){
+        if(certificate.type!=='application/pdf'&&!certificate.name.toLowerCase().endsWith('.pdf'))throw new Error('Certificate must be a PDF file.')
+        if(certificate.size>10*1024*1024)throw new Error('Certificate PDF must be 10 MB or less.')
+      }
 
       const title=String(form.get('paper_title')||'').trim()
       const author=String(form.get('author_name')||'').trim()
@@ -76,6 +82,12 @@ export default function PublicationManager(){
       const {error:uploadError}=await supabase.storage.from('green-papers').upload(path,file,{contentType:'application/pdf',upsert:false})
       if(uploadError)throw uploadError
 
+      if(certificate&&certificate.size>0){
+        certificatePath=`${publicationYear}/${crypto.randomUUID()}-${safeFileName(certificate.name)}`
+        const {error:certificateError}=await supabase.storage.from('green-certificates').upload(certificatePath,certificate,{contentType:'application/pdf',upsert:false})
+        if(certificateError)throw certificateError
+      }
+
       const {error:insertError}=await supabase.from('green_papers').insert({
         title,
         authors:author,
@@ -86,8 +98,8 @@ export default function PublicationManager(){
         issue,
         pdf_path:path,
         pdf_size:file.size,
-        certificate_path:null,
-        certificate_uploaded_at:null,
+        certificate_path:certificatePath||null,
+        certificate_uploaded_at:certificatePath?new Date().toISOString():null,
         status:'draft',
         published_at:null,
         created_by:user.id,
@@ -95,10 +107,13 @@ export default function PublicationManager(){
       if(insertError)throw insertError
 
       formEl.reset()
-      setMessage('GREEN paper uploaded successfully as Draft. Now use GREEN Certificate Check & Publish below to generate, review and publish the certificate with the paper.')
+      setMessage(certificatePath
+        ? 'GREEN paper and certificate uploaded successfully as Draft. Check the certificate below, then publish the paper and certificate together.'
+        : 'GREEN paper uploaded successfully as Draft. You can upload or generate a certificate below before publishing.')
       await load()
     }catch(error){
       if(path)await supabase.storage.from('green-papers').remove([path])
+      if(certificatePath)await supabase.storage.from('green-certificates').remove([certificatePath])
       setMessage(error instanceof Error?error.message:'GREEN upload failed.')
     }finally{setBusy(false)}
   }
@@ -236,7 +251,8 @@ export default function PublicationManager(){
           </div>
           <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Manual entry: Month, Year, Volume and Issue are saved exactly as entered. Article ID remains automatic.</div>
           <label style={labelStyle}>Paper PDF (max 50 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required style={fieldStyle}/></label>
-          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Certificate PDF is generated after upload. Upload the paper as Draft, then use the certificate workflow directly below to Generate → View / Check → Publish Both.</div>
+          <label style={labelStyle}>Certificate PDF (optional · max 10 MB)<input name="certificate" type="file" accept="application/pdf,.pdf" style={fieldStyle}/></label>
+          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>You can upload your prepared certificate with the paper. If you do not upload one now, you can upload or generate it in the certificate workflow below before publishing.</div>
           <button className="btn btnGreen" disabled={busy} type="submit">{busy?'Uploading…':'Upload GREEN Paper'}</button>
         </form>
       </section>
