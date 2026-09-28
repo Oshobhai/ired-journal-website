@@ -1,7 +1,7 @@
 import {Header,Footer} from '../components';
 
 const principles=[
-  ['Originality & Plagiarism','Manuscripts should be original work. Authors must appropriately acknowledge sources, quotations, data, images and ideas taken from other work. Plagiarism, fabricated citations and substantial unattributed copying are not acceptable.'],
+  ['Originality & Plagiarism','Manuscripts should be original work. Authors must appropriately acknowledge sources, quotations, data, images and ideas taken from other work. Plagiarism, fabricated citations and substantial unattributed copying are not acceptable. IRED follows applicable UGC Guidelines for checking plagiarism in articles and may require appropriate similarity/plagiarism screening before publication.'],
   ['Duplicate or Simultaneous Submission','A manuscript should not be submitted to multiple publications at the same time. Authors should disclose closely related manuscripts, previous versions, conference papers or other overlapping publications when relevant.'],
   ['Authorship & Contributions','Authorship should reflect meaningful scholarly contribution to the work. All listed authors should approve the submitted version, and individuals who did not make an appropriate contribution should not be listed as authors.'],
   ['Research Integrity & Data','Authors are responsible for the accuracy and integrity of the research, data, analysis and conclusions presented. Fabrication, falsification or selective manipulation of research findings is unacceptable.'],
