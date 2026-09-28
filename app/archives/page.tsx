@@ -19,7 +19,11 @@ export default async function Archives(){
         {!years.length?<div className="contentCard" style={{textAlign:'center',padding:'30px',color:'#687586'}}>Published items will appear in the archive automatically after publication.</div>:years.map(year=>{
           const gp=papers.filter(p=>p.publication_year===year);
           const rb=books.filter(b=>b.publication_year===year);
-          const issueGroups=Array.from(new Map(gp.map(p=>[`${p.volume||0}-${p.issue||0}`,{volume:p.volume||0,issue:p.issue||0,month:p.publication_month||'',papers:gp.filter(x=>(x.volume||0)===(p.volume||0)&&(x.issue||0)===(p.issue||0))}])).values()).sort((a,b)=>(b.volume-a.volume)||(b.issue-a.issue));
+          const issueGroups=Array.from(new Map(gp.map(p=>{
+            const volume=Number.parseInt(String(p.volume||'0'),10)||0;
+            const issue=Number.parseInt(String(p.issue||'0'),10)||0;
+            return [`${volume}-${issue}`,{volume,issue,month:p.publication_month||'',papers:gp.filter(x=>(Number.parseInt(String(x.volume||'0'),10)||0)===volume&&(Number.parseInt(String(x.issue||'0'),10)||0)===issue)}] as const;
+          })).values()).sort((a,b)=>(b.volume-a.volume)||(b.issue-a.issue));
           return <section key={year} style={{marginBottom:32}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'end',gap:14,borderBottom:'2px solid #173d60',paddingBottom:8,marginBottom:14}}><h2 style={{fontFamily:'Georgia,serif',fontSize:24,color:'#0b2d4e',margin:0}}>Year {year}</h2><div style={{fontSize:11,color:'#71808d'}}>{gp.length} GREEN paper{gp.length===1?'':'s'} · {rb.length} RED publication{rb.length===1?'':'s'}</div></div>
 
