@@ -11,6 +11,10 @@ export type SiteSettings={
   green_description:string
   green_scope:string
   green_editor_in_chief:string
+  green_frequency:string
+  green_language:string
+  green_format:string
+  green_subject:string
   red_title:string
   red_description:string
   red_scope:string
@@ -38,6 +42,10 @@ export const defaultSiteSettings:SiteSettings={
   green_description:'International, peer-reviewed, open-access multidisciplinary research journal for original research papers and scholarly articles.',
   green_scope:'Accounting, Archaeology, Biology, Business, Chemistry, Commerce, Economics, Education, Law, Linguistics, Management, Physics, Political Science, Social Work, Arts, Humanities, Sciences, Social Sciences and related academic disciplines.',
   green_editor_in_chief:'Dr. Bhavika Kadikar — Librarian and Assistant Professor, Surendranagar University, Wadhwan',
+  green_frequency:'',
+  green_language:'',
+  green_format:'Online',
+  green_subject:'Multidisciplinary',
   red_title:'RED: The Research Journal e-Journal',
   red_description:'Electronic research journal for online dissemination of scholarly and research-based knowledge across multiple academic disciplines.',
   red_scope:'Multidisciplinary research across Arts, Humanities, Sciences, Social Sciences, Commerce, Education, Management, Law and other academic disciplines.',
