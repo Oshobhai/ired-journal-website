@@ -21,8 +21,6 @@ type Publication = {
   publication_label?: string | null
 }
 
-type GreenPreview={month:string;year:number;volume:number;issue:number}
-
 const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
 function safeFileName(name:string){
@@ -33,30 +31,16 @@ export default function PublicationManager(){
   const supabase=createClient()
   const [green,setGreen]=useState<Publication[]>([])
   const [red,setRed]=useState<Publication[]>([])
-  const [greenPreview,setGreenPreview]=useState<GreenPreview>({month:'',year:0,volume:0,issue:0})
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState('')
 
   const load=useCallback(async()=>{
-    const [{data:g},{data:r},{data:settings}]=await Promise.all([
+    const [{data:g},{data:r}]=await Promise.all([
       supabase.from('green_papers').select('id,title,authors,affiliation,status,pdf_path,publication_year,publication_month,volume,issue,article_id,created_at').order('created_at',{ascending:false}),
       supabase.from('red_books').select('id,title,editors,status,pdf_path,cover_path,publication_year,publication_month,volume,issue,publication_label,created_at').order('created_at',{ascending:false}),
-      supabase.from('site_settings').select('first_volume_year').eq('id',true).maybeSingle(),
     ])
-    const greenRows=(g||[]) as Publication[]
-    setGreen(greenRows)
+    setGreen((g||[]) as Publication[])
     setRed((r||[]) as Publication[])
-
-    const now=new Date()
-    const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Kolkata',month:'long',year:'numeric'}).formatToParts(now)
-    const month=parts.find(x=>x.type==='month')?.value||months[now.getMonth()]
-    const year=Number(parts.find(x=>x.type==='year')?.value)||now.getFullYear()
-    const firstVolumeYear=Number(settings?.first_volume_year)||2026
-    const volume=Math.max(1,year-firstVolumeYear+1)
-    const maxIssue=greenRows
-      .filter(row=>row.publication_year===year)
-      .reduce((max,row)=>Math.max(max,Number.parseInt(String(row.issue||''),10)||0),0)
-    setGreenPreview({month,year,volume,issue:maxIssue+1})
   },[supabase])
 
   useEffect(()=>{void load()},[load])
@@ -84,15 +68,21 @@ export default function PublicationManager(){
       const title=String(form.get('paper_title')||'').trim()
       const author=String(form.get('author_name')||'').trim()
       const researchScholar=String(form.get('research_scholar')||'').trim()
+      const publicationMonth=String(form.get('publication_month')||'').trim()
+      const publicationYear=Number(form.get('publication_year'))
+      const volume=String(form.get('volume')||'').trim()
+      const issue=String(form.get('issue')||'').trim()
       if(!title||!author||!researchScholar)throw new Error('Paper Title, Author Name and Research Scholar are required.')
+      if(!months.includes(publicationMonth))throw new Error('Please select the GREEN publication month.')
+      if(!Number.isInteger(publicationYear)||publicationYear<1900||publicationYear>2100)throw new Error('Please enter a valid GREEN publication year.')
+      if(!volume||!issue)throw new Error('Volume and Issue are required for GREEN papers.')
 
-      const year=greenPreview.year||new Date().getFullYear()
-      path=`${year}/${crypto.randomUUID()}-${safeFileName(file.name)}`
+      path=`${publicationYear}/${crypto.randomUUID()}-${safeFileName(file.name)}`
       const {error:uploadError}=await supabase.storage.from('green-papers').upload(path,file,{contentType:'application/pdf',upsert:false})
       if(uploadError)throw uploadError
 
       if(certificate&&certificate.size>0){
-        certificatePath=`${year}/${crypto.randomUUID()}-${safeFileName(certificate.name)}`
+        certificatePath=`${publicationYear}/${crypto.randomUUID()}-${safeFileName(certificate.name)}`
         const {error:certificateError}=await supabase.storage.from('green-certificates').upload(certificatePath,certificate,{contentType:'application/pdf',upsert:false})
         if(certificateError)throw certificateError
       }
@@ -101,7 +91,10 @@ export default function PublicationManager(){
         title,
         authors:author,
         affiliation:researchScholar,
-        publication_year:year,
+        publication_month:publicationMonth,
+        publication_year:publicationYear,
+        volume,
+        issue,
         pdf_path:path,
         pdf_size:file.size,
         certificate_path:certificatePath||null,
@@ -113,7 +106,7 @@ export default function PublicationManager(){
       if(insertError)throw insertError
 
       formEl.reset()
-      setMessage(certificatePath?'GREEN paper and certificate uploaded successfully as Draft. Volume, Issue and Article ID were assigned automatically.':'GREEN paper uploaded successfully as Draft. Volume, Issue and Article ID were assigned automatically.')
+      setMessage(certificatePath?'GREEN paper and certificate uploaded successfully as Draft. Publication month, year, volume and issue were saved as entered; Article ID was assigned automatically.':'GREEN paper uploaded successfully as Draft. Publication month, year, volume and issue were saved as entered; Article ID was assigned automatically.')
       await load()
     }catch(error){
       if(path)await supabase.storage.from('green-papers').remove([path])
@@ -236,7 +229,6 @@ export default function PublicationManager(){
 
   const fieldStyle={width:'100%',padding:'9px 10px',border:'1px solid #ccd5dd',borderRadius:5,marginTop:4,marginBottom:10} as const
   const labelStyle={display:'block',fontSize:12,fontWeight:700} as const
-  const autoFieldStyle={...fieldStyle,background:'#f7f9fb',color:'#243746',fontWeight:700} as const
 
   return <div style={{display:'grid',gap:22,marginTop:24}}>
     {message?<div style={{padding:'11px 13px',background:'#eef7f2',border:'1px solid #c7e4d2',borderRadius:6,fontSize:13}}>{message}</div>:null}
@@ -244,18 +236,18 @@ export default function PublicationManager(){
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:18}}>
       <section className="contentCard">
         <h2>Add GREEN Research Paper</h2>
-        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Only essential author details are required. The paper is saved as Draft first.</p>
+        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Enter publication details exactly as they appear on the final paper PDF. The paper is saved as Draft first.</p>
         <form onSubmit={uploadGreen}>
           <label style={labelStyle}>Paper Title<input name="paper_title" required style={fieldStyle}/></label>
           <label style={labelStyle}>Author Name<input name="author_name" required style={fieldStyle}/></label>
           <label style={labelStyle}>Research Scholar<input name="research_scholar" required placeholder="Research Scholar / Institution" style={fieldStyle}/></label>
           <div style={{display:'grid',gridTemplateColumns:'repeat(4,minmax(0,1fr))',gap:8,marginTop:2}}>
-            <label style={labelStyle}>Month<select value={greenPreview.month} disabled style={autoFieldStyle}>{greenPreview.month?<option>{greenPreview.month}</option>:<option>—</option>}</select></label>
-            <label style={labelStyle}>Year<input value={greenPreview.year||''} readOnly style={autoFieldStyle}/></label>
-            <label style={labelStyle}>Volume<input value={greenPreview.volume||''} readOnly style={autoFieldStyle}/></label>
-            <label style={labelStyle}>Issue<input value={greenPreview.issue||''} readOnly style={autoFieldStyle}/></label>
+            <label style={labelStyle}>Month<select name="publication_month" defaultValue="" required style={fieldStyle}><option value="" disabled>Select month</option>{months.map(month=><option key={month} value={month}>{month}</option>)}</select></label>
+            <label style={labelStyle}>Year<input name="publication_year" type="number" min="1900" max="2100" required placeholder="2026" style={fieldStyle}/></label>
+            <label style={labelStyle}>Volume<input name="volume" type="number" min="1" required placeholder="1" style={fieldStyle}/></label>
+            <label style={labelStyle}>Issue<input name="issue" type="number" min="1" required placeholder="1" style={fieldStyle}/></label>
           </div>
-          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Auto-filled from the current publication cycle. Final numbering is confirmed by the database when uploaded.</div>
+          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Manual entry: Month, Year, Volume and Issue are saved exactly as entered. Article ID remains automatic.</div>
           <label style={labelStyle}>Paper PDF (max 50 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required style={fieldStyle}/></label>
           <label style={labelStyle}>Certificate PDF (optional · max 10 MB)<input name="certificate" type="file" accept="application/pdf,.pdf" style={fieldStyle}/></label>
           <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>You can upload the certificate now or add/replace it later from GREEN Papers Manager → Edit &amp; Files.</div>
