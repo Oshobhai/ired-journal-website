@@ -28,6 +28,10 @@ type Row = {
 const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
 const pageSize = 20
 
+function safeFileName(name:string){
+  return name.toLowerCase().replace(/[^a-z0-9._-]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'') || 'paper.pdf'
+}
+
 type Props = {
   initialKind?: Kind
   lockedKind?: Kind
@@ -117,25 +121,46 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
     event.preventDefault(); setBusy(true); setMessage('')
     const f = new FormData(event.currentTarget)
     const table = kind === 'green' ? 'green_papers' : 'red_books'
-    const updates: Record<string, string | number | null> = {
-      title: String(f.get('title') || '').trim(),
-      publication_year: Number(f.get('publication_year')) || null,
-      volume: String(f.get('volume') || '').trim() || null,
-      issue: String(f.get('issue') || '').trim() || null,
+    let newPdfPath = ''
+    try {
+      const updates: Record<string, string | number | null> = {
+        title: String(f.get('title') || '').trim(),
+        publication_year: Number(f.get('publication_year')) || null,
+        volume: String(f.get('volume') || '').trim() || null,
+        issue: String(f.get('issue') || '').trim() || null,
+      }
+      if (kind === 'green') {
+        updates.authors = String(f.get('authors') || '').trim()
+        updates.doi = String(f.get('doi') || '').trim() || null
+        const replacement = f.get('replacement_pdf') as File
+        if (replacement && replacement.size > 0) {
+          if (replacement.type !== 'application/pdf' && !replacement.name.toLowerCase().endsWith('.pdf')) throw new Error('Replacement file must be a PDF.')
+          if (replacement.size > 50 * 1024 * 1024) throw new Error('Replacement GREEN paper PDF must be 50 MB or less.')
+          const yearFolder = Number(updates.publication_year) || item.publication_year || new Date().getFullYear()
+          newPdfPath = `${yearFolder}/${crypto.randomUUID()}-${safeFileName(replacement.name)}`
+          const { error: uploadError } = await supabase.storage.from('green-papers').upload(newPdfPath, replacement, { contentType:'application/pdf', upsert:false })
+          if (uploadError) throw uploadError
+          updates.pdf_path = newPdfPath
+          updates.pdf_size = replacement.size
+        }
+      } else {
+        updates.editors = String(f.get('editors') || '').trim() || null
+        updates.publication_month = String(f.get('publication_month') || '').trim() || null
+        updates.issn = String(f.get('issn') || '').trim() || null
+        updates.publication_label = [updates.publication_month, updates.publication_year].filter(Boolean).join(' ') || null
+      }
+      const { error } = await supabase.from(table).update(updates).eq('id', item.id)
+      if (error) throw error
+      if (newPdfPath && item.pdf_path && item.pdf_path !== newPdfPath) await supabase.storage.from('green-papers').remove([item.pdf_path])
+      setMessage(newPdfPath ? 'Publication details and GREEN paper PDF updated successfully.' : 'Publication details updated.')
+      setEditing(null)
+      await load()
+    } catch (error) {
+      if (newPdfPath) await supabase.storage.from('green-papers').remove([newPdfPath])
+      setMessage(error instanceof Error ? error.message : 'Could not update publication.')
+    } finally {
+      setBusy(false)
     }
-    if (kind === 'green') {
-      updates.authors = String(f.get('authors') || '').trim()
-      updates.doi = String(f.get('doi') || '').trim() || null
-    } else {
-      updates.editors = String(f.get('editors') || '').trim() || null
-      updates.publication_month = String(f.get('publication_month') || '').trim() || null
-      updates.issn = String(f.get('issn') || '').trim() || null
-      updates.publication_label = [updates.publication_month, updates.publication_year].filter(Boolean).join(' ') || null
-    }
-    const { error } = await supabase.from(table).update(updates).eq('id', item.id)
-    setMessage(error ? error.message : 'Publication details updated.')
-    if (!error) setEditing(null)
-    await load(); setBusy(false)
   }
 
   async function deleteItem(item: Row) {
@@ -221,8 +246,9 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
               {editing===item.id ? <form onSubmit={e=>saveEdit(e,item)} style={{marginTop:8,padding:9,border:'1px solid #dce4ea',borderRadius:5,background:'#fafcfd',minWidth:340}}>
                 <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr',gap:6}}><input name="title" defaultValue={item.title} required style={control}/><input name="publication_year" type="number" defaultValue={item.publication_year || ''} placeholder="Year" style={control}/><input name="volume" defaultValue={item.volume || ''} placeholder="Volume" style={control}/></div>
                 <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr',gap:6,marginTop:6}}>{kind==='green'?<input name="authors" defaultValue={item.authors || ''} placeholder="Authors" style={control}/>:<input name="editors" defaultValue={item.editors || ''} placeholder="Editors" style={control}/>}<input name="issue" defaultValue={item.issue || ''} placeholder="Issue" style={control}/>{kind==='green'?<input name="doi" defaultValue={item.doi || ''} placeholder="DOI" style={control}/>:<select name="publication_month" defaultValue={item.publication_month || ''} style={control}><option value="">Month</option>{months.map(m=><option key={m}>{m}</option>)}</select>}</div>
+                {kind==='green'?<div style={{marginTop:8,padding:'8px 9px',background:'#f3f8f5',border:'1px solid #d8e8de',borderRadius:5}}><div style={{fontSize:10.5,fontWeight:800,color:'#315a42',marginBottom:5}}>Replace GREEN Paper PDF</div><div style={{fontSize:10,color:'#6b7c72',marginBottom:6,overflowWrap:'anywhere'}}>Current PDF: {item.pdf_path.split('/').pop() || item.pdf_path}</div><input name="replacement_pdf" type="file" accept="application/pdf,.pdf" style={{...control,width:'100%'}}/><div style={{fontSize:9.5,color:'#77857d',marginTop:5}}>Optional. Select a new PDF only when you want to replace the current paper. Maximum 50 MB. The old PDF is deleted only after the new file and database update succeed.</div></div>:null}
                 {kind==='red'?<div style={{marginTop:6}}><input name="issn" defaultValue={item.issn || ''} placeholder="ISSN" style={{...control,width:'100%'}}/></div>:null}
-                <div style={{display:'flex',gap:6,marginTop:7}}><button type="submit" style={primary} disabled={busy}>Save changes</button><button type="button" style={btn} onClick={()=>setEditing(null)}>Cancel</button></div>
+                <div style={{display:'flex',gap:6,marginTop:7}}><button type="submit" style={primary} disabled={busy}>{busy?'Saving…':'Save changes'}</button><button type="button" style={btn} onClick={()=>setEditing(null)}>Cancel</button></div>
               </form>:null}</td>
             </tr>
           })}</tbody>
