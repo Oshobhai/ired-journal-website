@@ -63,38 +63,65 @@ function wrapLines(ctx:CanvasRenderingContext2D,text:string,maxWidth:number){
 function drawWrappedCentered(ctx:CanvasRenderingContext2D,text:string,y:number,maxWidth:number,fontSize:number,lineHeight:number,maxLines=4,weight='600'){
   let size=fontSize
   let lines:string[]=[]
-  while(size>=20){
+  while(size>=18){
     ctx.font=`${weight} ${size}px "Nirmala UI","Noto Sans Gujarati","Shruti","Arial Unicode MS",Arial,sans-serif`
     lines=wrapLines(ctx,text,maxWidth)
     if(lines.length<=maxLines)break
     size-=2
   }
-  const actualLineHeight=Math.max(lineHeight-(fontSize-size)*0.5,size+8)
+  const actualLineHeight=Math.max(lineHeight-(fontSize-size)*0.45,size+7)
   ctx.textAlign='center'
   for(let i=0;i<lines.length;i++)ctx.fillText(lines[i],800,y+i*actualLineHeight)
   return y+lines.length*actualLineHeight
-}
-
-async function loadImage(src:string){
-  return await new Promise<HTMLImageElement>((resolve,reject)=>{
-    const image=new Image()
-    image.onload=()=>resolve(image)
-    image.onerror=()=>reject(new Error('Could not load certificate logo.'))
-    image.src=src
-  })
 }
 
 async function canvasBlob(canvas:HTMLCanvasElement){
   return await new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Could not render certificate image.')),'image/png'))
 }
 
-function certificateDate(){
-  return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',day:'2-digit',month:'long',year:'numeric'}).format(new Date())
+function certificateDateParts(){
+  const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',day:'2-digit',month:'long',year:'numeric'}).formatToParts(new Date())
+  const part=(type:Intl.DateTimeFormatPartTypes)=>parts.find(x=>x.type===type)?.value||''
+  return {day:part('day'),month:part('month'),year:part('year')}
 }
 
 function issnText(value:string){
   const clean=value.trim()
-  return clean&&!/^x{4}-x{4}$/i.test(clean)?`ISSN: ${clean}`:'ISSN: Pending'
+  return clean&&!/^x{4}-x{4}$/i.test(clean)?clean:'Pending'
+}
+
+function certificateAddress(value:string){
+  const first=(value||defaultInfo.officialAddress).split('|')[0].trim()
+  return first.replace(/^ired\s*,\s*/i,'')
+}
+
+function drawWatermark(ctx:CanvasRenderingContext2D){
+  ctx.save()
+  ctx.globalAlpha=.035
+  ctx.strokeStyle='#7c8b86'
+  ctx.fillStyle='#7c8b86'
+  ctx.lineWidth=4
+  const boxes=[[115,330,120,95],[280,620,140,115],[520,760,160,100],[900,700,145,110],[1225,355,135,100]]
+  for(const [x,y,w,h] of boxes){ctx.strokeRect(x,y,w,h);ctx.beginPath();ctx.moveTo(x+18,y+h-18);ctx.lineTo(x+w-18,y+h-18);ctx.stroke()}
+  const circles=[[200,640,46],[1180,640,55],[1420,520,42],[500,430,34]]
+  for(const [x,y,r] of circles){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke()}
+  const bars=[[330,470],[730,745],[1045,470]]
+  for(const [x,y] of bars){for(let i=0;i<4;i++)ctx.fillRect(x+i*34,y+(3-i)*26,20,(i+1)*26)}
+  ctx.font='700 42px Arial,sans-serif';ctx.textAlign='center';ctx.fillText('DATA',800,720)
+  ctx.font='700 34px Arial,sans-serif';ctx.fillText('RESEARCH',1260,790)
+  ctx.restore()
+}
+
+function drawReferenceHeader(ctx:CanvasRenderingContext2D,green:string){
+  ctx.save()
+  ctx.fillStyle=green
+  ctx.beginPath()
+  ctx.moveTo(315,72);ctx.lineTo(1300,62);ctx.lineTo(1450,88);ctx.lineTo(1308,106);ctx.lineTo(1455,124);ctx.lineTo(1305,138);ctx.lineTo(1435,160);ctx.lineTo(315,160);ctx.lineTo(190,143);ctx.lineTo(318,128);ctx.lineTo(180,106);ctx.lineTo(320,93);ctx.closePath();ctx.fill()
+  ctx.fillStyle='#fff'
+  ctx.textAlign='center'
+  ctx.font='800 58px Georgia,serif'
+  ctx.fillText('The Research e-Journal',800,137)
+  ctx.restore()
 }
 
 async function buildCertificatePdf(paper:Paper,info:CertificateInfo){
@@ -108,73 +135,60 @@ async function buildCertificatePdf(paper:Paper,info:CertificateInfo){
   const ctx=canvas.getContext('2d')
   if(!ctx)throw new Error('Certificate renderer is not available in this browser.')
 
-  const green='#138a44'
-  const dark='#0b2d4e'
+  const green='#0b8d3d'
+  const dark='#111111'
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height)
+  ctx.fillStyle='#f5f6f3';ctx.fillRect(70,55,1460,1020)
+  ctx.strokeStyle=green;ctx.lineWidth=5;ctx.strokeRect(52,36,1496,1058)
 
-  ctx.strokeStyle=green;ctx.lineWidth=5;ctx.strokeRect(28,24,1544,1083)
-  ctx.strokeStyle='#b8d9c4';ctx.lineWidth=1.5;ctx.strokeRect(43,39,1514,1053)
+  drawWatermark(ctx)
+  drawReferenceHeader(ctx,green)
 
-  ctx.save()
-  ctx.globalAlpha=.035
-  ctx.fillStyle=green
-  ctx.font='800 210px Georgia,serif'
+  ctx.fillStyle=dark
   ctx.textAlign='center'
-  ctx.fillText('IRED',800,670)
-  ctx.restore()
+  ctx.font='700 28px Georgia,serif'
+  ctx.fillText('International Multi-Disciplinary Peer-Reviewed Referred e-Journal',800,205)
+  ctx.strokeStyle=green;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(145,232);ctx.lineTo(1455,232);ctx.stroke()
 
-  const logo=await loadImage('/green-logo.png').catch(()=>null)
-  if(logo){
-    const maxW=560,maxH=118
-    const scale=Math.min(maxW/logo.width,maxH/logo.height)
-    const w=logo.width*scale,h=logo.height*scale
-    ctx.drawImage(logo,(1600-w)/2,54,w,h)
-  }else{
-    ctx.fillStyle=green;ctx.font='700 58px Georgia,serif';ctx.textAlign='center';ctx.fillText(info.greenTitle,800,125)
-  }
+  ctx.fillStyle=green
+  ctx.font='700 46px "Old English Text MT","Lucida Blackletter",Georgia,serif'
+  ctx.fillText('Certificate of Publication',800,300)
+  ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(145,330);ctx.lineTo(1455,330);ctx.stroke()
 
-  ctx.fillStyle='#111827';ctx.font='700 27px Georgia,serif';ctx.textAlign='center'
-  ctx.fillText('International Multi-Disciplinary Peer-Reviewed e-Journal',800,190)
-  ctx.strokeStyle=green;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(120,218);ctx.lineTo(1480,218);ctx.stroke()
+  ctx.fillStyle=dark
+  ctx.font='400 22px Georgia,serif'
+  ctx.fillText('This is to certify that our Editorial Board and Review Committee have accepted the Research Paper/Article',800,380)
+  ctx.font='600 21px Georgia,serif'
+  ctx.fillText('entitled',800,419)
 
-  ctx.fillStyle=green;ctx.font='700 48px Georgia,serif';ctx.fillText('Certificate of Publication',800,286)
-  ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(145,316);ctx.lineTo(1455,316);ctx.stroke()
+  ctx.fillStyle='#111111'
+  let y=drawWrappedCentered(ctx,paper.title,465,1250,35,44,3,'700')
+  ctx.font='600 21px Georgia,serif';ctx.textAlign='center';ctx.fillText('of',800,y+2)
+  y+=40
+  y=drawWrappedCentered(ctx,paper.authors,y,1050,32,41,2,'700')
 
-  ctx.fillStyle='#111827';ctx.font='400 24px Georgia,serif';ctx.fillText('This is to certify that the Editorial Board and Review Committee have accepted the Research Paper/Article',800,365)
-  ctx.font='600 23px Georgia,serif';ctx.fillText('entitled',800,405)
+  const publicationText=`Has been published in a Issue-${paper.issue}, Volume-${paper.volume} in the Month of ${paper.publication_month}-${paper.publication_year} in ${info.greenTitle} (ISSN: ${issnText(info.greenIssn)}), published by ${info.publisherName}.`
+  ctx.fillStyle=dark
+  y=drawWrappedCentered(ctx,publicationText,y+26,1370,21,31,3,'400')
+  const issued=certificateDateParts()
+  ctx.font='400 20px Georgia,serif';ctx.textAlign='center'
+  ctx.fillText(`This certificate issued on the ${issued.day} day of ${issued.month}, ${issued.year}.`,800,y+14)
 
-  ctx.fillStyle='#0f172a'
-  let y=drawWrappedCentered(ctx,paper.title,455,1320,38,47,3,'700')
-  ctx.font='600 23px Georgia,serif';ctx.textAlign='center';ctx.fillText('of',800,y+4)
-  y+=44
-  ctx.fillStyle='#0f172a'
-  y=drawWrappedCentered(ctx,paper.authors,y,1220,36,44,2,'700')
-
-  const publicationText=`Has been published in Issue-${paper.issue}, Volume-${paper.volume} in the Month of ${paper.publication_month}-${paper.publication_year} in ${info.greenTitle} (${issnText(info.greenIssn)}), published by ${info.publisherName}.`
-  ctx.fillStyle='#111827'
-  y=drawWrappedCentered(ctx,publicationText,y+24,1420,24,35,4,'400')
-  ctx.font='400 22px Georgia,serif';ctx.textAlign='center';ctx.fillText(`This certificate is issued on ${certificateDate()}.`,800,y+16)
-
-  if(paper.article_id){ctx.fillStyle='#64748b';ctx.font='600 17px Arial,sans-serif';ctx.fillText(`Article ID: ${paper.article_id}`,800,y+54)}
-
-  const signatureY=860
+  const signatureY=855
   const columns=[
-    {x:280,name:info.editorName,role:'Editor-in-Chief'},
-    {x:800,name:'Chandrakant Parmar',role:'Vice-President, IRED'},
-    {x:1320,name:info.chairName,role:'Chairman, Editorial Board'},
+    {x:285,name:info.editorName,role:'Editor-in-chief'},
+    {x:800,name:'Chandrakant Parmar',role:'Vice-president, IRed'},
+    {x:1315,name:info.chairName,role:'Chairman, Editorial Board'},
   ]
   for(const column of columns){
-    ctx.strokeStyle='#607080';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(column.x-145,signatureY);ctx.lineTo(column.x+145,signatureY);ctx.stroke()
-    ctx.fillStyle=dark;ctx.font='700 22px Georgia,serif';ctx.textAlign='center';ctx.fillText(column.name,column.x,signatureY+40)
-    ctx.fillStyle='#273746';ctx.font='400 18px Arial,sans-serif';ctx.fillText(column.role,column.x,signatureY+71)
+    ctx.strokeStyle='#7c8790';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(column.x-125,signatureY);ctx.lineTo(column.x+125,signatureY);ctx.stroke()
+    ctx.fillStyle='#111111';ctx.font='700 21px Georgia,serif';ctx.textAlign='center';ctx.fillText(column.name,column.x,signatureY+42)
+    ctx.font='400 18px Georgia,serif';ctx.fillText(column.role,column.x,signatureY+73)
   }
 
-  ctx.strokeStyle=green;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(145,1012);ctx.lineTo(1455,1012);ctx.stroke()
-  ctx.fillStyle=green;ctx.font='600 17px Arial,sans-serif';ctx.textAlign='center'
-  const address=info.officialAddress||defaultInfo.officialAddress
-  const addressLines=wrapLines(ctx,`IRED, ${address}`,1380)
-  addressLines.slice(0,2).forEach((line,index)=>ctx.fillText(line,800,1048+index*24))
-  ctx.fillStyle='#7a8792';ctx.font='400 12px Arial,sans-serif';ctx.fillText('Digitally generated by the IRED Journal Platform from the approved publication record.',800,1094)
+  ctx.strokeStyle=green;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(165,1007);ctx.lineTo(1435,1007);ctx.stroke()
+  ctx.fillStyle=green;ctx.font='600 16px Georgia,serif';ctx.textAlign='center'
+  ctx.fillText(`IRed, ${certificateAddress(info.officialAddress)}`,800,1046)
 
   const pngBlob=await canvasBlob(canvas)
   const pngBytes=await pngBlob.arrayBuffer()
