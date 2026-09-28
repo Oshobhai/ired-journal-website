@@ -43,7 +43,7 @@ function MemberCard({member,index,tone}:{member:Member;index:number;tone:'gold'|
       <DetailRow icon="institution">{member.institution}</DetailRow>
       {member.institutional_address?<DetailRow icon="location">{member.institutional_address}</DetailRow>:member.location?<DetailRow icon="location">{member.location}</DetailRow>:null}
       {member.institutional_email?<DetailRow icon="email"><a href={`mailto:${member.institutional_email}`} style={{color:'#0b5f91',fontWeight:700}}>{member.institutional_email}</a></DetailRow>:null}
-      {member.profile_url?<DetailRow icon="profile"><a href={member.profile_url} target="_blank" rel="noreferrer" style={{color:'#0b5f91',fontWeight:700}}>Institutional Profile</a></DetailRow>:null}
+      {member.profile_url?<DetailRow icon="profile"><a href={member.profile_url} target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',width:'fit-content',padding:'4px 8px',border:'1px solid #bfd2df',borderRadius:4,background:'#f5f9fc',color:'#0b5f91',fontWeight:800,textDecoration:'none'}}>Official Institutional Profile ↗</a></DetailRow>:null}
     </div>
   </article>;
 }
