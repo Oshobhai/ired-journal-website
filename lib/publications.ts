@@ -18,9 +18,13 @@ export type PublicGreenPaper = {
   issn: string | null
   doi: string | null
   pdf_path: string
+  certificate_path: string | null
+  certificate_uploaded_at: string | null
   published_at: string | null
   view_url: string | null
   download_url: string | null
+  certificate_view_url: string | null
+  certificate_download_url: string | null
 }
 
 export type PublicRedBook = {
@@ -84,7 +88,19 @@ async function signedUrls(bucket: string, path: string) {
   return { view_url: view?.signedUrl ?? null, download_url: download?.signedUrl ?? null }
 }
 
-const greenSelect = 'id,title,authors,affiliation,author_email,abstract,keywords,article_id,article_type,publication_year,publication_month,volume,issue,issn,doi,pdf_path,published_at'
+async function attachGreenUrls(paper:any):Promise<PublicGreenPaper>{
+  const pdf=await signedUrls('green-papers',paper.pdf_path)
+  let certificate_view_url:string|null=null
+  let certificate_download_url:string|null=null
+  if(paper.certificate_path){
+    const certificate=await signedUrls('green-certificates',paper.certificate_path)
+    certificate_view_url=certificate.view_url
+    certificate_download_url=certificate.download_url
+  }
+  return {...paper,...pdf,certificate_view_url,certificate_download_url} as PublicGreenPaper
+}
+
+const greenSelect = 'id,title,authors,affiliation,author_email,abstract,keywords,article_id,article_type,publication_year,publication_month,volume,issue,issn,doi,pdf_path,certificate_path,certificate_uploaded_at,published_at'
 const redSelect = 'id,title,subtitle,editors,description,theme,publication_year,publication_month,volume,issue,issn,publication_label,isbn,cover_path,pdf_path,published_at'
 
 export async function getPublishedGreenPapers(limit?: number): Promise<PublicGreenPaper[]> {
@@ -93,7 +109,7 @@ export async function getPublishedGreenPapers(limit?: number): Promise<PublicGre
   if (limit) query = query.limit(limit)
   const { data, error } = await query
   if (error || !data) return []
-  return Promise.all(data.map(async (paper) => ({ ...paper, ...(await signedUrls('green-papers', paper.pdf_path)) }))) as Promise<PublicGreenPaper[]>
+  return Promise.all(data.map(attachGreenUrls))
 }
 
 export async function getGreenArchive(options?: { q?: string; year?: number | null; page?: number; pageSize?: number }): Promise<GreenArchiveResult> {
@@ -124,7 +140,7 @@ export async function getGreenArchive(options?: { q?: string; year?: number | nu
 
   if (error || !data) return { papers: [], total: 0, page, pageSize, totalPages: 0 }
 
-  const papers = await Promise.all(data.map(async (paper) => ({ ...paper, ...(await signedUrls('green-papers', paper.pdf_path)) }))) as PublicGreenPaper[]
+  const papers = await Promise.all(data.map(attachGreenUrls))
   const total = count || 0
   return { papers, total, page, pageSize, totalPages: Math.ceil(total / pageSize) }
 }
@@ -133,7 +149,7 @@ export async function getPublishedGreenPaperById(id: string): Promise<PublicGree
   const supabase = await createClient()
   const { data, error } = await supabase.from('green_papers').select(greenSelect).eq('id', id).eq('status', 'published').maybeSingle()
   if (error || !data) return null
-  return { ...data, ...(await signedUrls('green-papers', data.pdf_path)) } as PublicGreenPaper
+  return attachGreenUrls(data)
 }
 
 export async function getPublishedRedBooks(limit?: number): Promise<PublicRedBook[]> {
