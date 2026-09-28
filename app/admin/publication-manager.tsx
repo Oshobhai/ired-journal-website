@@ -149,7 +149,6 @@ export default function PublicationManager(){
         title:String(form.get('title')||'').trim(),
         subtitle:String(form.get('subtitle')||'').trim()||null,
         editors:String(form.get('editors')||'').trim()||null,
-        description:String(form.get('description')||'').trim()||null,
         publication_year:publicationYear,
         publication_month:publicationMonth,
         volume:String(form.get('volume')||'').trim()||null,
@@ -262,7 +261,6 @@ export default function PublicationManager(){
           <label style={labelStyle}>Title<input name="title" required style={fieldStyle}/></label>
           <label style={labelStyle}>Subtitle<input name="subtitle" style={fieldStyle}/></label>
           <label style={labelStyle}>Editor(s)<input name="editors" style={fieldStyle}/></label>
-          <label style={labelStyle}>Description<textarea name="description" rows={3} style={fieldStyle}/></label>
           <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
             <label style={labelStyle}>Month<select name="publication_month" defaultValue="August" style={fieldStyle}>{months.map(month=><option key={month}>{month}</option>)}</select></label>
             <label style={labelStyle}>Year<input name="publication_year" type="number" min="1900" max="2100" style={fieldStyle}/></label>
