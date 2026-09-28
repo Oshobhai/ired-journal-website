@@ -66,14 +66,20 @@ export default function PublicationManager(){
     const formEl=event.currentTarget
     const form=new FormData(formEl)
     const file=form.get('pdf') as File
+    const certificate=form.get('certificate') as File
     setBusy(true);setMessage('')
     let path=''
+    let certificatePath=''
     try{
       const {data:{user},error:userError}=await supabase.auth.getUser()
       if(userError||!user)throw new Error('Admin session expired. Please sign in again.')
       if(!file||file.size===0)throw new Error('Please select the GREEN paper PDF.')
       if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf'))throw new Error('GREEN paper must be a PDF file.')
       if(file.size>50*1024*1024)throw new Error('GREEN paper PDF must be 50 MB or less.')
+      if(certificate&&certificate.size>0){
+        if(certificate.type!=='application/pdf'&&!certificate.name.toLowerCase().endsWith('.pdf'))throw new Error('Certificate must be a PDF file.')
+        if(certificate.size>10*1024*1024)throw new Error('Certificate PDF must be 10 MB or less.')
+      }
 
       const title=String(form.get('paper_title')||'').trim()
       const author=String(form.get('author_name')||'').trim()
@@ -85,6 +91,12 @@ export default function PublicationManager(){
       const {error:uploadError}=await supabase.storage.from('green-papers').upload(path,file,{contentType:'application/pdf',upsert:false})
       if(uploadError)throw uploadError
 
+      if(certificate&&certificate.size>0){
+        certificatePath=`${year}/${crypto.randomUUID()}-${safeFileName(certificate.name)}`
+        const {error:certificateError}=await supabase.storage.from('green-certificates').upload(certificatePath,certificate,{contentType:'application/pdf',upsert:false})
+        if(certificateError)throw certificateError
+      }
+
       const {error:insertError}=await supabase.from('green_papers').insert({
         title,
         authors:author,
@@ -92,20 +104,20 @@ export default function PublicationManager(){
         publication_year:year,
         pdf_path:path,
         pdf_size:file.size,
+        certificate_path:certificatePath||null,
+        certificate_uploaded_at:certificatePath?new Date().toISOString():null,
         status:'draft',
         published_at:null,
         created_by:user.id,
       })
-      if(insertError){
-        await supabase.storage.from('green-papers').remove([path])
-        throw insertError
-      }
+      if(insertError)throw insertError
 
       formEl.reset()
-      setMessage('GREEN paper uploaded successfully as Draft. Volume, Issue and Article ID were assigned automatically.')
+      setMessage(certificatePath?'GREEN paper and certificate uploaded successfully as Draft. Volume, Issue and Article ID were assigned automatically.':'GREEN paper uploaded successfully as Draft. Volume, Issue and Article ID were assigned automatically.')
       await load()
     }catch(error){
       if(path)await supabase.storage.from('green-papers').remove([path])
+      if(certificatePath)await supabase.storage.from('green-certificates').remove([certificatePath])
       setMessage(error instanceof Error?error.message:'GREEN upload failed.')
     }finally{setBusy(false)}
   }
@@ -245,6 +257,8 @@ export default function PublicationManager(){
           </div>
           <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Auto-filled from the current publication cycle. Final numbering is confirmed by the database when uploaded.</div>
           <label style={labelStyle}>Paper PDF (max 50 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required style={fieldStyle}/></label>
+          <label style={labelStyle}>Certificate PDF (optional · max 10 MB)<input name="certificate" type="file" accept="application/pdf,.pdf" style={fieldStyle}/></label>
+          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>You can upload the certificate now or add/replace it later from GREEN Papers Manager → Edit &amp; Files.</div>
           <button className="btn btnGreen" disabled={busy} type="submit">{busy?'Uploading…':'Upload GREEN Paper'}</button>
         </form>
       </section>
