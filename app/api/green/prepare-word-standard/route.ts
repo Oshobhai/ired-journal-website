@@ -60,7 +60,7 @@ function para(content:string,align:'left'|'right'|'center'='left',after=0){retur
 function headerMarkup(articleId:string,volume:number,issue:number,year:number,issn:string){
   const left=[
     para(run('◉ ',42,true,'148444')+run('GREEN',48,true,'148444'), 'left', 0),
-    para(run('The Research Journal',18,true,'148444',true),'left',15),
+    para(run('The Research e-Journal',18,true,'148444',true),'left',15),
     para(run('Institute of Research Education and Development (IRED)',13,true,'334B5F'),'left',0),
     para(run('Knowledge for a Better Tomorrow',12,false,'148444',true),'left',0),
   ].join('')
