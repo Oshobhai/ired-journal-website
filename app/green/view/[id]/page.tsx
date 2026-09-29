@@ -23,7 +23,7 @@ export async function generateMetadata({params}:{params:Promise<{id:string}>}):P
       citation_title:paper.title,
       citation_author:paper.authors,
       citation_publication_date:String(paper.publication_year||''),
-      citation_journal_title:'GREEN: The Research Journal',
+      citation_journal_title:'GREEN: The Research e-Journal',
       citation_volume:paper.volume||'',
       citation_issue:paper.issue||'',
       citation_doi:paper.doi||'',
