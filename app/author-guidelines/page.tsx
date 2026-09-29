@@ -64,7 +64,7 @@ export default function AuthorGuidelines(){return <><Header/>
     <div style={{maxWidth:1100,margin:'0 auto'}}>
       <section style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:14,marginBottom:28}}>
         <article style={{border:'1px solid #d8e3dc',borderTop:'3px solid #148444',padding:'17px 18px',background:'#fff'}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,color:'#148444',marginBottom:6}}><Icon type="document"/><strong style={{fontFamily:'Georgia,serif',fontSize:18}}>GREEN: The Research Journal</strong></div>
+          <div style={{display:'flex',alignItems:'center',gap:8,color:'#148444',marginBottom:6}}><Icon type="document"/><strong style={{fontFamily:'Georgia,serif',fontSize:18}}>GREEN: The Research e-Journal</strong></div>
           <p style={{fontSize:11.8,lineHeight:1.65,color:'#526273',margin:'0 0 10px'}}>For individual research papers and scholarly articles published as separate journal papers.</p>
           <div style={{fontSize:10.8,color:'#667782'}}><strong>Typical submissions:</strong> Research Article · Review Article · Case Study · Short Communication</div>
         </article>
