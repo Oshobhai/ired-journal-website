@@ -36,8 +36,8 @@ export default async function Green({searchParams}:{searchParams:Promise<{q?:str
 
       {(q||yearText)?<div style={{fontSize:10.5,color:'#5f6f7c',margin:'0 0 9px'}}>Showing {archive.total} result{archive.total===1?'':'s'}{q?<> for <strong>“{q}”</strong></>:null}{yearText?<> · Year <strong>{yearText}</strong></>:null}</div>:null}
 
-      <div className="listPanel">{archive.papers.length ? archive.papers.map((p)=><article className="paperRow" key={p.id}>
-        <div className="paperThumb" aria-hidden="true" style={{fontFamily:'Georgia,serif',fontSize:19,fontWeight:700,color:'#148444'}}>G</div>
+      <div className="listPanel">{archive.papers.length ? archive.papers.map((p,index)=><article className="paperRow" key={p.id}>
+        <div className="paperThumb" aria-label={`Paper ${(currentPage-1)*10+index+1}`} style={{fontFamily:'Georgia,serif',fontSize:16,fontWeight:700,color:'#148444'}}>{String((currentPage-1)*10+index+1).padStart(2,'0')}</div>
         <div className="itemMain" style={{minWidth:0}}>
           <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',marginBottom:4}}><span style={{fontSize:9.5,fontWeight:800,letterSpacing:'.07em',textTransform:'uppercase',color:'#14733d'}}>{p.article_id||'GREEN Research Paper'}</span><span style={{fontSize:9,color:'#7a8791'}}>{[p.publication_month,p.publication_year].filter(Boolean).join(' ')}</span>{p.certificate_path?<span style={{fontSize:9,padding:'2px 6px',borderRadius:999,background:'#eef8f2',border:'1px solid #cfe5d6',color:'#176f3d',fontWeight:800}}>Certificate Available</span>:null}</div>
           <div className="itemTitle" style={{fontSize:14,lineHeight:1.35,overflowWrap:'anywhere'}}>{p.title}</div>
