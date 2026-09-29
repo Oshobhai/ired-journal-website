@@ -81,8 +81,8 @@ export default async function JournalInformation(){
         <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginTop:8}}>Official Publication Title</div>
         <h2>{settings.red_title}</h2>
         <p>{settings.red_description}</p>
-        <p><strong>e-ISSN:</strong> {contact.red_eissn}</p>
-        <p><strong>Publication Mode:</strong> Electronic publication</p>
+        <p><strong>ISSN:</strong> {contact.red_eissn}</p>
+        <p><strong>Publication Mode:</strong> Print Publication</p>
         <p><strong>Scope:</strong> {settings.red_scope}</p>
         <p><strong>Published By:</strong> {settings.publisher_name}</p>
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:16}}>
