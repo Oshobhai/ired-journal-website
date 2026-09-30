@@ -20,7 +20,10 @@ export async function generateMetadata():Promise<Metadata>{
     authors:[{name:settings.publisher_name}],
     creator:settings.publisher_name,
     publisher:settings.publisher_name,
-    icons:{icon:'/api/brand/favicon'},
+    icons:{
+      icon:[{url:'/ired-favicon.svg',type:'image/svg+xml',sizes:'any'}],
+      shortcut:'/ired-favicon.svg',
+    },
     openGraph:{type:'website',siteName:`${settings.institution_short_name} Research Journals`,title:settings.seo_title,description:settings.seo_description,url:siteUrl,images:[{url:'/api/brand/ired_header',alt:`${settings.institution_short_name} — ${settings.institution_name}`}]},
     twitter:{card:'summary_large_image',title:settings.seo_title,description:settings.seo_description,images:['/api/brand/ired_header']},
     robots:{index:true,follow:true},
