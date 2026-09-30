@@ -2,13 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {Header,Footer,JournalTitle} from '../../../components';
 import {getPublishedGreenPaperById} from '@/lib/publications';
+import {getSiteSettings} from '@/lib/site-settings';
 import ShareButtons from './share-buttons';
 
 export const dynamic='force-dynamic';
 
 export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{
   const {id}=await params;
-  const paper=await getPublishedGreenPaperById(id);
+  const [paper,settings]=await Promise.all([getPublishedGreenPaperById(id),getSiteSettings()]);
   if(!paper)return {title:'GREEN Paper'};
   const description=(paper.abstract||`${paper.title} by ${paper.authors}`).slice(0,220);
   const authors=paper.authors.split(/,|;|\band\b/i).map(name=>({name:name.trim()})).filter(x=>x.name);
@@ -23,7 +24,7 @@ export async function generateMetadata({params}:{params:Promise<{id:string}>}):P
       citation_title:paper.title,
       citation_author:paper.authors,
       citation_publication_date:String(paper.publication_year||''),
-      citation_journal_title:'GREEN: The Research e-Journal',
+      citation_journal_title:settings.green_title,
       citation_volume:paper.volume||'',
       citation_issue:paper.issue||'',
       citation_doi:paper.doi||'',
@@ -34,11 +35,11 @@ export async function generateMetadata({params}:{params:Promise<{id:string}>}):P
 
 export default async function GreenPaperDetail({params}:{params:Promise<{id:string}>}){
   const {id}=await params;
-  const paper=await getPublishedGreenPaperById(id);
+  const [paper,settings]=await Promise.all([getPublishedGreenPaperById(id),getSiteSettings()]);
   if(!paper){return <><Header/><main className="container" style={{padding:'28px 0'}}><div className="contentCard"><h1>Paper not available</h1><p>This GREEN publication is not currently available.</p><Link className="smallBtn" href="/green">← Back to GREEN Papers</Link></div></main><Footer/></>}
   const meta=[paper.publication_month,paper.publication_year].filter(Boolean).join(' ');
   return <><Header/>
-    <section className="pageHero"><div className="container"><div style={{marginBottom:7}}><JournalTitle kind="green" size={15}/></div><div style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'#14733d',marginBottom:5}}>{paper.article_type||'Research Article'}</div><h1 style={{fontSize:31,maxWidth:980}}>{paper.title}</h1><p style={{fontSize:13,color:'#536473',margin:'8px 0 0'}}>{paper.authors}</p></div></section>
+    <section className="pageHero"><div className="container"><div style={{marginBottom:7}}><JournalTitle kind="green" title={settings.green_title} size={15}/></div><div style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'#14733d',marginBottom:5}}>{paper.article_type||'Research Article'}</div><h1 style={{fontSize:31,maxWidth:980}}>{paper.title}</h1><p style={{fontSize:13,color:'#536473',margin:'8px 0 0'}}>{paper.authors}</p></div></section>
     <main className="container" style={{padding:'22px 0 34px'}}>
       <div className="paperDetailGrid" style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) 280px',gap:24,alignItems:'start'}}>
         <article className="contentCard">
