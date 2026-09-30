@@ -9,8 +9,6 @@ type Settings={
   email:string
   secondary_email:string
   registration_no:string
-  green_issn:string
-  red_eissn:string
   institute_address:string
   journal_office_address:string
 }
@@ -21,8 +19,6 @@ const defaults:Settings={
   email:'contact@iredjournal.org',
   secondary_email:'ired.foundation@gmail.com',
   registration_no:'GUJ/15856/AHMEDABAD',
-  green_issn:'Pending',
-  red_eissn:'Pending',
   institute_address:'IRED, Pooja Bunglows, Kalol Highway-Road, Chandkheda, Ahmedabad-382424, Gujarat, India.',
   journal_office_address:'A-3, 3rd Floor, Gita Apartment, Nr. Hirabaug Crossing, Ambawadi, Ahmedabad-380015, Gujarat, India.',
 }
@@ -35,7 +31,7 @@ export default function ContactSettingsManager(){
 
   useEffect(()=>{void (async()=>{
     const [contactResult,siteResult]=await Promise.all([
-      supabase.from('contact_settings').select('phone_primary,phone_secondary,email,secondary_email,registration_no,green_issn,red_eissn').eq('id',true).maybeSingle(),
+      supabase.from('contact_settings').select('phone_primary,phone_secondary,email,secondary_email,registration_no').eq('id',true).maybeSingle(),
       supabase.from('site_settings').select('official_address,journal_office_address').eq('id',true).maybeSingle(),
     ])
     if(contactResult.error){setMessage(contactResult.error.message);return}
@@ -48,8 +44,6 @@ export default function ContactSettingsManager(){
       email:contact?.email||defaults.email,
       secondary_email:contact?.secondary_email||defaults.secondary_email,
       registration_no:contact?.registration_no||defaults.registration_no,
-      green_issn:contact?.green_issn||defaults.green_issn,
-      red_eissn:contact?.red_eissn||defaults.red_eissn,
       institute_address:site?.official_address||defaults.institute_address,
       journal_office_address:site?.journal_office_address||defaults.journal_office_address,
     })
@@ -66,8 +60,6 @@ export default function ContactSettingsManager(){
         email:form.email.trim().toLowerCase(),
         secondary_email:form.secondary_email.trim().toLowerCase(),
         registration_no:form.registration_no.trim(),
-        green_issn:form.green_issn.trim()||'Pending',
-        red_eissn:form.red_eissn.trim()||'Pending',
         institute_address:form.institute_address.trim(),
         journal_office_address:form.journal_office_address.trim(),
       }
@@ -81,8 +73,6 @@ export default function ContactSettingsManager(){
         email:cleaned.email,
         secondary_email:cleaned.secondary_email,
         registration_no:cleaned.registration_no,
-        green_issn:cleaned.green_issn,
-        red_eissn:cleaned.red_eissn,
         updated_at:now,
         updated_by:user.id,
       },{onConflict:'id'})
@@ -95,13 +85,13 @@ export default function ContactSettingsManager(){
       }).eq('id',true)
       if(siteError)throw siteError
       setForm(cleaned)
-      setMessage('Contact details, addresses and journal ISSN values updated successfully.')
+      setMessage('Contact details and addresses updated successfully.')
     }catch(error){setMessage(error instanceof Error?error.message:'Could not update contact details.')}
     finally{setBusy(false)}
   }
 
   async function restore(){
-    if(!confirm('Restore the default IRED contact details, addresses and ISSN placeholders?'))return
+    if(!confirm('Restore the default IRED contact details and addresses?'))return
     setBusy(true);setMessage('')
     try{
       const {data:{user}}=await supabase.auth.getUser()
@@ -113,8 +103,6 @@ export default function ContactSettingsManager(){
         email:defaults.email,
         secondary_email:defaults.secondary_email,
         registration_no:defaults.registration_no,
-        green_issn:defaults.green_issn,
-        red_eissn:defaults.red_eissn,
         updated_at:now,
         updated_by:user?.id||null,
       },{onConflict:'id'})
@@ -127,7 +115,7 @@ export default function ContactSettingsManager(){
       }).eq('id',true)
       if(siteError)throw siteError
       setForm(defaults)
-      setMessage('Default contact details, addresses and ISSN placeholders restored.')
+      setMessage('Default contact details and addresses restored.')
     }catch(error){setMessage(error instanceof Error?error.message:'Could not restore defaults.')}
     finally{setBusy(false)}
   }
@@ -139,7 +127,7 @@ export default function ContactSettingsManager(){
   return <section className="contentCard" style={{marginTop:20,borderTop:'4px solid #0b2d4e'}}>
     <div style={{fontSize:10,fontWeight:800,letterSpacing:'.1em',textTransform:'uppercase',color:'#6d7d89'}}>Website Administration</div>
     <h2 style={{margin:'4px 0 5px'}}>Contact Us Details</h2>
-    <p style={{margin:'0 0 15px',fontSize:12,color:'#667887',lineHeight:1.6}}>Update the public phone numbers, two contact emails, registration number, institute address, journal office address and journal ISSN values from one place.</p>
+    <p style={{margin:'0 0 15px',fontSize:12,color:'#667887',lineHeight:1.6}}>Update the public phone numbers, two contact emails, registration number, institute address and journal office address from one place. GREEN and RED ISSN particulars are managed under Website Settings.</p>
     {message?<div style={{padding:'10px 12px',marginBottom:14,border:'1px solid #cbdde8',background:'#f3f8fb',fontSize:11.5}}>{message}</div>:null}
     <form onSubmit={save} style={{display:'grid',gap:12,maxWidth:900}}>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
@@ -154,10 +142,6 @@ export default function ContactSettingsManager(){
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:12}}>
         <label style={label}>Institute Address<textarea value={form.institute_address} onChange={e=>setForm({...form,institute_address:e.target.value})} style={area} required/></label>
         <label style={label}>Journal Office Address<textarea value={form.journal_office_address} onChange={e=>setForm({...form,journal_office_address:e.target.value})} style={area} required/></label>
-      </div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
-        <label style={label}>GREEN ISSN<input value={form.green_issn} onChange={e=>setForm({...form,green_issn:e.target.value})} style={field} placeholder="Pending"/></label>
-        <label style={label}>RED e-ISSN<input value={form.red_eissn} onChange={e=>setForm({...form,red_eissn:e.target.value})} style={field} placeholder="Pending"/></label>
       </div>
       <div style={{display:'flex',gap:8,flexWrap:'wrap',paddingTop:3}}><button className="btn btnNavy" type="submit" disabled={busy}>{busy?'Saving…':'Save Contact Details'}</button><button className="btn btnOutline" type="button" disabled={busy} onClick={restore}>Restore Default</button></div>
     </form>
