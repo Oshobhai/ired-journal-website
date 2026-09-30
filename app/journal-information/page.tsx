@@ -101,7 +101,7 @@ export default async function JournalInformation(){
               ['Title',settings.red_title],
               ['ISSN',redIssnStatus],
               ['Publication Format',settings.red_format],
-              ['Starting Year',String(settings.first_volume_year)],
+              ['Starting Year',String(settings.red_starting_year)],
               ['Subject',settings.red_subject],
               ['Language',settings.red_language],
               ['Frequency',settings.red_frequency],
