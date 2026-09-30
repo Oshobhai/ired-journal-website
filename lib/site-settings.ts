@@ -23,6 +23,7 @@ export type SiteSettings={
   red_language:string
   red_format:string
   red_subject:string
+  red_starting_year:number
   first_volume_year:number
   article_id_prefix:string
   doi_prefix:string
@@ -59,6 +60,7 @@ export const defaultSiteSettings:SiteSettings={
   red_language:'English, Gujarati',
   red_format:'Print',
   red_subject:'Multidisciplinary',
+  red_starting_year:2026,
   first_volume_year:2026,
   article_id_prefix:'GREEN',
   doi_prefix:'',
