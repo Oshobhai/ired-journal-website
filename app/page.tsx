@@ -39,7 +39,7 @@ function ScheduleItem({label,value,accent}:{label:string;value:string;accent:str
 
 function issnDisplay(value:string){
   const raw=String(value||'').trim();
-  return (!raw || /^pending$/i.test(raw) || /^x{4}-?x{4}$/i.test(raw)) ? 'Pending / Not Assigned' : raw;
+  return (!raw || /^x{4}-?x{4}$/i.test(raw)) ? 'Pending' : raw;
 }
 
 function formatMonthYear(value:string){
@@ -94,7 +94,7 @@ export default async function Home(){
             ['Publication Format',settings.green_format],
             ['Subject',settings.green_subject],
             ['ISSN Status',greenIssnStatus],
-          ].map(([label,value])=><InfoItem key={label} label={label} value={value} valueColor={label==='ISSN Status'&&greenIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#183f2a'}/>)}</div>
+          ].map(([label,value])=><InfoItem key={label} label={label} value={value} valueColor={label==='ISSN Status'&&greenIssnStatus==='Pending'?'#9a6a12':'#183f2a'}/>)}</div>
           {greenScheduleVisible?<div style={{borderTop:'1px solid #dbe7df',marginTop:8,paddingTop:11}}>
             <PanelHeading title="Upcoming Issue Schedule" color="#148444" calendar/>
             <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:7}}>
@@ -121,7 +121,7 @@ export default async function Home(){
             ['Publication Format',settings.red_format],
             ['Subject',settings.red_subject],
             ['ISSN Status',redIssnStatus],
-          ].map(([label,value])=><InfoItem key={label} label={label} value={value} valueColor={label==='ISSN Status'&&redIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#722226'}/>)}</div>
+          ].map(([label,value])=><InfoItem key={label} label={label} value={value} valueColor={label==='ISSN Status'&&redIssnStatus==='Pending'?'#9a6a12':'#722226'}/>)}</div>
           {redScheduleVisible?<div style={{borderTop:'1px solid #efdede',marginTop:8,paddingTop:11}}>
             <PanelHeading title="Upcoming Issue Schedule" color="#bd2025" calendar/>
             <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:7}}>
