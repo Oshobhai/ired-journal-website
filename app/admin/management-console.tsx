@@ -41,7 +41,7 @@ type Props = {
 }
 
 export default function ManagementConsole({initialKind='green',lockedKind,showStats=true}:Props) {
-  const supabase = createClient()
+  const supabase = useMemo(()=>createClient(),[])
   const [green, setGreen] = useState<Row[]>([])
   const [red, setRed] = useState<Row[]>([])
   const [kind, setKind] = useState<Kind>(lockedKind || initialKind)
@@ -223,7 +223,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
     {showStats ? <div className="stats">
       <div className="stat"><span>Total Publications</span><strong>{counts.total}</strong></div>
       <div className="stat"><span>GREEN Papers</span><strong>{counts.green}</strong></div>
-      <div className="stat"><span>RED Books</span><strong>{counts.red}</strong></div>
+      <div className="stat"><span>RED Publications</span><strong>{counts.red}</strong></div>
       <div className="stat"><span>Published</span><strong>{counts.published}</strong></div>
       <div className="stat"><span>Drafts</span><strong>{counts.draft}</strong></div>
       <div className="stat"><span>Archived</span><strong>{counts.archived}</strong></div>
@@ -234,12 +234,12 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
     <div className="contentCard" id={kind === 'green' ? 'green-manager' : 'red-manager'}>
       <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',flexWrap:'wrap',marginBottom:14}}>
         <div>
-          <h2 style={{margin:'0 0 4px'}}>{kind === 'green' ? 'GREEN Papers Manager' : 'RED Books Manager'}</h2>
-          <div style={{fontSize:12,color:'#687586'}}>{kind==='green'?'Edit metadata, replace the paper PDF, upload/replace certificates, publish and archive from one place.':'Search, filter, edit, publish, archive and manage publication records.'}</div>
+          <h2 style={{margin:'0 0 4px'}}>{kind === 'green' ? 'GREEN Papers Manager' : 'RED Publications Manager'}</h2>
+          <div style={{fontSize:12,color:'#687586'}}>{kind==='green'?'Edit metadata, replace the paper PDF, upload/replace certificates, publish and archive from one place.':'Search, filter, edit, publish, archive and manage RED print publication records.'}</div>
         </div>
         {!lockedKind ? <div style={{display:'flex',gap:6}}>
           <button style={kind==='green'?primary:btn} onClick={()=>setKind('green')}>GREEN Papers ({green.length})</button>
-          <button style={kind==='red'?{...primary,background:'#bd2025',borderColor:'#bd2025'}:btn} onClick={()=>setKind('red')}>RED Books ({red.length})</button>
+          <button style={kind==='red'?{...primary,background:'#bd2025',borderColor:'#bd2025'}:btn} onClick={()=>setKind('red')}>RED Publications ({red.length})</button>
         </div> : <div style={{fontSize:10,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:kind==='green'?'#16723b':'#a8282d'}}>{kind==='green'?`${green.length} GREEN record(s)`:`${red.length} RED record(s)`}</div>}
       </div>
 
@@ -286,7 +286,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
                 <button style={danger} disabled={busy} onClick={()=>deleteItem(item)}>Delete</button>
               </div>
               {editing===item.id ? <form onSubmit={e=>saveEdit(e,item)} style={{marginTop:8,padding:10,border:'1px solid #dce4ea',borderRadius:5,background:'#fafcfd',minWidth:420}}>
-                <div style={{fontSize:11,fontWeight:800,color:'#173d60',marginBottom:7}}>Paper details</div>
+                <div style={{fontSize:11,fontWeight:800,color:'#173d60',marginBottom:7}}>{kind==='green'?'Paper details':'Publication details'}</div>
                 <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr',gap:6}}><input name="title" defaultValue={item.title} required style={control}/><input name="publication_year" type="number" defaultValue={item.publication_year || ''} placeholder="Year" style={control}/><input name="volume" defaultValue={item.volume || ''} placeholder="Volume" style={control}/></div>
                 <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr',gap:6,marginTop:6}}>{kind==='green'?<input name="authors" defaultValue={item.authors || ''} placeholder="Authors" style={control}/>:<input name="editors" defaultValue={item.editors || ''} placeholder="Editors" style={control}/>}<input name="issue" defaultValue={item.issue || ''} placeholder="Issue" style={control}/>{kind==='green'?<input name="doi" defaultValue={item.doi || ''} placeholder="DOI" style={control}/>:<select name="publication_month" defaultValue={item.publication_month || ''} style={control}><option value="">Month</option>{months.map(m=><option key={m}>{m}</option>)}</select>}</div>
                 {kind==='green'?<div style={{marginTop:6}}><select name="publication_month" defaultValue={item.publication_month || ''} style={{...control,width:'100%'}}><option value="">Publication month</option>{months.map(m=><option key={m}>{m}</option>)}</select></div>:null}
