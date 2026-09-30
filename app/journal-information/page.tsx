@@ -36,7 +36,8 @@ export default async function JournalInformation(){
         <p><strong>Institute Address:</strong> {settings.official_address}</p>
         <p><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}</p>
         <p><strong>Phone:</strong> {phones}</p>
-        <p><strong>General Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+        <p><strong>Primary Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+        <p><strong>Secondary Contact Email:</strong> <a href={`mailto:${contact.secondary_email}`}>{contact.secondary_email}</a></p>
       </section>
 
       <section className="contentCard" style={{borderTop:'4px solid #148444'}}>
@@ -68,6 +69,7 @@ export default async function JournalInformation(){
         <p><strong>Institute Address:</strong> {settings.official_address}</p>
         <p><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}</p>
         <p><strong>Primary Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+        <p><strong>Secondary Contact Email:</strong> <a href={`mailto:${contact.secondary_email}`}>{contact.secondary_email}</a></p>
         <p><strong>Manuscript Submission Email:</strong> <a href={`mailto:${IRED_EMAILS.greenSubmission}`}>{IRED_EMAILS.greenSubmission}</a></p>
 
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:16}}>
@@ -91,6 +93,7 @@ export default async function JournalInformation(){
         <p><strong>Institute Address:</strong> {settings.official_address}</p>
         <p><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}</p>
         <p><strong>Primary Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+        <p><strong>Secondary Contact Email:</strong> <a href={`mailto:${contact.secondary_email}`}>{contact.secondary_email}</a></p>
         <p><strong>Manuscript Submission Email:</strong> <a href={`mailto:${IRED_EMAILS.redSubmission}`}>{IRED_EMAILS.redSubmission}</a></p>
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:16}}>
           <Link className="btn btnRed compact" href="/red">View RED Publications</Link>
