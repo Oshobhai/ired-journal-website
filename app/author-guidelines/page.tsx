@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import {Header,Footer,JournalTitle} from '../components';
+import {IRED_EMAILS} from '@/lib/contact-settings';
 
 function Icon({type}:{type:'document'|'structure'|'table'|'reference'|'ethics'|'email'|'review'|'check'|'book'|'fee'}){
   const common={width:19,height:19,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,strokeLinecap:'round' as const,strokeLinejoin:'round' as const,'aria-hidden':true};
@@ -95,8 +96,8 @@ export default function AuthorGuidelines(){return <><Header/>
 
           <section style={{paddingBottom:21,marginBottom:20,borderBottom:'1px solid #dfe5ea'}}>
             <div style={{display:'flex',alignItems:'center',gap:9,marginBottom:9,color:'#173d60'}}><Icon type="email"/><h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:0}}>7. How to Submit</h2></div>
-            <p style={{fontSize:12,lineHeight:1.72,color:'#4b5d6d',margin:'0 0 10px'}}>Manuscripts are submitted directly to the IRED Editorial Office by email. The Contact page provides separate prepared email options for GREEN and RED submissions.</p>
-            <div style={{display:'flex',gap:9,flexWrap:'wrap'}}><Link className="btn btnGreen compact" href="/contact">Contact to Submit</Link><a href="mailto:ired.foundation@gmail.com" className="btn btnOutline compact">ired.foundation@gmail.com</a></div>
+            <p style={{fontSize:12,lineHeight:1.72,color:'#4b5d6d',margin:'0 0 10px'}}>Manuscripts are submitted directly to the IRED Editorial Office by email. Use the dedicated GREEN or RED submission address for the appropriate publication.</p>
+            <div style={{display:'flex',gap:9,flexWrap:'wrap'}}><Link className="btn btnOutline compact" href="/contact">Submission Information</Link><a href={`mailto:${IRED_EMAILS.greenSubmission}`} className="btn btnGreen compact">GREEN: {IRED_EMAILS.greenSubmission}</a><a href={`mailto:${IRED_EMAILS.redSubmission}`} className="btn btnRed compact">RED: {IRED_EMAILS.redSubmission}</a></div>
           </section>
 
           <section style={{padding:'16px 18px',border:'1px solid #dbe3e9',background:'#f8fafb'}}>
