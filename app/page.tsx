@@ -53,7 +53,7 @@ export default async function Home(){
       <article className="journalCard red"><img className="journalLogo redJournalLogo" src="/api/brand/red_logo" alt={settings.red_title}/><div className="journalCopy"><h2><JournalTitle kind="red" title={settings.red_title} size={20}/></h2><p>{settings.red_description}</p><div style={{margin:'12px 0 14px',border:'1px solid #efd2d3',background:'#fff8f8',padding:'10px 12px',borderRadius:4}}><div style={{fontSize:9.5,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:'#bd2025',marginBottom:7}}>RED Journal Particulars</div><div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'7px 14px',fontSize:10.5,lineHeight:1.45,color:'#654345'}}>{[
         ['Frequency',settings.red_frequency],
         ['Language',settings.red_language],
-        ['Starting Year',String(settings.first_volume_year)],
+        ['Starting Year',String(settings.red_starting_year)],
         ['Publication Format',settings.red_format],
         ['Subject',settings.red_subject],
         ['ISSN Status',redIssnStatus],
