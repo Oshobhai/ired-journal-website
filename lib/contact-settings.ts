@@ -1,6 +1,12 @@
 import 'server-only'
 import { createClient } from '@/lib/supabase/server'
 
+export const IRED_EMAILS={
+  contact:'contact@iredjournal.org',
+  greenSubmission:'greensubmission@iredjournal.org',
+  redSubmission:'redsubmission@iredjournal.org',
+} as const
+
 export type ContactSettings={
   phone_primary:string
   phone_secondary:string
@@ -13,7 +19,7 @@ export type ContactSettings={
 export const defaultContactSettings:ContactSettings={
   phone_primary:'7383000930',
   phone_secondary:'7203998343',
-  email:'ired.foundation@gmail.com',
+  email:IRED_EMAILS.contact,
   registration_no:'GUJ/15856/AHMEDABAD',
   green_issn:'XXXX-XXXX',
   red_eissn:'XXXX-XXXX',
