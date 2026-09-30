@@ -1,5 +1,5 @@
 import {Header,Footer,JournalTitle} from '../components';
-import {getContactSettings} from '@/lib/contact-settings';
+import {getContactSettings,IRED_EMAILS} from '@/lib/contact-settings';
 
 function mailto(email:string,subject:string,body:string){
   return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -46,13 +46,13 @@ export default async function Contact(){
           <InfoRow icon="institution" label="Institution">Institute of Research Education and Development (IRED)</InfoRow>
           <InfoRow icon="location" label="Address">A-3, 3rd Floor, Gita Apartment, Nr. Hirabaug Crossing, Ambawadi, Ahmedabad-380015, Gujarat, India</InfoRow>
           <InfoRow icon="phone" label="Telephone">{phones}</InfoRow>
-          <InfoRow icon="email" label="Editorial Email"><a href={mailto(contact.email,'','')} style={{color:'#0c6298',fontWeight:700}}>{contact.email}</a></InfoRow>
+          <InfoRow icon="email" label="General Contact"><a href={mailto(contact.email,'','')} style={{color:'#0c6298',fontWeight:700}}>{contact.email}</a></InfoRow>
         </section>
 
         <section style={{padding:'22px 0 18px'}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}><Icon name="paper" color="#0b2d4e"/><h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:0}}>Manuscript Submission by Email</h2></div>
-          <p style={{fontSize:12.5,lineHeight:1.7,color:'#445565',margin:'0 0 8px',maxWidth:900}}>Authors should send manuscripts directly to the IRED Editorial Office by email. Please attach the research paper in <strong>DOCX or PDF format</strong> and include the information listed below for the appropriate publication.</p>
-          <p style={{fontSize:11,color:'#6a7885',margin:'0'}}>The GREEN and RED submission links open Gmail in a new browser tab with the current IRED editorial email, subject and submission details already prepared. Add the manuscript attachment before sending.</p>
+          <p style={{fontSize:12.5,lineHeight:1.7,color:'#445565',margin:'0 0 8px',maxWidth:900}}>Authors should send manuscripts directly to the dedicated IRED journal submission email. Please attach the research paper in <strong>DOCX or PDF format</strong> and include the information listed below for the appropriate publication.</p>
+          <p style={{fontSize:11,color:'#6a7885',margin:'0'}}>GREEN submissions are sent to <strong>{IRED_EMAILS.greenSubmission}</strong> and RED submissions are sent to <strong>{IRED_EMAILS.redSubmission}</strong>.</p>
         </section>
 
         <section style={{borderTop:'2px solid #0b2d4e',borderBottom:'1px solid #cfd8df'}}>
@@ -61,8 +61,8 @@ export default async function Contact(){
               <th style={{...th,width:'23%'}}>Publication</th><th style={{...th,width:'32%'}}>Submission Type</th><th style={{...th,width:'30%'}}>Information Required</th><th style={{...th,width:'15%',textAlign:'right'}}>Submission</th>
             </tr></thead>
             <tbody>
-              <tr><td style={td}><JournalTitle kind="green" size={13}/></td><td style={td}>Individual research papers, research articles, review articles, case studies and scholarly contributions.</td><td style={td}>Author name, paper title, mobile number, affiliation / institution and email address.</td><td style={{...td,textAlign:'right'}}><a href={gmailCompose(contact.email,'GREEN Research Paper Submission',greenBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#126f3a',whiteSpace:'nowrap'}}><Icon name="email" color="#126f3a"/> Email Paper →</a></td></tr>
-              <tr><td style={td}><JournalTitle kind="red" size={13}/></td><td style={td}>Research papers considered for inclusion in a compiled RED research book / printed volume.</td><td style={td}>Author details, mobile number, email, affiliation, full postal address, city / district, state and PIN code.</td><td style={{...td,textAlign:'right'}}><a href={gmailCompose(contact.email,'RED Research Journal Submission',redBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#a61d22',whiteSpace:'nowrap'}}><Icon name="email" color="#a61d22"/> Email Paper →</a></td></tr>
+              <tr><td style={td}><JournalTitle kind="green" size={13}/></td><td style={td}>Individual research papers, research articles, review articles, case studies and scholarly contributions.</td><td style={td}>Author name, paper title, mobile number, affiliation / institution and email address.</td><td style={{...td,textAlign:'right'}}><a href={gmailCompose(IRED_EMAILS.greenSubmission,'GREEN Research Paper Submission',greenBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#126f3a',whiteSpace:'nowrap'}}><Icon name="email" color="#126f3a"/> Email Paper →</a><div style={{fontSize:9.5,color:'#6b7a86',marginTop:5,whiteSpace:'nowrap'}}>{IRED_EMAILS.greenSubmission}</div></td></tr>
+              <tr><td style={td}><JournalTitle kind="red" size={13}/></td><td style={td}>Research papers considered for inclusion in a compiled RED research book / printed volume.</td><td style={td}>Author details, mobile number, email, affiliation, full postal address, city / district, state and PIN code.</td><td style={{...td,textAlign:'right'}}><a href={gmailCompose(IRED_EMAILS.redSubmission,'RED Research Journal Submission',redBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#a61d22',whiteSpace:'nowrap'}}><Icon name="email" color="#a61d22"/> Email Paper →</a><div style={{fontSize:9.5,color:'#7a6b6c',marginTop:5,whiteSpace:'nowrap'}}>{IRED_EMAILS.redSubmission}</div></td></tr>
             </tbody>
           </table>
         </section>
