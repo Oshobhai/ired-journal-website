@@ -33,7 +33,8 @@ export default async function JournalInformation(){
         <p><strong>Publisher:</strong> {settings.publisher_name}</p>
         <p><strong>Organization:</strong> Academic and research-oriented organization located in Ahmedabad, Gujarat, India.</p>
         <p><strong>Registration:</strong> Approved by the Charity Commissioner, Ahmedabad, Government of Gujarat, under the Mumbai Public Trusts Act, 1950, Registration No. {contact.registration_no}.</p>
-        <p><strong>Official Address:</strong> {settings.official_address}</p>
+        <p><strong>IRED Registered Office / Publisher Address:</strong> {settings.official_address}</p>
+        <p><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}</p>
         <p><strong>Phone:</strong> {phones}</p>
         <p><strong>General Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
       </section>
@@ -64,7 +65,8 @@ export default async function JournalInformation(){
 
         <h3 style={{fontFamily:'Georgia,serif',color:'#0b2d4e',margin:'18px 0 6px'}}>Aims & Scope</h3>
         <p style={{marginTop:0}}>{settings.green_scope}</p>
-        <p><strong>Publisher Address:</strong> {settings.official_address}</p>
+        <p><strong>Publisher / Registered Office:</strong> {settings.official_address}</p>
+        <p><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}</p>
         <p><strong>Primary Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
         <p><strong>Manuscript Submission Email:</strong> <a href={`mailto:${IRED_EMAILS.greenSubmission}`}>{IRED_EMAILS.greenSubmission}</a></p>
 
@@ -86,6 +88,8 @@ export default async function JournalInformation(){
         <p><strong>Publication Mode:</strong> Print Publication</p>
         <p><strong>Scope:</strong> {settings.red_scope}</p>
         <p><strong>Published By:</strong> {settings.publisher_name}</p>
+        <p><strong>Publisher / Registered Office:</strong> {settings.official_address}</p>
+        <p><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}</p>
         <p><strong>Primary Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
         <p><strong>Manuscript Submission Email:</strong> <a href={`mailto:${IRED_EMAILS.redSubmission}`}>{IRED_EMAILS.redSubmission}</a></p>
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:16}}>
