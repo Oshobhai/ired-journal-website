@@ -48,7 +48,8 @@ export default async function Contact(){
           <InfoRow icon="location" label="Journal / Editorial Office">{settings.journal_office_address}</InfoRow>
           <InfoRow icon="location" label="Institute Address">{settings.official_address}</InfoRow>
           <InfoRow icon="phone" label="Telephone">{phones}</InfoRow>
-          <InfoRow icon="email" label="General Contact"><a href={mailto(contact.email,'','')} style={{color:'#0c6298',fontWeight:700}}>{contact.email}</a></InfoRow>
+          <InfoRow icon="email" label="Primary Email"><a href={mailto(contact.email,'','')} style={{color:'#0c6298',fontWeight:700}}>{contact.email}</a></InfoRow>
+          <InfoRow icon="email" label="Secondary Email"><a href={mailto(contact.secondary_email,'','')} style={{color:'#0c6298',fontWeight:700}}>{contact.secondary_email}</a></InfoRow>
         </section>
 
         <section style={{padding:'22px 0 18px'}}>
