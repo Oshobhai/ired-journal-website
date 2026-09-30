@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import {Header,Footer,JournalTitle} from '../components';
 import {getRedArchive} from '@/lib/publications';
-import {IRED_EMAILS} from '@/lib/contact-settings';
+import {getContactSettings,IRED_EMAILS} from '@/lib/contact-settings';
 import {getSiteSettings} from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
@@ -21,14 +21,15 @@ export default async function Red({searchParams}:{searchParams:Promise<{q?:strin
   const yearText=(params.year||'').trim();
   const year=yearText?Number(yearText):null;
   const requestedPage=Math.max(Number(params.page)||1,1);
-  const [archive,settings]=await Promise.all([
+  const [archive,settings,contact]=await Promise.all([
     getRedArchive({q,year:Number.isFinite(year as number)?year:null,page:requestedPage,pageSize:10}),
     getSiteSettings(),
+    getContactSettings(),
   ]);
   const currentPage=Math.min(Math.max(archive.page,1),Math.max(archive.totalPages,1));
 
-  return <><Header/><section className="pageHero"><div className="container"><div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginBottom:6}}>Official Print Publication</div><h1 style={{margin:0}}><JournalTitle kind="red" size={32}/></h1><p style={{fontSize:12.5,color:'#607080',margin:'7px 0 0'}}>Print Publication · Scholarly Research · Multidisciplinary</p></div></section><main className="container" style={{padding:'22px 0 34px'}}>
-    <section className="contentCard" style={{borderTop:'4px solid #cb2528'}}><div style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) minmax(220px,320px)',gap:20,alignItems:'start'}}><div><div style={{marginBottom:9}}><JournalTitle kind="red" size={18}/></div><h2 style={{marginTop:0}}>Publication Information</h2><p>RED is the print publication section of the Institute of Research Education and Development (IRED) for scholarly research publications published by IRED.</p><p>This section presents multidisciplinary research publications across Arts, Humanities, Sciences, Social Sciences, Commerce, Education, Management, Law and other related disciplines.</p><div style={{fontSize:11.5,lineHeight:1.7,color:'#526577'}}><strong>Publishing Body & Publisher:</strong> {settings.publisher_name}<br/><strong>Publisher / Registered Office:</strong> {settings.official_address}<br/><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}<br/><strong>Contact Email:</strong> <a href={`mailto:${IRED_EMAILS.contact}`}>{IRED_EMAILS.contact}</a><br/><strong>RED Submission:</strong> <a href={`mailto:${IRED_EMAILS.redSubmission}`}>{IRED_EMAILS.redSubmission}</a></div><div style={{marginTop:14,display:'flex',gap:8,flexWrap:'wrap'}}><Link className="btn btnOutline compact" href="/journal-information">Publication Information</Link><Link className="btn btnOutline compact" href="/editorial-board">Editorial Board</Link></div></div><img src="/api/brand/red_logo" alt="RED: The Research Journal" style={{width:'100%',maxHeight:150,objectFit:'contain'}}/></div></section>
+  return <><Header/><section className="pageHero"><div className="container"><div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginBottom:6}}>Official Print Publication</div><h1 style={{margin:0}}><JournalTitle kind="red" title={settings.red_title} size={32}/></h1><p style={{fontSize:12.5,color:'#607080',margin:'7px 0 0'}}>Print Publication · Scholarly Research · Multidisciplinary</p></div></section><main className="container" style={{padding:'22px 0 34px'}}>
+    <section className="contentCard" style={{borderTop:'4px solid #cb2528'}}><div style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) minmax(220px,320px)',gap:20,alignItems:'start'}}><div><div style={{marginBottom:9}}><JournalTitle kind="red" title={settings.red_title} size={18}/></div><h2 style={{marginTop:0}}>Publication Information</h2><p><strong style={{color:'#b32328'}}>{settings.red_title}</strong> is the print research journal published by {settings.publisher_name}.</p><p>{settings.red_description}</p><div style={{fontSize:11.5,lineHeight:1.7,color:'#526577'}}><strong>Publishing Body & Publisher:</strong> {settings.publisher_name}<br/><strong>Institute Address:</strong> {settings.official_address}<br/><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}<br/><strong>Primary Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a><br/><strong>Secondary Contact Email:</strong> <a href={`mailto:${contact.secondary_email}`}>{contact.secondary_email}</a><br/><strong>RED Submission:</strong> <a href={`mailto:${IRED_EMAILS.redSubmission}`}>{IRED_EMAILS.redSubmission}</a></div><div style={{marginTop:14,display:'flex',gap:8,flexWrap:'wrap'}}><Link className="btn btnOutline compact" href="/journal-information">Publication Information</Link><Link className="btn btnOutline compact" href="/editorial-board">Editorial Board</Link></div></div><img src="/api/brand/red_logo" alt={settings.red_title} style={{width:'100%',maxHeight:150,objectFit:'contain'}}/></div></section>
 
     <section className="contentCard"><div style={{display:'flex',justifyContent:'space-between',alignItems:'end',gap:16,flexWrap:'wrap',marginBottom:14}}><div><div style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginBottom:4}}>RED Publications Archive</div><h2 style={{margin:'0 0 5px'}}>Published Publications</h2><p style={{margin:0,color:'#617181',fontSize:12.5}}>Search by title, subtitle, editor, theme, ISBN, ISSN or description. Use year filtering as the archive grows.</p></div><div style={{fontSize:10.5,color:'#6d7b87'}}>{archive.total} published item{archive.total===1?'':'s'}</div></div>
 
@@ -49,7 +50,7 @@ export default async function Red({searchParams}:{searchParams:Promise<{q?:strin
             <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',marginBottom:4}}><span style={{fontSize:9.5,fontWeight:800,letterSpacing:'.07em',textTransform:'uppercase',color:'#b32328'}}>RED Publication</span><span style={{fontSize:9,color:'#7a8791'}}>{dateLabel}</span></div>
             <div className="itemTitle" style={{fontSize:14,lineHeight:1.35,overflowWrap:'anywhere'}}>{b.title}</div>
             {b.subtitle?<div className="meta" style={{fontSize:10.5,marginTop:4}}>{b.subtitle}</div>:null}
-            <div className="meta" style={{fontSize:10.5,marginTop:5}}><strong style={{color:'#5d4547'}}>Editor(s):</strong> {b.editors||'Institute of Research Education and Development'}</div>
+            <div className="meta" style={{fontSize:10.5,marginTop:5}}><strong style={{color:'#5d4547'}}>Editor(s):</strong> {b.editors||settings.publisher_name}</div>
             <div className="meta" style={{fontSize:10,marginTop:3}}>{b.volume?`Volume ${b.volume}`:''}{b.issue?`${b.volume?' · ':''}Issue ${b.issue}`:''}{b.issn?`${b.volume||b.issue?' · ':''}ISSN: ${b.issn}`:''}{b.isbn?`${b.volume||b.issue||b.issn?' · ':''}ISBN: ${b.isbn}`:''}</div>
             {b.description?<p style={{fontSize:11.5,lineHeight:1.5,margin:'7px 0 0',color:'#5e6d79'}}>{b.description}</p>:null}
           </div>
