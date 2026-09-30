@@ -12,7 +12,6 @@ export async function generateMetadata():Promise<Metadata>{
   const keywords=settings.seo_keywords.split(',').map(x=>x.trim()).filter(Boolean);
   return {
     metadataBase:new URL(siteUrl),
-    alternates:{canonical:'/'},
     title:{default:settings.seo_title,template:`%s | ${settings.institution_short_name}`},
     description:settings.seo_description,
     applicationName:`${settings.institution_short_name} Research Journals`,
@@ -24,7 +23,7 @@ export async function generateMetadata():Promise<Metadata>{
       icon:[{url:'/ired-favicon.svg',type:'image/svg+xml',sizes:'any'}],
       shortcut:'/ired-favicon.svg',
     },
-    openGraph:{type:'website',siteName:`${settings.institution_short_name} Research Journals`,title:settings.seo_title,description:settings.seo_description,url:siteUrl,images:[{url:'/api/brand/ired_header',alt:`${settings.institution_short_name} — ${settings.institution_name}`}]},
+    openGraph:{type:'website',siteName:`${settings.institution_short_name} Research Journals`,title:settings.seo_title,description:settings.seo_description,images:[{url:'/api/brand/ired_header',alt:`${settings.institution_short_name} — ${settings.institution_name}`}]},
     twitter:{card:'summary_large_image',title:settings.seo_title,description:settings.seo_description,images:['/api/brand/ired_header']},
     robots:{index:true,follow:true},
   };
