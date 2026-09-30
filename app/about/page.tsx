@@ -12,7 +12,7 @@ export default async function About(){
       <div className="contentCard">
         <h2>Institute of Research Education and Development (IRED)</h2>
         <p>The Institute of Research Education and Development (IRED) is an academic and research-oriented organization located in Ahmedabad, Gujarat, India. The Institute is approved by the Charity Commissioner, Ahmedabad, Government of Gujarat, under the Mumbai Public Trusts Act, 1950, with Registration No. {contact.registration_no}.</p>
-        <p><strong>IRED Registered Office:</strong> {settings.official_address}</p>
+        <p><strong>Institute Address:</strong> {settings.official_address}</p>
         <p><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}</p>
         <p>IRED is committed to promoting research, education, academic development, and the exchange of knowledge. It provides a platform where researchers, teachers, academicians, students, and professionals can share ideas, research findings, and scholarly work.</p>
         <p>The Institute encourages meaningful research across social, scientific, educational, economic, cultural, and technological areas, with the aim of supporting the academic community and wider society.</p>
