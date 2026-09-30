@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {Header,Footer} from './components';
+import {Header,Footer,JournalTitle} from './components';
 import {getPublishedGreenPapers,getPublishedRedBooks} from '@/lib/publications';
 import {getSiteSettings} from '@/lib/site-settings';
 
@@ -33,8 +33,8 @@ export default async function Home(){
     <section style={{background:'#f7f9fb',borderBottom:'1px solid #d9e1e8'}}><div className="container" style={{padding:'12px 0',display:'flex',justifyContent:'space-between',gap:16,alignItems:'center',flexWrap:'wrap'}}><div style={{fontSize:11.5,lineHeight:1.6,color:'#526577'}}><strong style={{color:'#0b2d4e'}}>Publishing Body & Publisher:</strong> {settings.publisher_name} · {settings.official_address}</div><Link href="/journal-information" style={{fontSize:11,fontWeight:800,color:'#0b5f91',whiteSpace:'nowrap'}}>Official Journal Information →</Link></div></section>
 
     <section className="publicationStrip" id="publications"><div className="container journalGrid">
-      <article className="journalCard green"><img className="journalLogo" src="/api/brand/green_logo" alt={settings.green_title}/><div className="journalCopy"><h2>{settings.green_title}</h2><p>{settings.green_description}</p><Link className="btn btnGreen" href="/green">View GREEN Research Papers →</Link><div className="featureRow"><span>⚖ Peer-reviewed</span><span>▣ Open access</span><span>◉ Multidisciplinary</span></div></div><div className="journalWatermark">▤</div></article>
-      <article className="journalCard red"><img className="journalLogo redJournalLogo" src="/api/brand/red_logo" alt={settings.red_title}/><div className="journalCopy"><h2>{settings.red_title}</h2><p>{settings.red_description}</p><Link className="btn btnRed" href="/red">View RED Publications →</Link><div className="featureRow"><span>▣ Published books</span><span>▤ Scholarly publications</span><span>▰ Multidisciplinary</span></div></div><div className="journalWatermark">▥</div></article>
+      <article className="journalCard green"><img className="journalLogo" src="/api/brand/green_logo" alt={settings.green_title}/><div className="journalCopy"><h2><JournalTitle kind="green" title={settings.green_title} size={20}/></h2><p>{settings.green_description}</p><Link className="btn btnGreen" href="/green">View GREEN Research Papers →</Link><div className="featureRow"><span>⚖ Peer-reviewed</span><span>▣ Open access</span><span>◉ Multidisciplinary</span></div></div><div className="journalWatermark">▤</div></article>
+      <article className="journalCard red"><img className="journalLogo redJournalLogo" src="/api/brand/red_logo" alt={settings.red_title}/><div className="journalCopy"><h2><JournalTitle kind="red" title={settings.red_title} size={20}/></h2><p>{settings.red_description}</p><Link className="btn btnRed" href="/red">View RED Publications →</Link><div className="featureRow"><span>▣ Published books</span><span>▤ Scholarly publications</span><span>▰ Multidisciplinary</span></div></div><div className="journalWatermark">▥</div></article>
     </div></section>
 
     <section className="section compactSection"><div className="container latestGrid">
