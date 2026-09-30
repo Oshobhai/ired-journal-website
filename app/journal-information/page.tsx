@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import {Header,Footer,JournalTitle} from '../components'
-import {getContactSettings} from '@/lib/contact-settings'
+import {getContactSettings,IRED_EMAILS} from '@/lib/contact-settings'
 import {getSiteSettings} from '@/lib/site-settings'
 
 const journalLogoStyle={
@@ -35,7 +35,7 @@ export default async function JournalInformation(){
         <p><strong>Registration:</strong> Approved by the Charity Commissioner, Ahmedabad, Government of Gujarat, under the Mumbai Public Trusts Act, 1950, Registration No. {contact.registration_no}.</p>
         <p><strong>Official Address:</strong> {settings.official_address}</p>
         <p><strong>Phone:</strong> {phones}</p>
-        <p><strong>Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+        <p><strong>General Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
       </section>
 
       <section className="contentCard" style={{borderTop:'4px solid #148444'}}>
@@ -66,6 +66,7 @@ export default async function JournalInformation(){
         <p style={{marginTop:0}}>{settings.green_scope}</p>
         <p><strong>Publisher Address:</strong> {settings.official_address}</p>
         <p><strong>Primary Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+        <p><strong>Manuscript Submission Email:</strong> <a href={`mailto:${IRED_EMAILS.greenSubmission}`}>{IRED_EMAILS.greenSubmission}</a></p>
 
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:16}}>
           <Link className="btn btnGreen compact" href="/green">View GREEN Research Papers</Link>
@@ -85,6 +86,8 @@ export default async function JournalInformation(){
         <p><strong>Publication Mode:</strong> Print Publication</p>
         <p><strong>Scope:</strong> {settings.red_scope}</p>
         <p><strong>Published By:</strong> {settings.publisher_name}</p>
+        <p><strong>Primary Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+        <p><strong>Manuscript Submission Email:</strong> <a href={`mailto:${IRED_EMAILS.redSubmission}`}>{IRED_EMAILS.redSubmission}</a></p>
         <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:16}}>
           <Link className="btn btnRed compact" href="/red">View RED Publications</Link>
         </div>
