@@ -32,7 +32,7 @@ export default async function Archives(){
   return <><Header/>
     <section className="pageHero" style={{padding:'32px 0 30px'}}><div className="container">
       <div style={{display:'flex',alignItems:'center',gap:12}}><span style={{width:42,height:42,borderRadius:'50%',background:'#fff',border:'1px solid #cad6df',display:'grid',placeItems:'center',color:'#0b2d4e'}}><ArchiveIcon/></span><div><div style={{fontSize:10,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:800,color:'#7b8792',marginBottom:3}}>Published Record</div><h1 style={{fontSize:36,margin:0}}>Archives</h1></div></div>
-      <p style={{maxWidth:850,fontSize:12.5,lineHeight:1.7,color:'#5d6c79',margin:'12px 0 0'}}>Browse GREEN issues by volume and issue number. Open any issue to view its published articles, individual article pages, PDF files and publication certificates. RED publications are archived separately below.</p>
+      <p style={{maxWidth:850,fontSize:12.5,lineHeight:1.7,color:'#5d6c79',margin:'12px 0 0'}}>Browse GREEN issues by volume, issue number and publication period. Use View to open the published GREEN paper listing. RED publications are archived separately below.</p>
     </div></section>
 
     <main className="container" style={{padding:'24px 0 34px'}}>
@@ -53,23 +53,11 @@ export default async function Archives(){
                 <td style={{padding:'11px 12px',borderRight:'1px solid #e0e6eb',borderBottom:'1px solid #e0e6eb',fontWeight:700,color:'#263f58'}}>Volume {group.volume||'—'} / Issue {group.issue||'—'}</td>
                 <td style={{padding:'11px 12px',borderRight:'1px solid #e0e6eb',borderBottom:'1px solid #e0e6eb',color:'#5e6e7d'}}>{group.month?`${group.month} ${group.year}`:group.year||'—'}</td>
                 <td style={{padding:'11px 10px',borderRight:'1px solid #e0e6eb',borderBottom:'1px solid #e0e6eb',textAlign:'center'}}>{group.papers.length}</td>
-                <td style={{padding:'8px 10px',borderBottom:'1px solid #e0e6eb',textAlign:'center'}}><a href={`#issue-${group.key}`} style={{display:'inline-block',padding:'6px 12px',border:'1px solid #0aa7c2',borderRadius:3,color:'#058ca5',fontWeight:700,background:'#fff'}}>View</a></td>
+                <td style={{padding:'8px 10px',borderBottom:'1px solid #e0e6eb',textAlign:'center'}}><a href={`/green?year=${group.year}`} style={{display:'inline-block',padding:'6px 12px',border:'1px solid #0aa7c2',borderRadius:3,color:'#058ca5',fontWeight:700,background:'#fff'}}>View</a></td>
               </tr>)}</tbody>
             </table>
           </div>}
         </section>
-
-        {greenIssues.map(group=><section id={`issue-${group.key}`} key={`detail-${group.key}`} style={{marginBottom:24,scrollMarginTop:18,border:'1px solid #dbe3e9',background:'#fff'}}>
-          <div style={{padding:'12px 14px',borderBottom:'1px solid #dbe3e9',background:'#f2faf5',display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,flexWrap:'wrap'}}>
-            <div><div style={{fontFamily:'Georgia,serif',fontWeight:700,color:'#167843',fontSize:16}}>Volume {group.volume||'—'} / Issue {group.issue||'—'}</div><div style={{fontSize:10.5,color:'#63766b',marginTop:2}}>{group.month?`${group.month} ${group.year}`:group.year} · {group.papers.length} article{group.papers.length===1?'':'s'}</div></div>
-            <a href="#all-volumes" style={{fontSize:10.5,fontWeight:700,color:'#466276'}}>↑ All Volumes</a>
-          </div>
-          <div>{group.papers.map((p,index)=><article key={p.id} style={{display:'grid',gridTemplateColumns:'38px minmax(0,1fr) auto',gap:10,alignItems:'start',padding:'12px 13px',borderTop:index?'1px solid #edf2ee':'0'}}>
-            <div style={{width:30,height:30,borderRadius:'50%',display:'grid',placeItems:'center',background:'#edf7f0',color:'#167843',fontWeight:800,fontSize:10}}>{index+1}</div>
-            <div><div style={{fontSize:12,fontWeight:800,color:'#173d60'}}>{p.title}</div><div style={{fontSize:10.5,color:'#667787',marginTop:3}}>{p.authors}{p.article_id?` · ${p.article_id}`:''}{p.doi?` · DOI: ${p.doi}`:''}</div></div>
-            <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>{p.view_url?<a href={p.view_url} style={{fontSize:10.5,fontWeight:700,color:'#126f3a',whiteSpace:'nowrap'}}>View Article →</a>:null}{p.download_url?<a href={p.download_url} style={{fontSize:10.5,fontWeight:700,color:'#506577',whiteSpace:'nowrap'}}>PDF</a>:null}{p.certificate_view_url?<a href={p.certificate_view_url} target="_blank" rel="noreferrer" style={{fontSize:10.5,fontWeight:700,color:'#126f3a',whiteSpace:'nowrap'}}>Certificate</a>:null}{p.certificate_download_url?<a href={p.certificate_download_url} style={{fontSize:10.5,fontWeight:700,color:'#506577',whiteSpace:'nowrap'}}>Certificate PDF</a>:null}</div>
-          </article>)}</div>
-        </section>)}
 
         <section style={{marginTop:34}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'end',gap:14,borderBottom:'2px solid #8e2026',paddingBottom:8,marginBottom:14}}><h2 style={{fontFamily:'Georgia,serif',fontSize:22,color:'#8e2026',margin:0}}>RED — Books &amp; Publications</h2><span style={{fontSize:10.5,color:'#71808d'}}>{books.length} publication{books.length===1?'':'s'}</span></div>
