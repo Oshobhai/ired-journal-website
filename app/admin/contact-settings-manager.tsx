@@ -7,6 +7,7 @@ type Settings={
   phone_primary:string
   phone_secondary:string
   email:string
+  secondary_email:string
   registration_no:string
   green_issn:string
   red_eissn:string
@@ -18,6 +19,7 @@ const defaults:Settings={
   phone_primary:'7383000930',
   phone_secondary:'7203998343',
   email:'contact@iredjournal.org',
+  secondary_email:'ired.foundation@gmail.com',
   registration_no:'GUJ/15856/AHMEDABAD',
   green_issn:'Pending',
   red_eissn:'Pending',
@@ -33,7 +35,7 @@ export default function ContactSettingsManager(){
 
   useEffect(()=>{void (async()=>{
     const [contactResult,siteResult]=await Promise.all([
-      supabase.from('contact_settings').select('phone_primary,phone_secondary,email,registration_no,green_issn,red_eissn').eq('id',true).maybeSingle(),
+      supabase.from('contact_settings').select('phone_primary,phone_secondary,email,secondary_email,registration_no,green_issn,red_eissn').eq('id',true).maybeSingle(),
       supabase.from('site_settings').select('official_address,journal_office_address').eq('id',true).maybeSingle(),
     ])
     if(contactResult.error){setMessage(contactResult.error.message);return}
@@ -44,6 +46,7 @@ export default function ContactSettingsManager(){
       phone_primary:contact?.phone_primary||defaults.phone_primary,
       phone_secondary:contact?.phone_secondary||'',
       email:contact?.email||defaults.email,
+      secondary_email:contact?.secondary_email||defaults.secondary_email,
       registration_no:contact?.registration_no||defaults.registration_no,
       green_issn:contact?.green_issn||defaults.green_issn,
       red_eissn:contact?.red_eissn||defaults.red_eissn,
@@ -61,20 +64,22 @@ export default function ContactSettingsManager(){
         phone_primary:form.phone_primary.trim(),
         phone_secondary:form.phone_secondary.trim(),
         email:form.email.trim().toLowerCase(),
+        secondary_email:form.secondary_email.trim().toLowerCase(),
         registration_no:form.registration_no.trim(),
         green_issn:form.green_issn.trim()||'Pending',
         red_eissn:form.red_eissn.trim()||'Pending',
         institute_address:form.institute_address.trim(),
         journal_office_address:form.journal_office_address.trim(),
       }
-      if(!cleaned.phone_primary||!cleaned.email||!cleaned.registration_no||!cleaned.institute_address||!cleaned.journal_office_address)throw new Error('Primary phone, email, registration number and both addresses are required.')
-      if(!/^\S+@\S+\.\S+$/.test(cleaned.email))throw new Error('Enter a valid email address.')
+      if(!cleaned.phone_primary||!cleaned.email||!cleaned.secondary_email||!cleaned.registration_no||!cleaned.institute_address||!cleaned.journal_office_address)throw new Error('Primary phone, both emails, registration number and both addresses are required.')
+      if(!/^\S+@\S+\.\S+$/.test(cleaned.email)||!/^\S+@\S+\.\S+$/.test(cleaned.secondary_email))throw new Error('Enter valid email addresses.')
       const now=new Date().toISOString()
       const {error:contactError}=await supabase.from('contact_settings').upsert({
         id:true,
         phone_primary:cleaned.phone_primary,
         phone_secondary:cleaned.phone_secondary,
         email:cleaned.email,
+        secondary_email:cleaned.secondary_email,
         registration_no:cleaned.registration_no,
         green_issn:cleaned.green_issn,
         red_eissn:cleaned.red_eissn,
@@ -106,6 +111,7 @@ export default function ContactSettingsManager(){
         phone_primary:defaults.phone_primary,
         phone_secondary:defaults.phone_secondary,
         email:defaults.email,
+        secondary_email:defaults.secondary_email,
         registration_no:defaults.registration_no,
         green_issn:defaults.green_issn,
         red_eissn:defaults.red_eissn,
@@ -133,14 +139,17 @@ export default function ContactSettingsManager(){
   return <section className="contentCard" style={{marginTop:20,borderTop:'4px solid #0b2d4e'}}>
     <div style={{fontSize:10,fontWeight:800,letterSpacing:'.1em',textTransform:'uppercase',color:'#6d7d89'}}>Website Administration</div>
     <h2 style={{margin:'4px 0 5px'}}>Contact Us Details</h2>
-    <p style={{margin:'0 0 15px',fontSize:12,color:'#667887',lineHeight:1.6}}>Update the public phone numbers, editorial email, registration number, institute address, journal office address and journal ISSN values from one place.</p>
+    <p style={{margin:'0 0 15px',fontSize:12,color:'#667887',lineHeight:1.6}}>Update the public phone numbers, two contact emails, registration number, institute address, journal office address and journal ISSN values from one place.</p>
     {message?<div style={{padding:'10px 12px',marginBottom:14,border:'1px solid #cbdde8',background:'#f3f8fb',fontSize:11.5}}>{message}</div>:null}
     <form onSubmit={save} style={{display:'grid',gap:12,maxWidth:900}}>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
         <label style={label}>Primary Phone<input value={form.phone_primary} onChange={e=>setForm({...form,phone_primary:e.target.value})} style={field} required/></label>
         <label style={label}>Secondary Phone<input value={form.phone_secondary} onChange={e=>setForm({...form,phone_secondary:e.target.value})} style={field}/></label>
       </div>
-      <label style={label}>Editorial Email<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} style={field} required/></label>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:12}}>
+        <label style={label}>Primary Email<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} style={field} required/></label>
+        <label style={label}>Secondary Email<input type="email" value={form.secondary_email} onChange={e=>setForm({...form,secondary_email:e.target.value})} style={field} required/></label>
+      </div>
       <label style={label}>Registration Number<input value={form.registration_no} onChange={e=>setForm({...form,registration_no:e.target.value})} style={field} required/></label>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:12}}>
         <label style={label}>Institute Address<textarea value={form.institute_address} onChange={e=>setForm({...form,institute_address:e.target.value})} style={area} required/></label>
