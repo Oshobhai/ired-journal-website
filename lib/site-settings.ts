@@ -16,6 +16,11 @@ export type SiteSettings={
   green_language:string
   green_format:string
   green_subject:string
+  green_upcoming_volume:string
+  green_upcoming_issue:string
+  green_upcoming_month:string
+  green_upcoming_publication_date:string
+  green_upcoming_submission_deadline:string
   red_title:string
   red_description:string
   red_scope:string
@@ -24,6 +29,11 @@ export type SiteSettings={
   red_format:string
   red_subject:string
   red_starting_year:number
+  red_upcoming_volume:string
+  red_upcoming_issue:string
+  red_upcoming_month:string
+  red_upcoming_publication_date:string
+  red_upcoming_submission_deadline:string
   first_volume_year:number
   article_id_prefix:string
   doi_prefix:string
@@ -53,6 +63,11 @@ export const defaultSiteSettings:SiteSettings={
   green_language:'English, Gujarati',
   green_format:'Online',
   green_subject:'Multidisciplinary',
+  green_upcoming_volume:'',
+  green_upcoming_issue:'',
+  green_upcoming_month:'',
+  green_upcoming_publication_date:'',
+  green_upcoming_submission_deadline:'',
   red_title:'RED: The Research Journal',
   red_description:'Print research journals to disseminate scholarly and research-based knowledge across multiple academic disciplines.',
   red_scope:'Multidisciplinary research across Arts, Humanities, Sciences, Social Sciences, Commerce, Education, Management, Law and other academic disciplines.',
@@ -61,6 +76,11 @@ export const defaultSiteSettings:SiteSettings={
   red_format:'Print',
   red_subject:'Multidisciplinary',
   red_starting_year:2026,
+  red_upcoming_volume:'',
+  red_upcoming_issue:'',
+  red_upcoming_month:'',
+  red_upcoming_publication_date:'',
+  red_upcoming_submission_deadline:'',
   first_volume_year:2026,
   article_id_prefix:'GREEN',
   doi_prefix:'',
