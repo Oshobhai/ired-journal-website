@@ -1,14 +1,19 @@
 import Link from 'next/link';
 import {Header,Footer,JournalTitle} from '../components';
+import {getSiteSettings} from '@/lib/site-settings';
+import {getContactSettings} from '@/lib/contact-settings';
 
-export default function About(){
+export default async function About(){
+  const [settings,contact]=await Promise.all([getSiteSettings(),getContactSettings()]);
   return <>
     <Header/>
     <section className="pageHero"><div className="container"><h1>About IRED</h1></div></section>
     <main className="container">
       <div className="contentCard">
         <h2>Institute of Research Education and Development (IRED)</h2>
-        <p>The Institute of Research Education and Development (IRED) is an academic and research-oriented organization located in Ahmedabad, Gujarat, India. The Institute is approved by the Charity Commissioner, Ahmedabad, Government of Gujarat, under the Mumbai Public Trusts Act, 1950, with Registration No. GUJ/15856/AHMEDABAD.</p>
+        <p>The Institute of Research Education and Development (IRED) is an academic and research-oriented organization located in Ahmedabad, Gujarat, India. The Institute is approved by the Charity Commissioner, Ahmedabad, Government of Gujarat, under the Mumbai Public Trusts Act, 1950, with Registration No. {contact.registration_no}.</p>
+        <p><strong>IRED Registered Office:</strong> {settings.official_address}</p>
+        <p><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}</p>
         <p>IRED is committed to promoting research, education, academic development, and the exchange of knowledge. It provides a platform where researchers, teachers, academicians, students, and professionals can share ideas, research findings, and scholarly work.</p>
         <p>The Institute encourages meaningful research across social, scientific, educational, economic, cultural, and technological areas, with the aim of supporting the academic community and wider society.</p>
 
