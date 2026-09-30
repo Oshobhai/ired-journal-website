@@ -18,8 +18,9 @@ export function JournalTitle({kind,title,size=18}:{kind:'green'|'red';title?:str
 export async function Header(){
   const [contact,settings]=await Promise.all([getContactSettings(),getSiteSettings()]);
   const phones=[contact.phone_primary,contact.phone_secondary].filter(Boolean).join(' · ');
+  const languages=Array.from(new Set(`${settings.green_language},${settings.red_language}`.split(',').map(x=>x.trim()).filter(Boolean))).join(' · ');
   return <>
-    <div className="utilityBar"><div className="container utilityInner"><div className="utilityLeft"><span>● Ahmedabad, Gujarat, India</span><span>✉ {contact.email} · {contact.secondary_email}</span><span>☎ {phones}</span></div><div className="utilityRight"><Link href="/admin" style={{color:'inherit',textDecoration:'none',fontWeight:700}}>♟ Editorial Login</Link><span>Languages: English · Gujarati</span></div></div></div>
+    <div className="utilityBar"><div className="container utilityInner"><div className="utilityLeft"><span>● Ahmedabad, Gujarat, India</span><span>✉ {contact.email} · {contact.secondary_email}</span><span>☎ {phones}</span></div><div className="utilityRight"><Link href="/admin" style={{color:'inherit',textDecoration:'none',fontWeight:700}}>♟ Editorial Login</Link>{languages?<span>Languages: {languages}</span>:null}</div></div></div>
     <header className="siteHeader"><div className="container brandRow">
       <Link href="/" className="brandLogoLink" aria-label={`${settings.institution_short_name} home`}><img className="iredLogo" src="/api/brand/ired_header" alt={`${settings.institution_short_name} — ${settings.institution_name}`}/></Link>
       <div className="headerActions"><form className="search" action="/search" method="get"><input name="q" aria-label="Search publications" placeholder="Search papers, journals, authors, keywords..."/><button type="submit" aria-label="Search">⌕</button></form><Link className="btn btnGold compact" href="/contact">Contact to Submit</Link></div>
