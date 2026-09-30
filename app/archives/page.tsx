@@ -25,9 +25,9 @@ function archivePageHref(type:string,year:string,month:string,redPage:number){
 
 export default async function Archives({searchParams}:{searchParams:Promise<{type?:string;year?:string;month?:string;redPage?:string}>}){
   const params=await searchParams;
-  const publicationType=params.type==='green'?'green':params.type==='all'?'all':'red';
-  const yearText=(params.year??'2026').trim();
-  const monthText=(params.month??'August').trim();
+  const publicationType=params.type==='green'?'green':params.type==='red'?'red':'all';
+  const yearText=(params.year??'').trim();
+  const monthText=(params.month??'').trim();
   const selectedYear=yearText?Number(yearText):null;
   const [papers,books]=await Promise.all([getPublishedGreenPapers(),getPublishedRedBooks()]);
 
