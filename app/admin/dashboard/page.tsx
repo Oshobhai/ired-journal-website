@@ -18,10 +18,10 @@ export default async function AdminDashboard(){
   ])
   const g=green||0,r=red||0,p=(greenPublished||0)+(redPublished||0),d=(greenDraft||0)+(redDraft||0)
   return <AdminFrame access={access} active="dashboard" kicker="Institutional Control Panel" title="Journal & Research Administration" description="A concise overview of IRED publication activity. Open a dedicated section from the sidebar to manage records, workflows, governance and permissions.">
-    <div className="stats" style={{marginBottom:18}}><div className="stat"><span>Total Publications</span><strong>{g+r}</strong></div><div className="stat"><span>GREEN Papers</span><strong>{g}</strong></div><div className="stat"><span>RED Books</span><strong>{r}</strong></div><div className="stat"><span>Published</span><strong>{p}</strong></div><div className="stat"><span>Drafts</span><strong>{d}</strong></div><div className="stat"><span>Academic Portal</span><strong>Live</strong></div></div>
+    <div className="stats" style={{marginBottom:18}}><div className="stat"><span>Total Publications</span><strong>{g+r}</strong></div><div className="stat"><span>GREEN Papers</span><strong>{g}</strong></div><div className="stat"><span>RED Publications</span><strong>{r}</strong></div><div className="stat"><span>Published</span><strong>{p}</strong></div><div className="stat"><span>Drafts</span><strong>{d}</strong></div><div className="stat"><span>Academic Portal</span><strong>Live</strong></div></div>
     <section className="contentCard"><h2 style={{marginTop:0}}>Administrative Areas</h2><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))',gap:10}}>{[
       ['/admin/green','GREEN Papers','Manage paper records, status, metadata and publication lifecycle.'],
-      ['/admin/red','RED Books','Manage compiled research books, covers and publication status.'],
+      ['/admin/red','RED Publications','Manage RED print journal publication records, covers and publication status.'],
       ['/admin/editorial-board','Editorial Board','Maintain Editorial Board and Review Committee records.'],
       ['/admin/green-generator','GREEN Generator','Process multilingual DOCX manuscripts and save drafts.'],
       ['/admin/upload','Upload Center','Upload publication PDFs, covers and replacement files.'],
