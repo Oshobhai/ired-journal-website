@@ -7,6 +7,7 @@ export type SiteSettings={
   motto:string
   publisher_name:string
   official_address:string
+  journal_office_address:string
   green_title:string
   green_description:string
   green_scope:string
@@ -37,7 +38,8 @@ export const defaultSiteSettings:SiteSettings={
   institution_short_name:'IRED',
   motto:'Knowledge for a Better Tomorrow',
   publisher_name:'Institute of Research Education and Development (IRED)',
-  official_address:'A-3, 3rd Floor, Gita Apartment, Nr. Hirabaug Crossing, Ambawadi, Ahmedabad-380015, Gujarat, India.',
+  official_address:'IRED, Pooja Bunglows, Kalol Highway-Road, Chandkheda, Ahmedabad-382424, Gujarat, India.',
+  journal_office_address:'A-3, 3rd Floor, Gita Apartment, Nr. Hirabaug Crossing, Ambawadi, Ahmedabad-380015, Gujarat, India.',
   green_title:'GREEN: The Research e-Journal',
   green_description:'International, peer-reviewed, open-access multidisciplinary research e-Journal for original research papers and scholarly articles.',
   green_scope:'Accounting, Archaeology, Biology, Business, Chemistry, Commerce, Economics, Education, Law, Linguistics, Management, Physics, Political Science, Social Work, Arts, Humanities, Sciences, Social Sciences and related academic disciplines.',
