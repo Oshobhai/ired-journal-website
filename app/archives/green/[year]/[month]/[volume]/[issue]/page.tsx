@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {Header,Footer} from '../../../../../components';
+import {Header,Footer} from '../../../../../../components';
 import {getPublishedGreenPapers} from '@/lib/publications';
 
 export const dynamic='force-dynamic';
