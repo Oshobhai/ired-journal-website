@@ -27,7 +27,7 @@ export default function PublicationEthics(){return <><Header/>
       <section style={{display:'grid',gridTemplateColumns:'250px 1fr',gap:34,alignItems:'start'}}>
         <aside style={{borderTop:'3px solid #173d60',background:'#f7f9fb',padding:'16px 17px'}}>
           <div style={{fontSize:10,fontWeight:800,letterSpacing:'.1em',textTransform:'uppercase',color:'#6f7d89',marginBottom:8}}>Scope of this policy</div>
-          <p style={{fontSize:11.5,lineHeight:1.65,color:'#536473',margin:'0 0 12px'}}>These principles apply to research papers, review articles and compiled scholarly volumes published through GREEN and RED.</p>
+          <p style={{fontSize:11.5,lineHeight:1.65,color:'#536473',margin:'0 0 12px'}}>These principles apply to research papers, review articles and other scholarly material published through the GREEN online research journal and the RED print research journal.</p>
           <div style={{borderTop:'1px solid #dde4e9',paddingTop:12,fontSize:11,lineHeight:1.6,color:'#687784'}}>For ethics-related correspondence:<br/><a href={`mailto:${IRED_EMAILS.contact}`} style={{color:'#0c6298',fontWeight:700}}>{IRED_EMAILS.contact}</a></div>
         </aside>
 
