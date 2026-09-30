@@ -16,9 +16,9 @@ const monthOrder=['January','February','March','April','May','June','July','Augu
 
 export default async function Archives({searchParams}:{searchParams:Promise<{type?:string;year?:string;month?:string}>}){
   const params=await searchParams;
-  const publicationType=params.type==='red'?'red':params.type==='green'?'green':'all';
-  const yearText=(params.year||'').trim();
-  const monthText=(params.month||'').trim();
+  const publicationType=params.type==='green'?'green':params.type==='all'?'all':'red';
+  const yearText=(params.year??'2026').trim();
+  const monthText=(params.month??'August').trim();
   const selectedYear=yearText?Number(yearText):null;
   const [papers,books]=await Promise.all([getPublishedGreenPapers(),getPublishedRedBooks()]);
 
@@ -40,7 +40,7 @@ export default async function Archives({searchParams}:{searchParams:Promise<{typ
 
   const filteredGreen=greenIssues.filter(group=>(publicationType==='all'||publicationType==='green')&&(!selectedYear||group.year===selectedYear)&&(!monthText||group.month===monthText));
   const filteredRed=books.filter(book=>(publicationType==='all'||publicationType==='red')&&(!selectedYear||book.publication_year===selectedYear)&&(!monthText||(book.publication_month||'')===monthText));
-  const hasFilter=publicationType!=='all'||Boolean(yearText)||Boolean(monthText);
+  const hasFilter=Boolean(params.type||params.year||params.month);
 
   const filterCard={display:'grid',gridTemplateColumns:'36px minmax(0,1fr)',gap:10,alignItems:'center',padding:'10px 11px',background:'#fff',border:'1px solid #dbe4ea',borderRadius:6} as const;
   const fieldIcon={width:36,height:36,borderRadius:5,display:'grid',placeItems:'center',background:'#eef4f8',color:'#173d60',border:'1px solid #d9e3e9'} as const;
