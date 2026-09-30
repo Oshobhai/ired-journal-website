@@ -1,4 +1,4 @@
-import {Header,Footer} from '../components';
+import {Header,Footer,JournalTitle} from '../components';
 import {getContactSettings} from '@/lib/contact-settings';
 
 function mailto(email:string,subject:string,body:string){
@@ -58,11 +58,11 @@ export default async function Contact(){
         <section style={{borderTop:'2px solid #0b2d4e',borderBottom:'1px solid #cfd8df'}}>
           <table style={{width:'100%',borderCollapse:'collapse'}}>
             <thead><tr style={{background:'#f5f7f8'}}>
-              <th style={{...th,width:'19%'}}>Publication</th><th style={{...th,width:'35%'}}>Submission Type</th><th style={{...th,width:'31%'}}>Information Required</th><th style={{...th,width:'15%',textAlign:'right'}}>Submission</th>
+              <th style={{...th,width:'23%'}}>Publication</th><th style={{...th,width:'32%'}}>Submission Type</th><th style={{...th,width:'30%'}}>Information Required</th><th style={{...th,width:'15%',textAlign:'right'}}>Submission</th>
             </tr></thead>
             <tbody>
-              <tr><td style={td}><div style={{display:'flex',alignItems:'center',gap:7}}><Icon name="paper" color="#148444"/><div><strong style={{fontFamily:'Georgia,serif',fontSize:16,color:'#148444'}}>GREEN</strong><div style={{fontSize:10,color:'#718078',marginTop:2}}>The Research e-Journal</div></div></div></td><td style={td}>Individual research papers, research articles, review articles, case studies and scholarly contributions.</td><td style={td}>Author name, paper title, mobile number, affiliation / institution and email address.</td><td style={{...td,textAlign:'right'}}><a href={gmailCompose(contact.email,'GREEN Research Paper Submission',greenBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#126f3a',whiteSpace:'nowrap'}}><Icon name="email" color="#126f3a"/> Email Paper →</a></td></tr>
-              <tr><td style={td}><div style={{display:'flex',alignItems:'center',gap:7}}><Icon name="book" color="#bd2025"/><div><strong style={{fontFamily:'Georgia,serif',fontSize:16,color:'#bd2025'}}>RED</strong><div style={{fontSize:10,color:'#806e6f',marginTop:2}}>The Research Journal</div></div></div></td><td style={td}>Research papers considered for inclusion in a compiled RED research book / printed volume.</td><td style={td}>Author details, mobile number, email, affiliation, full postal address, city / district, state and PIN code.</td><td style={{...td,textAlign:'right'}}><a href={gmailCompose(contact.email,'RED Research Journal Submission',redBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#a61d22',whiteSpace:'nowrap'}}><Icon name="email" color="#a61d22"/> Email Paper →</a></td></tr>
+              <tr><td style={td}><JournalTitle kind="green" size={13}/></td><td style={td}>Individual research papers, research articles, review articles, case studies and scholarly contributions.</td><td style={td}>Author name, paper title, mobile number, affiliation / institution and email address.</td><td style={{...td,textAlign:'right'}}><a href={gmailCompose(contact.email,'GREEN Research Paper Submission',greenBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#126f3a',whiteSpace:'nowrap'}}><Icon name="email" color="#126f3a"/> Email Paper →</a></td></tr>
+              <tr><td style={td}><JournalTitle kind="red" size={13}/></td><td style={td}>Research papers considered for inclusion in a compiled RED research book / printed volume.</td><td style={td}>Author details, mobile number, email, affiliation, full postal address, city / district, state and PIN code.</td><td style={{...td,textAlign:'right'}}><a href={gmailCompose(contact.email,'RED Research Journal Submission',redBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#a61d22',whiteSpace:'nowrap'}}><Icon name="email" color="#a61d22"/> Email Paper →</a></td></tr>
             </tbody>
           </table>
         </section>
