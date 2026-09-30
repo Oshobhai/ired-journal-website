@@ -19,6 +19,21 @@ function issnDisplay(value:string){
   return (!raw || /^pending$/i.test(raw) || /^x{4}-?x{4}$/i.test(raw)) ? 'Pending / Not Assigned' : raw;
 }
 
+function formatMonthYear(value:string){
+  const match=/^(\d{4})-(\d{2})$/.exec(String(value||'').trim());
+  if(!match)return value||'—';
+  const year=Number(match[1]);const month=Number(match[2]);
+  if(month<1||month>12)return value;
+  return new Intl.DateTimeFormat('en-GB',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(Date.UTC(year,month-1,1)));
+}
+
+function formatDate(value:string){
+  const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value||'').trim());
+  if(!match)return value||'—';
+  const year=Number(match[1]);const month=Number(match[2]);const day=Number(match[3]);
+  return new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(Date.UTC(year,month-1,day)));
+}
+
 export default async function Home(){
   const [greenPapers, redBooks, settings, contact] = await Promise.all([
     getPublishedGreenPapers(3),
@@ -28,6 +43,8 @@ export default async function Home(){
   ]);
   const greenIssnStatus=issnDisplay(contact.green_issn);
   const redIssnStatus=issnDisplay(contact.red_eissn);
+  const greenScheduleVisible=[settings.green_upcoming_volume,settings.green_upcoming_issue,settings.green_upcoming_month,settings.green_upcoming_publication_date,settings.green_upcoming_submission_deadline].some(v=>String(v||'').trim());
+  const redScheduleVisible=[settings.red_upcoming_volume,settings.red_upcoming_issue,settings.red_upcoming_month,settings.red_upcoming_publication_date,settings.red_upcoming_submission_deadline].some(v=>String(v||'').trim());
 
   return <><Header/><main>
     <section className="hero heroVisual" style={{backgroundImage:"linear-gradient(90deg,rgba(6,20,18,.86) 0%,rgba(7,22,18,.67) 38%,rgba(13,21,16,.18) 67%,rgba(12,14,10,.34) 100%),url('/hero-reference-art.jpg')",backgroundSize:'cover',backgroundPosition:'center 47%',backgroundRepeat:'no-repeat'}}><div className="container heroGrid" style={{minHeight:285,gridTemplateColumns:'minmax(0,.9fr) minmax(420px,1.1fr)',gap:24}}>
@@ -52,7 +69,12 @@ export default async function Home(){
           ['Publication Format',settings.green_format],
           ['Subject',settings.green_subject],
           ['ISSN Status',greenIssnStatus],
-        ].map(([label,value])=><div key={label}><strong style={{display:'block',fontSize:9,textTransform:'uppercase',letterSpacing:'.04em',color:'#64786a'}}>{label}</strong><span style={{fontWeight:700,color:label==='ISSN Status'&&greenIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#183f2a'}}>{value}</span></div>)}</div></section>
+        ].map(([label,value])=><div key={label}><strong style={{display:'block',fontSize:9,textTransform:'uppercase',letterSpacing:'.04em',color:'#64786a'}}>{label}</strong><span style={{fontWeight:700,color:label==='ISSN Status'&&greenIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#183f2a'}}>{value}</span></div>)}</div>{greenScheduleVisible?<div style={{borderTop:'1px solid #cfe5d6',marginTop:12,paddingTop:10}}><div style={{fontSize:9.5,fontWeight:800,letterSpacing:'.07em',textTransform:'uppercase',color:'#148444',marginBottom:8}}>Upcoming Issue Schedule</div><div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'8px 16px',fontSize:10.5,lineHeight:1.45}}>{[
+          ['Volume / Issue',[settings.green_upcoming_volume?`Volume ${settings.green_upcoming_volume}`:'',settings.green_upcoming_issue?`Issue ${settings.green_upcoming_issue}`:''].filter(Boolean).join(' · ')||'—'],
+          ['Issue Month',formatMonthYear(settings.green_upcoming_month)],
+          ['Publication Date',formatDate(settings.green_upcoming_publication_date)],
+          ['Paper Submission Last Date',formatDate(settings.green_upcoming_submission_deadline)],
+        ].map(([label,value])=><div key={label}><strong style={{display:'block',fontSize:9,textTransform:'uppercase',letterSpacing:'.04em',color:'#64786a'}}>{label}</strong><span style={{fontWeight:700,color:'#183f2a'}}>{value}</span></div>)}</div></div>:null}</section>
 
         <div><div className="sectionTitle greenTitle"><h2>🍃 Latest Research Papers <span>(GREEN)</span></h2><Link href="/green">View GREEN Papers →</Link></div><div className="listPanel">{greenPapers.length ? greenPapers.map((p)=><div className="paperRow" key={p.id}><div className="paperThumb"><PaperIcon/></div><div className="itemMain"><div className="itemTitle">{p.title}</div><div className="meta">{p.authors}</div><div className="meta">{p.publication_year || ''}{p.volume ? ` · Vol. ${p.volume}` : ''}{p.issue ? ` · Issue ${p.issue}` : ''}</div></div><div className="actions"><Link className="smallBtn" href={`/green/view/${p.id}`}>View Details</Link>{p.download_url ? <a className="smallBtn filledGreen" href={p.download_url}>↓ Download PDF</a> : null}</div></div>) : <div style={{padding:'18px',color:'#687586'}}>Published GREEN research papers will appear here.</div>}</div></div>
       </div>
@@ -67,7 +89,12 @@ export default async function Home(){
           ['Publication Format',settings.red_format],
           ['Subject',settings.red_subject],
           ['ISSN Status',redIssnStatus],
-        ].map(([label,value])=><div key={label}><strong style={{display:'block',fontSize:9,textTransform:'uppercase',letterSpacing:'.04em',color:'#826467'}}>{label}</strong><span style={{fontWeight:700,color:label==='ISSN Status'&&redIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#722226'}}>{value}</span></div>)}</div></section>
+        ].map(([label,value])=><div key={label}><strong style={{display:'block',fontSize:9,textTransform:'uppercase',letterSpacing:'.04em',color:'#826467'}}>{label}</strong><span style={{fontWeight:700,color:label==='ISSN Status'&&redIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#722226'}}>{value}</span></div>)}</div>{redScheduleVisible?<div style={{borderTop:'1px solid #efd2d3',marginTop:12,paddingTop:10}}><div style={{fontSize:9.5,fontWeight:800,letterSpacing:'.07em',textTransform:'uppercase',color:'#bd2025',marginBottom:8}}>Upcoming Issue Schedule</div><div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'8px 16px',fontSize:10.5,lineHeight:1.45}}>{[
+          ['Volume / Issue',[settings.red_upcoming_volume?`Volume ${settings.red_upcoming_volume}`:'',settings.red_upcoming_issue?`Issue ${settings.red_upcoming_issue}`:''].filter(Boolean).join(' · ')||'—'],
+          ['Issue Month',formatMonthYear(settings.red_upcoming_month)],
+          ['Publication Date',formatDate(settings.red_upcoming_publication_date)],
+          ['Paper Submission Last Date',formatDate(settings.red_upcoming_submission_deadline)],
+        ].map(([label,value])=><div key={label}><strong style={{display:'block',fontSize:9,textTransform:'uppercase',letterSpacing:'.04em',color:'#826467'}}>{label}</strong><span style={{fontWeight:700,color:'#722226'}}>{value}</span></div>)}</div></div>:null}</section>
 
         <div><div className="sectionTitle redTitle"><h2>📕 Latest Publications <span>(RED)</span></h2><Link href="/red">View RED Publications →</Link></div><div className="listPanel">{redBooks.length ? redBooks.map((b)=><div className="bookRow" key={b.id}>{b.cover_url ? <img src={b.cover_url} alt={`${b.title} cover`} style={{width:72,height:96,objectFit:'cover',border:'1px solid #ddd',borderRadius:3,flex:'0 0 auto'}}/> : <div className="bookCover">RED<br/>Book<br/>Publication</div>}<div className="itemMain"><div className="itemTitle">{b.title}</div><div className="meta">{b.editors ? `Edited by ${b.editors}` : 'IRED Publication'}</div><div className="meta">{[b.publication_month,b.publication_year].filter(Boolean).join(' ') || b.publication_label || ''}{b.volume ? ` · Vol. ${b.volume}` : ''}{b.issue ? ` · Issue ${b.issue}` : ''}</div></div><div className="actions"><Link className="smallBtn" href={`/red/view/${b.id}`} style={{background:'#cb2528',borderColor:'#cb2528',color:'#fff'}}>View Publication</Link></div></div>) : <div style={{padding:'18px',color:'#687586'}}>Published RED books and publications will appear here.</div>}</div></div>
       </div>
