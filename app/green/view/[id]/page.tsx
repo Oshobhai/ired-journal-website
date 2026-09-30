@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import {Header,Footer} from '../../../components';
+import {Header,Footer,JournalTitle} from '../../../components';
 import {getPublishedGreenPaperById} from '@/lib/publications';
 import ShareButtons from './share-buttons';
 
@@ -38,7 +38,7 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
   if(!paper){return <><Header/><main className="container" style={{padding:'28px 0'}}><div className="contentCard"><h1>Paper not available</h1><p>This GREEN publication is not currently available.</p><Link className="smallBtn" href="/green">← Back to GREEN Papers</Link></div></main><Footer/></>}
   const meta=[paper.publication_month,paper.publication_year].filter(Boolean).join(' ');
   return <><Header/>
-    <section className="pageHero"><div className="container"><div style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'#14733d',marginBottom:5}}>GREEN · {paper.article_type||'Research Article'}</div><h1 style={{fontSize:31,maxWidth:980}}>{paper.title}</h1><p style={{fontSize:13,color:'#536473',margin:'8px 0 0'}}>{paper.authors}</p></div></section>
+    <section className="pageHero"><div className="container"><div style={{marginBottom:7}}><JournalTitle kind="green" size={15}/></div><div style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'#14733d',marginBottom:5}}>{paper.article_type||'Research Article'}</div><h1 style={{fontSize:31,maxWidth:980}}>{paper.title}</h1><p style={{fontSize:13,color:'#536473',margin:'8px 0 0'}}>{paper.authors}</p></div></section>
     <main className="container" style={{padding:'22px 0 34px'}}>
       <div className="paperDetailGrid" style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) 280px',gap:24,alignItems:'start'}}>
         <article className="contentCard">
