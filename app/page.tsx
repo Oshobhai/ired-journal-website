@@ -2,6 +2,7 @@ import Link from 'next/link';
 import {Header,Footer,JournalTitle} from './components';
 import {getPublishedGreenPapers,getPublishedRedBooks} from '@/lib/publications';
 import {getSiteSettings} from '@/lib/site-settings';
+import {getContactSettings} from '@/lib/contact-settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,11 +15,14 @@ function PaperIcon(){
 }
 
 export default async function Home(){
-  const [greenPapers, redBooks, settings] = await Promise.all([
+  const [greenPapers, redBooks, settings, contact] = await Promise.all([
     getPublishedGreenPapers(3),
     getPublishedRedBooks(2),
     getSiteSettings(),
+    getContactSettings(),
   ]);
+  const greenIssnRaw=String(contact.green_issn||'').trim();
+  const greenIssnStatus=(!greenIssnRaw || /^pending$/i.test(greenIssnRaw) || /^x{4}-?x{4}$/i.test(greenIssnRaw)) ? 'Pending / Not Assigned' : greenIssnRaw;
 
   return <><Header/><main>
     <section className="hero heroVisual" style={{backgroundImage:"linear-gradient(90deg,rgba(6,20,18,.86) 0%,rgba(7,22,18,.67) 38%,rgba(13,21,16,.18) 67%,rgba(12,14,10,.34) 100%),url('/hero-reference-art.jpg')",backgroundSize:'cover',backgroundPosition:'center 47%',backgroundRepeat:'no-repeat'}}><div className="container heroGrid" style={{minHeight:285,gridTemplateColumns:'minmax(0,.9fr) minmax(420px,1.1fr)',gap:24}}>
@@ -33,7 +37,14 @@ export default async function Home(){
     <section style={{background:'#f7f9fb',borderBottom:'1px solid #d9e1e8'}}><div className="container" style={{padding:'12px 0',display:'flex',justifyContent:'space-between',gap:16,alignItems:'center',flexWrap:'wrap'}}><div style={{fontSize:11.5,lineHeight:1.65,color:'#526577'}}><strong style={{color:'#0b2d4e'}}>Publishing Body & Publisher:</strong> {settings.publisher_name}<br/><strong style={{color:'#0b2d4e'}}>Institute Address:</strong> {settings.official_address}<br/><strong style={{color:'#0b2d4e'}}>Journal / Editorial Office:</strong> {settings.journal_office_address}</div><Link href="/journal-information" style={{fontSize:11,fontWeight:800,color:'#0b5f91',whiteSpace:'nowrap'}}>Official Journal Information →</Link></div></section>
 
     <section className="publicationStrip" id="publications"><div className="container journalGrid">
-      <article className="journalCard green"><img className="journalLogo" src="/api/brand/green_logo" alt={settings.green_title}/><div className="journalCopy"><h2><JournalTitle kind="green" title={settings.green_title} size={20}/></h2><p>{settings.green_description}</p><Link className="btn btnGreen" href="/green">View GREEN Research Papers →</Link><div className="featureRow"><span>⚖ Peer-reviewed</span><span>▣ Open access</span><span>◉ Multidisciplinary</span></div></div><div className="journalWatermark">▤</div></article>
+      <article className="journalCard green"><img className="journalLogo" src="/api/brand/green_logo" alt={settings.green_title}/><div className="journalCopy"><h2><JournalTitle kind="green" title={settings.green_title} size={20}/></h2><p>{settings.green_description}</p><div style={{margin:'12px 0 14px',border:'1px solid #cfe5d6',background:'#f7fcf8',padding:'10px 12px',borderRadius:4}}><div style={{fontSize:9.5,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:'#148444',marginBottom:7}}>GREEN Journal Particulars</div><div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'7px 14px',fontSize:10.5,lineHeight:1.45,color:'#40584a'}}>{[
+        ['Frequency',settings.green_frequency],
+        ['Language',settings.green_language],
+        ['Starting Year',String(settings.first_volume_year)],
+        ['Publication Format',settings.green_format],
+        ['Subject',settings.green_subject],
+        ['ISSN Status',greenIssnStatus],
+      ].map(([label,value])=><div key={label}><strong style={{display:'block',fontSize:9,textTransform:'uppercase',letterSpacing:'.04em',color:'#64786a'}}>{label}</strong><span style={{fontWeight:700,color:label==='ISSN Status'&&greenIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#183f2a'}}>{value}</span></div>)}</div></div><Link className="btn btnGreen" href="/green">View GREEN Research Papers →</Link><div className="featureRow"><span>⚖ Peer-reviewed</span><span>▣ Open access</span><span>◉ Multidisciplinary</span></div></div><div className="journalWatermark">▤</div></article>
       <article className="journalCard red"><img className="journalLogo redJournalLogo" src="/api/brand/red_logo" alt={settings.red_title}/><div className="journalCopy"><h2><JournalTitle kind="red" title={settings.red_title} size={20}/></h2><p>{settings.red_description}</p><Link className="btn btnRed" href="/red">View RED Publications →</Link><div className="featureRow"><span>▣ Published books</span><span>▤ Scholarly publications</span><span>▰ Multidisciplinary</span></div></div><div className="journalWatermark">▥</div></article>
     </div></section>
 
