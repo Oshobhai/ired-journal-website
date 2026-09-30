@@ -3,6 +3,7 @@ import AdminFrame from '../admin-frame'
 import ManagementConsole from '../management-console'
 import GreenFinalPdfManager from '../green-final-pdf-manager'
 import GreenCertificateManager from '../green-certificate-manager'
+import GreenEnglishMetadataManager from '../green-english-metadata-manager'
 
 export const dynamic='force-dynamic'
 
@@ -11,6 +12,7 @@ export default async function GreenAdmin(){
   return <AdminFrame access={access} active="green" kicker="Publication Management" title="GREEN Papers" description="Manage GREEN research paper records, metadata, final PDFs, certificate review, publication status, archiving and lifecycle actions in a dedicated workspace.">
     <GreenFinalPdfManager/>
     <GreenCertificateManager/>
+    <GreenEnglishMetadataManager/>
     <ManagementConsole initialKind="green" lockedKind="green" showStats={false}/>
   </AdminFrame>
 }
