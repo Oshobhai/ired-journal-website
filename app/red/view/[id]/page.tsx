@@ -59,7 +59,7 @@ export default async function RedPublicationViewer({ params }: { params: Promise
             <div style={{marginTop:13,display:'flex',gap:8,flexWrap:'wrap'}}><Link className="smallBtn" href="/red">← Back to RED e-Journal</Link><Link className="smallBtn" href="/journal-information">Official Journal Information</Link></div>
           </div>
         </div>
-        <div style={{paddingTop:14,borderTop:'1px solid #dde4e8'}}><div style={{display:'flex',justifyContent:'space-between',gap:10,alignItems:'center',flexWrap:'wrap',marginBottom:10}}><h2 style={{fontFamily:'Georgia,serif',fontSize:18,color:'#0b2d4e',margin:0}}>Read RED e-Journal Publication</h2><span style={{fontSize:10.5,color:'#687586'}}>View-only mode · download control hidden</span></div>
+        <div style={{paddingTop:14,borderTop:'1px solid #dde4e8'}}><div style={{display:'flex',justifyContent:'flex-end',gap:10,alignItems:'center',flexWrap:'wrap',marginBottom:10}}><span style={{fontSize:10.5,color:'#687586'}}>View-only mode · download control hidden</span></div>
         {viewerUrl ? <iframe className="redViewerFrame" src={viewerUrl} title={publication.title} style={{width:'100%',height:'82vh',border:'1px solid #ccd5dd',borderRadius:6,background:'#fff'}}/> : <div style={{padding:'24px',border:'1px solid #e1b9b9',background:'#fff5f5',borderRadius:6,color:'#8b2222'}}>The publication viewer could not be opened. Please try again after refreshing the page.{error?.message ? ` (${error.message})` : ''}</div>}</div>
       </div>
     </main><Footer/></>
