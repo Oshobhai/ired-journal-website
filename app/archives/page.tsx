@@ -38,10 +38,6 @@ export default async function Archives(){
     <main className="container" style={{padding:'24px 0 34px'}}>
       <div style={{maxWidth:1120,margin:'0 auto'}}>
         <section id="all-volumes" style={{marginBottom:30}}>
-          <div style={{borderBottom:'2px solid #173d60',paddingBottom:10,marginBottom:16}}>
-            <div style={{display:'flex',alignItems:'baseline',gap:10,flexWrap:'wrap'}}><strong style={{fontFamily:'Georgia,serif',fontSize:20,color:'#0b8ea8'}}>ARCHIVE</strong><span style={{fontWeight:800,color:'#0b8ea8'}}>Link:</span><a href="https://iredjournal.org/archives" style={{fontSize:12,color:'#087f9d'}}>iredjournal.org/archives</a></div>
-          </div>
-
           <h2 style={{fontFamily:'Georgia,serif',fontSize:18,color:'#0b2d4e',margin:'0 0 12px'}}>GREEN — All Volumes &amp; Issues</h2>
           {!greenIssues.length?<div className="contentCard" style={{textAlign:'center',padding:'30px',color:'#687586'}}>Published GREEN issues will appear here automatically after publication.</div>:<div style={{overflowX:'auto',border:'1px solid #d6e0e7',background:'#fff'}}>
             <table style={{width:'100%',borderCollapse:'collapse',minWidth:650,fontSize:12}}>
