@@ -19,6 +19,10 @@ export type SiteSettings={
   red_title:string
   red_description:string
   red_scope:string
+  red_frequency:string
+  red_language:string
+  red_format:string
+  red_subject:string
   first_volume_year:number
   article_id_prefix:string
   doi_prefix:string
@@ -51,6 +55,10 @@ export const defaultSiteSettings:SiteSettings={
   red_title:'RED: The Research Journal',
   red_description:'Print research journals to disseminate scholarly and research-based knowledge across multiple academic disciplines.',
   red_scope:'Multidisciplinary research across Arts, Humanities, Sciences, Social Sciences, Commerce, Education, Management, Law and other academic disciplines.',
+  red_frequency:'Monthly',
+  red_language:'English, Gujarati',
+  red_format:'Print',
+  red_subject:'Multidisciplinary',
   first_volume_year:2026,
   article_id_prefix:'GREEN',
   doi_prefix:'',
