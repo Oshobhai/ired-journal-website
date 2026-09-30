@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import {Header,Footer} from '../components'
+import {Header,Footer,JournalTitle} from '../components'
 import {getContactSettings} from '@/lib/contact-settings'
 import {getSiteSettings} from '@/lib/site-settings'
 
@@ -41,7 +41,7 @@ export default async function JournalInformation(){
       <section className="contentCard" style={{borderTop:'4px solid #148444'}}>
         <img src="/api/brand/green_logo" alt={settings.green_title} style={journalLogoStyle}/>
         <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#148444',marginTop:8}}>Official Journal Title</div>
-        <h2>{settings.green_title}</h2>
+        <h2><JournalTitle kind="green" title={settings.green_title} size={22}/></h2>
         <p>{settings.green_description}</p>
 
         <div style={{marginTop:18,border:'1px solid #dbe7df',background:'#f8fcf9'}}>
@@ -58,7 +58,7 @@ export default async function JournalInformation(){
               ['Submission Status',settings.submission_status],
               ['Publisher',settings.publisher_name],
               ['Editor in Chief',settings.green_editor_in_chief],
-            ].filter(([,value])=>Boolean(value)).map(([label,value])=><div key={label} style={{padding:'10px 12px',borderBottom:'1px solid #edf1ee',fontSize:11.5,lineHeight:1.55}}><strong style={{display:'block',fontSize:9.5,textTransform:'uppercase',letterSpacing:'.05em',color:'#65766b',marginBottom:2}}>{label}</strong>{value}</div>)}
+            ].filter(([,value])=>Boolean(value)).map(([label,value])=><div key={label} style={{padding:'10px 12px',borderBottom:'1px solid #edf1ee',fontSize:11.5,lineHeight:1.55}}><strong style={{display:'block',fontSize:9.5,textTransform:'uppercase',letterSpacing:'.05em',color:'#65766b',marginBottom:2}}>{label}</strong>{label==='Title'?<JournalTitle kind="green" title={String(value)} size={12}/>:value}</div>)}
           </div>
         </div>
 
@@ -79,7 +79,7 @@ export default async function JournalInformation(){
       <section className="contentCard" style={{borderTop:'4px solid #cb2528'}}>
         <img src="/api/brand/red_logo" alt={settings.red_title} style={journalLogoStyle}/>
         <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginTop:8}}>Official Publication Title</div>
-        <h2>{settings.red_title}</h2>
+        <h2><JournalTitle kind="red" title={settings.red_title} size={22}/></h2>
         <p>{settings.red_description}</p>
         <p><strong>ISSN:</strong> {contact.red_eissn}</p>
         <p><strong>Publication Mode:</strong> Print Publication</p>
