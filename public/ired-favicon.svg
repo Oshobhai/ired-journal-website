@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">IRED</title>
+  <desc id="desc">Institute of Research Education and Development favicon</desc>
+  <rect width="64" height="64" rx="12" fill="#ffffff"/>
+  <g transform="translate(32 25)">
+    <circle cx="0" cy="0" r="7" fill="#e51b23"/>
+    <g fill="none" stroke="#e51b23" stroke-width="3" stroke-linecap="round">
+      <path d="M0-11V-18"/><path d="M0 11v7"/><path d="M-11 0h-7"/><path d="M11 0h7"/>
+      <path d="M-8-8l-5-5"/><path d="M8 8l5 5"/><path d="M8-8l5-5"/><path d="M-8 8l-5 5"/>
+    </g>
+  </g>
+  <text x="32" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="800" fill="#123454">IRED</text>
+</svg>
