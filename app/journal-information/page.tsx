@@ -15,7 +15,7 @@ const journalLogoStyle={
 
 function issnDisplay(value:string){
   const raw=String(value||'').trim()
-  return (!raw || /^pending$/i.test(raw) || /^x{4}-?x{4}$/i.test(raw)) ? 'Pending / Not Assigned' : raw
+  return (!raw || /^x{4}-?x{4}$/i.test(raw)) ? 'Pending' : raw
 }
 
 export default async function JournalInformation(){
