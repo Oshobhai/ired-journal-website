@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {Header,Footer} from '../components';
+import {Header,Footer,JournalTitle} from '../components';
 
 function Icon({type}:{type:'document'|'structure'|'table'|'reference'|'ethics'|'email'|'review'|'check'|'book'|'fee'}){
   const common={width:19,height:19,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,strokeLinecap:'round' as const,strokeLinejoin:'round' as const,'aria-hidden':true};
@@ -64,12 +64,12 @@ export default function AuthorGuidelines(){return <><Header/>
     <div style={{maxWidth:1100,margin:'0 auto'}}>
       <section style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:14,marginBottom:28}}>
         <article style={{border:'1px solid #d8e3dc',borderTop:'3px solid #148444',padding:'17px 18px',background:'#fff'}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,color:'#148444',marginBottom:6}}><Icon type="document"/><strong style={{fontFamily:'Georgia,serif',fontSize:18}}>GREEN: The Research e-Journal</strong></div>
+          <div style={{marginBottom:8}}><JournalTitle kind="green" size={18}/></div>
           <p style={{fontSize:11.8,lineHeight:1.65,color:'#526273',margin:'0 0 10px'}}>For individual research papers and scholarly articles published as separate journal papers.</p>
           <div style={{fontSize:10.8,color:'#667782'}}><strong>Typical submissions:</strong> Research Article · Review Article · Case Study · Short Communication</div>
         </article>
         <article style={{border:'1px solid #ead7d8',borderTop:'3px solid #bd2025',padding:'17px 18px',background:'#fff'}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,color:'#bd2025',marginBottom:6}}><Icon type="book"/><strong style={{fontFamily:'Georgia,serif',fontSize:18}}>RED: The Research Journal</strong></div>
+          <div style={{marginBottom:8}}><JournalTitle kind="red" size={18}/></div>
           <p style={{fontSize:11.8,lineHeight:1.65,color:'#526273',margin:'0 0 10px'}}>For research papers considered for inclusion in compiled research books / printed volumes.</p>
           <div style={{fontSize:10.8,color:'#667782'}}><strong>Additional requirement:</strong> Full postal address may be requested for printed-copy dispatch.</div>
         </article>
