@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import {Header,Footer,JournalTitle} from '../components';
 import {IRED_EMAILS} from '@/lib/contact-settings';
+import {getSiteSettings} from '@/lib/site-settings';
 
 function Icon({type}:{type:'document'|'structure'|'table'|'reference'|'ethics'|'email'|'review'|'check'|'book'|'fee'}){
   const common={width:19,height:19,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,strokeLinecap:'round' as const,strokeLinejoin:'round' as const,'aria-hidden':true};
@@ -55,7 +56,9 @@ const sections=[
   ]}
 ];
 
-export default function AuthorGuidelines(){return <><Header/>
+export default async function AuthorGuidelines(){
+  const settings=await getSiteSettings();
+  return <><Header/>
   <section className="pageHero" style={{padding:'32px 0 30px'}}><div className="container">
     <div style={{display:'flex',alignItems:'center',gap:12}}><span style={{width:42,height:42,borderRadius:'50%',background:'#fff',border:'1px solid #cad6df',display:'grid',placeItems:'center',color:'#0b2d4e'}}><Icon type="document"/></span><div><div style={{fontSize:10,letterSpacing:'.12em',textTransform:'uppercase',fontWeight:800,color:'#7b8792',marginBottom:3}}>For Contributors</div><h1 style={{fontSize:36,margin:0}}>Author Guidelines</h1></div></div>
     <p style={{maxWidth:860,fontSize:12.5,lineHeight:1.7,color:'#5d6c79',margin:'12px 0 0'}}>These guidelines explain how authors should prepare and submit manuscripts for IRED research publications. Final journal formatting is applied during the editorial and publication process.</p>
@@ -65,13 +68,13 @@ export default function AuthorGuidelines(){return <><Header/>
     <div style={{maxWidth:1100,margin:'0 auto'}}>
       <section style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:14,marginBottom:28}}>
         <article style={{border:'1px solid #d8e3dc',borderTop:'3px solid #148444',padding:'17px 18px',background:'#fff'}}>
-          <div style={{marginBottom:8}}><JournalTitle kind="green" size={18}/></div>
+          <div style={{marginBottom:8}}><JournalTitle kind="green" title={settings.green_title} size={18}/></div>
           <p style={{fontSize:11.8,lineHeight:1.65,color:'#526273',margin:'0 0 10px'}}>For individual research papers and scholarly articles published as separate journal papers.</p>
           <div style={{fontSize:10.8,color:'#667782'}}><strong>Typical submissions:</strong> Research Article · Review Article · Case Study · Short Communication</div>
         </article>
         <article style={{border:'1px solid #ead7d8',borderTop:'3px solid #bd2025',padding:'17px 18px',background:'#fff'}}>
-          <div style={{marginBottom:8}}><JournalTitle kind="red" size={18}/></div>
-          <p style={{fontSize:11.8,lineHeight:1.65,color:'#526273',margin:'0 0 10px'}}>For research papers considered for inclusion in compiled research books / printed volumes.</p>
+          <div style={{marginBottom:8}}><JournalTitle kind="red" title={settings.red_title} size={18}/></div>
+          <p style={{fontSize:11.8,lineHeight:1.65,color:'#526273',margin:'0 0 10px'}}>For research papers considered for publication in the RED print research journal.</p>
           <div style={{fontSize:10.8,color:'#667782'}}><strong>Additional requirement:</strong> Full postal address may be requested for printed-copy dispatch.</div>
         </article>
       </section>
@@ -102,7 +105,7 @@ export default function AuthorGuidelines(){return <><Header/>
 
           <section style={{padding:'16px 18px',border:'1px solid #dbe3e9',background:'#f8fafb'}}>
             <h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',margin:'0 0 7px'}}>Final Publication Formatting</h3>
-            <p style={{fontSize:11.5,lineHeight:1.65,color:'#5a6a78',margin:0}}>Authors do not need to recreate the final GREEN journal header, footer, page numbering or publication layout themselves. After editorial acceptance, IRED may standardize the manuscript into the journal publication format. Authors should therefore prioritize a clean, complete and logically structured source manuscript.</p>
+            <p style={{fontSize:11.5,lineHeight:1.65,color:'#5a6a78',margin:0}}>Authors do not need to recreate the final journal header, footer, page numbering or publication layout themselves. After editorial acceptance, IRED may standardize the manuscript into the appropriate journal publication format. Authors should therefore prioritize a clean, complete and logically structured source manuscript.</p>
           </section>
         </div>
       </div>
