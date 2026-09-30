@@ -46,7 +46,7 @@ export default async function Contact(){
           <h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:'0 0 8px'}}>Editorial Office</h2>
           <InfoRow icon="institution" label="Institution">{settings.publisher_name}</InfoRow>
           <InfoRow icon="location" label="Journal / Editorial Office">{settings.journal_office_address}</InfoRow>
-          <InfoRow icon="location" label="IRED Registered Office">{settings.official_address}</InfoRow>
+          <InfoRow icon="location" label="Institute Address">{settings.official_address}</InfoRow>
           <InfoRow icon="phone" label="Telephone">{phones}</InfoRow>
           <InfoRow icon="email" label="General Contact"><a href={mailto(contact.email,'','')} style={{color:'#0c6298',fontWeight:700}}>{contact.email}</a></InfoRow>
         </section>
