@@ -13,9 +13,16 @@ const journalLogoStyle={
   margin:0,
 } as const
 
+function issnDisplay(value:string){
+  const raw=String(value||'').trim()
+  return (!raw || /^pending$/i.test(raw) || /^x{4}-?x{4}$/i.test(raw)) ? 'Pending / Not Assigned' : raw
+}
+
 export default async function JournalInformation(){
   const [contact,settings]=await Promise.all([getContactSettings(),getSiteSettings()])
   const phones=[contact.phone_primary,contact.phone_secondary].filter(Boolean).join(' | ')
+  const greenIssnStatus=issnDisplay(contact.green_issn)
+  const redIssnStatus=issnDisplay(contact.red_eissn)
   return <>
     <Header/>
     <section className="pageHero">
@@ -51,7 +58,7 @@ export default async function JournalInformation(){
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(235px,1fr))'}}>
             {[
               ['Title',settings.green_title],
-              ['ISSN / e-ISSN',contact.green_issn],
+              ['ISSN / e-ISSN',greenIssnStatus],
               ['Publication Format',settings.green_format],
               ['Starting Year',String(settings.first_volume_year)],
               ['Subject',settings.green_subject],
@@ -83,13 +90,28 @@ export default async function JournalInformation(){
 
       <section className="contentCard" style={{borderTop:'4px solid #cb2528'}}>
         <img src="/api/brand/red_logo" alt={settings.red_title} style={journalLogoStyle}/>
-        <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginTop:8}}>Official Publication Title</div>
+        <div style={{fontSize:10,letterSpacing:'.11em',textTransform:'uppercase',fontWeight:800,color:'#b32328',marginTop:8}}>Official Journal Title</div>
         <h2><JournalTitle kind="red" title={settings.red_title} size={22}/></h2>
         <p>{settings.red_description}</p>
-        <p><strong>ISSN:</strong> {contact.red_eissn}</p>
-        <p><strong>Publication Mode:</strong> Print Publication</p>
-        <p><strong>Scope:</strong> {settings.red_scope}</p>
-        <p><strong>Published By:</strong> {settings.publisher_name}</p>
+
+        <div style={{marginTop:18,border:'1px solid #efd7d8',background:'#fff9f9'}}>
+          <div style={{padding:'9px 12px',background:'#fff0f0',borderBottom:'1px solid #efd7d8',fontSize:11,fontWeight:800,color:'#a61d22',letterSpacing:'.06em',textTransform:'uppercase'}}>RED Journal Particulars</div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(235px,1fr))'}}>
+            {[
+              ['Title',settings.red_title],
+              ['ISSN',redIssnStatus],
+              ['Publication Format',settings.red_format],
+              ['Starting Year',String(settings.first_volume_year)],
+              ['Subject',settings.red_subject],
+              ['Language',settings.red_language],
+              ['Frequency',settings.red_frequency],
+              ['Publisher',settings.publisher_name],
+            ].filter(([,value])=>Boolean(value)).map(([label,value])=><div key={label} style={{padding:'10px 12px',borderBottom:'1px solid #f3e7e7',fontSize:11.5,lineHeight:1.55}}><strong style={{display:'block',fontSize:9.5,textTransform:'uppercase',letterSpacing:'.05em',color:'#826467',marginBottom:2}}>{label}</strong>{label==='Title'?<JournalTitle kind="red" title={String(value)} size={12}/>:value}</div>)}
+          </div>
+        </div>
+
+        <h3 style={{fontFamily:'Georgia,serif',color:'#0b2d4e',margin:'18px 0 6px'}}>Aims & Scope</h3>
+        <p style={{marginTop:0}}>{settings.red_scope}</p>
         <p><strong>Institute Address:</strong> {settings.official_address}</p>
         <p><strong>Journal / Editorial Office:</strong> {settings.journal_office_address}</p>
         <p><strong>Primary Contact Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
