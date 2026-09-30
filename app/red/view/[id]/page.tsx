@@ -3,13 +3,14 @@ import Link from 'next/link'
 import { Header, Footer, JournalTitle } from '../../../components'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedRedBookById } from '@/lib/publications'
+import { getSiteSettings } from '@/lib/site-settings'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{
   const {id}=await params
-  const publication=await getPublishedRedBookById(id)
-  if(!publication)return {title:'RED: The Research Journal'}
+  const [publication,settings]=await Promise.all([getPublishedRedBookById(id),getSiteSettings()])
+  if(!publication)return {title:settings.red_title}
   const description=(publication.description||publication.subtitle||`${publication.title}${publication.editors?` edited by ${publication.editors}`:''}`).slice(0,220)
   return {
     title:publication.title,
@@ -17,25 +18,25 @@ export async function generateMetadata({params}:{params:Promise<{id:string}>}):P
     alternates:{canonical:`/red/view/${publication.id}`},
     openGraph:{type:'article',title:publication.title,description,url:`/red/view/${publication.id}`,images:publication.cover_url?[{url:publication.cover_url,alt:`${publication.title} cover`}]:undefined},
     other:{
-      citation_journal_title:'RED: The Research Journal',
+      citation_journal_title:settings.red_title,
       citation_title:publication.title,
-      citation_author:publication.editors||'Institute of Research Education and Development',
+      citation_author:publication.editors||settings.publisher_name,
       citation_publication_date:String(publication.publication_year||''),
       citation_volume:publication.volume||'',
       citation_issue:publication.issue||'',
       citation_issn:publication.issn||'',
       citation_isbn:publication.isbn||'',
-      citation_publisher:'Institute of Research Education and Development (IRED)',
+      citation_publisher:settings.publisher_name,
     }
   }
 }
 
 export default async function RedPublicationViewer({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const publication = await getPublishedRedBookById(id)
+  const [publication,settings]=await Promise.all([getPublishedRedBookById(id),getSiteSettings()])
 
   if (!publication) {
-    return <><Header/><main className="container" style={{paddingTop:20,paddingBottom:30}}><div className="contentCard"><h1>Publication not available</h1><p><JournalTitle kind="red" size={12}/> publication is not currently available for public viewing.</p><Link className="smallBtn" href="/red" style={{color:'#a61d22'}}>← Back to RED: The Research Journal</Link></div></main><Footer/></>
+    return <><Header/><main className="container" style={{paddingTop:20,paddingBottom:30}}><div className="contentCard"><h1>Publication not available</h1><p><JournalTitle kind="red" title={settings.red_title} size={12}/> publication is not currently available for public viewing.</p><Link className="smallBtn" href="/red" style={{color:'#a61d22'}}>← Back to {settings.red_title}</Link></div></main><Footer/></>
   }
 
   const supabase = await createClient()
@@ -45,18 +46,18 @@ export default async function RedPublicationViewer({ params }: { params: Promise
   const details=[['Published',dateLabel],['Editor(s)',publication.editors],['Volume',publication.volume],['Issue',publication.issue],['ISSN',publication.issn],['ISBN',publication.isbn],['Theme',publication.theme]].filter(([,v])=>v)
 
   return <><Header/>
-    <section className="pageHero"><div className="container"><div style={{marginBottom:7}}><JournalTitle kind="red" size={15}/></div><h1 style={{fontSize:31,maxWidth:980}}>{publication.title}</h1>{publication.subtitle?<p style={{fontSize:13,color:'#536473',margin:'8px 0 0'}}>{publication.subtitle}</p>:null}<p style={{fontSize:11.5,color:'#6a7885',margin:'7px 0 0'}}>Published by Institute of Research Education and Development (IRED)</p></div></section>
+    <section className="pageHero"><div className="container"><div style={{marginBottom:7}}><JournalTitle kind="red" title={settings.red_title} size={15}/></div><h1 style={{fontSize:31,maxWidth:980}}>{publication.title}</h1>{publication.subtitle?<p style={{fontSize:13,color:'#536473',margin:'8px 0 0'}}>{publication.subtitle}</p>:null}<p style={{fontSize:11.5,color:'#6a7885',margin:'7px 0 0'}}>Published by {settings.publisher_name}</p></div></section>
     <main className="container" style={{paddingTop:20,paddingBottom:30}}>
       <div className="contentCard redViewerCard" style={{padding:18}}>
         <div style={{display:'flex',gap:22,alignItems:'flex-start',flexWrap:'wrap',marginBottom:18}}>
-          {publication.cover_url?<img src={publication.cover_url} alt={`${publication.title} cover`} style={{width:180,maxWidth:'42vw',height:'auto',maxHeight:250,objectFit:'cover',border:'1px solid #d8d8d8',boxShadow:'0 3px 10px #00000014'}}/>:<div style={{width:160,height:215,display:'grid',placeItems:'center',background:'#8f2e31',color:'#fff',fontFamily:'Georgia,serif',textAlign:'center',padding:16}}>RED:<br/>The Research Journal</div>}
+          {publication.cover_url?<img src={publication.cover_url} alt={`${publication.title} cover`} style={{width:180,maxWidth:'42vw',height:'auto',maxHeight:250,objectFit:'cover',border:'1px solid #d8d8d8',boxShadow:'0 3px 10px #00000014'}}/>:<div style={{width:160,height:215,display:'grid',placeItems:'center',background:'#8f2e31',color:'#fff',fontFamily:'Georgia,serif',textAlign:'center',padding:16}}>{settings.red_title}</div>}
           <div style={{flex:'1 1 320px',minWidth:0}}>
-            <div style={{marginBottom:7}}><JournalTitle kind="red" size={13}/></div>
+            <div style={{marginBottom:7}}><JournalTitle kind="red" title={settings.red_title} size={13}/></div>
             <h2 style={{fontFamily:'Georgia,serif',fontSize:23,color:'#0b2d4e',margin:'0 0 7px',overflowWrap:'anywhere'}}>{publication.title}</h2>
             {publication.subtitle?<div style={{fontSize:12.5,color:'#5f6f7b',marginBottom:10}}>{publication.subtitle}</div>:null}
             {publication.description?<p style={{fontSize:12,lineHeight:1.7,color:'#4e6170',margin:'0 0 13px'}}>{publication.description}</p>:null}
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',borderTop:'1px solid #e2e7ea'}}>{details.map(([k,v])=><div key={String(k)} style={{padding:'9px 10px 9px 0',borderBottom:'1px solid #edf1f3'}}><div style={{fontSize:9,textTransform:'uppercase',letterSpacing:'.07em',fontWeight:800,color:'#7d8992'}}>{k}</div><div style={{fontSize:11.5,color:'#344b5d',marginTop:3,overflowWrap:'anywhere'}}>{v}</div></div>)}</div>
-            <div style={{marginTop:13,display:'flex',gap:8,flexWrap:'wrap'}}><Link className="smallBtn" href="/red" style={{color:'#a61d22'}}>← Back to RED: The Research Journal</Link><Link className="smallBtn" href="/journal-information">Official Journal Information</Link></div>
+            <div style={{marginTop:13,display:'flex',gap:8,flexWrap:'wrap'}}><Link className="smallBtn" href="/red" style={{color:'#a61d22'}}>← Back to {settings.red_title}</Link><Link className="smallBtn" href="/journal-information">Official Journal Information</Link></div>
           </div>
         </div>
         <div style={{paddingTop:14,borderTop:'1px solid #dde4e8'}}><div style={{display:'flex',justifyContent:'flex-end',gap:10,alignItems:'center',flexWrap:'wrap',marginBottom:10}}><span style={{fontSize:10.5,color:'#687586'}}>View-only mode · download control hidden</span></div>
