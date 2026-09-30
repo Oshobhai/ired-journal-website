@@ -19,7 +19,7 @@ function needsEnglishSupport(title:string){
 }
 
 export default function GreenEnglishMetadataManager(){
-  const supabase=createClient()
+  const supabase=useMemo(()=>createClient(),[])
   const [rows,setRows]=useState<Row[]>([])
   const [search,setSearch]=useState('')
   const [busyId,setBusyId]=useState<string|null>(null)
