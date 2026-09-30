@@ -3,8 +3,27 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-type Settings={phone_primary:string;phone_secondary:string;email:string;registration_no:string;green_issn:string;red_eissn:string}
-const defaults:Settings={phone_primary:'7383000930',phone_secondary:'7203998343',email:'ired.foundation@gmail.com',registration_no:'GUJ/15856/AHMEDABAD',green_issn:'XXXX-XXXX',red_eissn:'XXXX-XXXX'}
+type Settings={
+  phone_primary:string
+  phone_secondary:string
+  email:string
+  registration_no:string
+  green_issn:string
+  red_eissn:string
+  institute_address:string
+  journal_office_address:string
+}
+
+const defaults:Settings={
+  phone_primary:'7383000930',
+  phone_secondary:'7203998343',
+  email:'contact@iredjournal.org',
+  registration_no:'GUJ/15856/AHMEDABAD',
+  green_issn:'Pending',
+  red_eissn:'Pending',
+  institute_address:'IRED, Pooja Bunglows, Kalol Highway-Road, Chandkheda, Ahmedabad-382424, Gujarat, India.',
+  journal_office_address:'A-3, 3rd Floor, Gita Apartment, Nr. Hirabaug Crossing, Ambawadi, Ahmedabad-380015, Gujarat, India.',
+}
 
 export default function ContactSettingsManager(){
   const supabase=createClient()
@@ -13,9 +32,24 @@ export default function ContactSettingsManager(){
   const [message,setMessage]=useState('')
 
   useEffect(()=>{void (async()=>{
-    const {data,error}=await supabase.from('contact_settings').select('phone_primary,phone_secondary,email,registration_no,green_issn,red_eissn').eq('id',true).maybeSingle()
-    if(error){setMessage(error.message);return}
-    if(data)setForm({phone_primary:data.phone_primary||'',phone_secondary:data.phone_secondary||'',email:data.email||'',registration_no:data.registration_no||'',green_issn:data.green_issn||'XXXX-XXXX',red_eissn:data.red_eissn||'XXXX-XXXX'})
+    const [contactResult,siteResult]=await Promise.all([
+      supabase.from('contact_settings').select('phone_primary,phone_secondary,email,registration_no,green_issn,red_eissn').eq('id',true).maybeSingle(),
+      supabase.from('site_settings').select('official_address,journal_office_address').eq('id',true).maybeSingle(),
+    ])
+    if(contactResult.error){setMessage(contactResult.error.message);return}
+    if(siteResult.error){setMessage(siteResult.error.message);return}
+    const contact=contactResult.data
+    const site=siteResult.data
+    setForm({
+      phone_primary:contact?.phone_primary||defaults.phone_primary,
+      phone_secondary:contact?.phone_secondary||'',
+      email:contact?.email||defaults.email,
+      registration_no:contact?.registration_no||defaults.registration_no,
+      green_issn:contact?.green_issn||defaults.green_issn,
+      red_eissn:contact?.red_eissn||defaults.red_eissn,
+      institute_address:site?.official_address||defaults.institute_address,
+      journal_office_address:site?.journal_office_address||defaults.journal_office_address,
+    })
   })()},[])
 
   async function save(event:FormEvent<HTMLFormElement>){
@@ -28,49 +62,93 @@ export default function ContactSettingsManager(){
         phone_secondary:form.phone_secondary.trim(),
         email:form.email.trim().toLowerCase(),
         registration_no:form.registration_no.trim(),
-        green_issn:form.green_issn.trim()||'XXXX-XXXX',
-        red_eissn:form.red_eissn.trim()||'XXXX-XXXX',
+        green_issn:form.green_issn.trim()||'Pending',
+        red_eissn:form.red_eissn.trim()||'Pending',
+        institute_address:form.institute_address.trim(),
+        journal_office_address:form.journal_office_address.trim(),
       }
-      if(!cleaned.phone_primary||!cleaned.email||!cleaned.registration_no)throw new Error('Primary phone, email and registration number are required.')
+      if(!cleaned.phone_primary||!cleaned.email||!cleaned.registration_no||!cleaned.institute_address||!cleaned.journal_office_address)throw new Error('Primary phone, email, registration number and both addresses are required.')
       if(!/^\S+@\S+\.\S+$/.test(cleaned.email))throw new Error('Enter a valid email address.')
-      const {error}=await supabase.from('contact_settings').upsert({id:true,...cleaned,updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:'id'})
-      if(error)throw error
+      const now=new Date().toISOString()
+      const {error:contactError}=await supabase.from('contact_settings').upsert({
+        id:true,
+        phone_primary:cleaned.phone_primary,
+        phone_secondary:cleaned.phone_secondary,
+        email:cleaned.email,
+        registration_no:cleaned.registration_no,
+        green_issn:cleaned.green_issn,
+        red_eissn:cleaned.red_eissn,
+        updated_at:now,
+        updated_by:user.id,
+      },{onConflict:'id'})
+      if(contactError)throw contactError
+      const {error:siteError}=await supabase.from('site_settings').update({
+        official_address:cleaned.institute_address,
+        journal_office_address:cleaned.journal_office_address,
+        updated_at:now,
+        updated_by:user.id,
+      }).eq('id',true)
+      if(siteError)throw siteError
       setForm(cleaned)
-      setMessage('Contact details and journal ISSN values updated successfully.')
+      setMessage('Contact details, addresses and journal ISSN values updated successfully.')
     }catch(error){setMessage(error instanceof Error?error.message:'Could not update contact details.')}
     finally{setBusy(false)}
   }
 
   async function restore(){
-    if(!confirm('Restore the default IRED contact details and ISSN placeholders?'))return
+    if(!confirm('Restore the default IRED contact details, addresses and ISSN placeholders?'))return
     setBusy(true);setMessage('')
     try{
       const {data:{user}}=await supabase.auth.getUser()
-      const {error}=await supabase.from('contact_settings').upsert({id:true,...defaults,updated_at:new Date().toISOString(),updated_by:user?.id||null},{onConflict:'id'})
-      if(error)throw error
-      setForm(defaults);setMessage('Default contact details and ISSN placeholders restored.')
+      const now=new Date().toISOString()
+      const {error:contactError}=await supabase.from('contact_settings').upsert({
+        id:true,
+        phone_primary:defaults.phone_primary,
+        phone_secondary:defaults.phone_secondary,
+        email:defaults.email,
+        registration_no:defaults.registration_no,
+        green_issn:defaults.green_issn,
+        red_eissn:defaults.red_eissn,
+        updated_at:now,
+        updated_by:user?.id||null,
+      },{onConflict:'id'})
+      if(contactError)throw contactError
+      const {error:siteError}=await supabase.from('site_settings').update({
+        official_address:defaults.institute_address,
+        journal_office_address:defaults.journal_office_address,
+        updated_at:now,
+        updated_by:user?.id||null,
+      }).eq('id',true)
+      if(siteError)throw siteError
+      setForm(defaults)
+      setMessage('Default contact details, addresses and ISSN placeholders restored.')
     }catch(error){setMessage(error instanceof Error?error.message:'Could not restore defaults.')}
     finally{setBusy(false)}
   }
 
   const label={display:'block',fontSize:11,fontWeight:800,color:'#40566a'} as const
   const field={display:'block',width:'100%',marginTop:5,padding:'10px 11px',border:'1px solid #cbd6de',background:'#fff',fontSize:12} as const
+  const area={...field,minHeight:72,resize:'vertical' as const}
 
   return <section className="contentCard" style={{marginTop:20,borderTop:'4px solid #0b2d4e'}}>
     <div style={{fontSize:10,fontWeight:800,letterSpacing:'.1em',textTransform:'uppercase',color:'#6d7d89'}}>Website Administration</div>
     <h2 style={{margin:'4px 0 5px'}}>Contact Us Details</h2>
-    <p style={{margin:'0 0 15px',fontSize:12,color:'#667887',lineHeight:1.6}}>Update the public phone numbers, editorial email, registration number and journal ISSN values from one place. These details are used across the website and GREEN publication header.</p>
+    <p style={{margin:'0 0 15px',fontSize:12,color:'#667887',lineHeight:1.6}}>Update the public phone numbers, editorial email, registration number, institute address, journal office address and journal ISSN values from one place.</p>
     {message?<div style={{padding:'10px 12px',marginBottom:14,border:'1px solid #cbdde8',background:'#f3f8fb',fontSize:11.5}}>{message}</div>:null}
-    <form onSubmit={save} style={{display:'grid',gap:12,maxWidth:760}}>
+    <form onSubmit={save} style={{display:'grid',gap:12,maxWidth:900}}>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
         <label style={label}>Primary Phone<input value={form.phone_primary} onChange={e=>setForm({...form,phone_primary:e.target.value})} style={field} required/></label>
         <label style={label}>Secondary Phone<input value={form.phone_secondary} onChange={e=>setForm({...form,phone_secondary:e.target.value})} style={field}/></label>
       </div>
       <label style={label}>Editorial Email<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} style={field} required/></label>
       <label style={label}>Registration Number<input value={form.registration_no} onChange={e=>setForm({...form,registration_no:e.target.value})} style={field} required/></label>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:12}}>
+        <label style={label}>Institute Address<textarea value={form.institute_address} onChange={e=>setForm({...form,institute_address:e.target.value})} style={area} required/></label>
+        <label style={label}>Journal Office Address<textarea value={form.journal_office_address} onChange={e=>setForm({...form,journal_office_address:e.target.value})} style={area} required/></label>
+      </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
-        <label style={label}>GREEN ISSN<input value={form.green_issn} onChange={e=>setForm({...form,green_issn:e.target.value})} style={field} placeholder="XXXX-XXXX"/></label>
-        <label style={label}>RED e-ISSN<input value={form.red_eissn} onChange={e=>setForm({...form,red_eissn:e.target.value})} style={field} placeholder="XXXX-XXXX"/></label>
+        <label style={label}>GREEN ISSN<input value={form.green_issn} onChange={e=>setForm({...form,green_issn:e.target.value})} style={field} placeholder="Pending"/></label>
+        <label style={label}>RED e-ISSN<input value={form.red_eissn} onChange={e=>setForm({...form,red_eissn:e.target.value})} style={field} placeholder="Pending"/></label>
       </div>
       <div style={{display:'flex',gap:8,flexWrap:'wrap',paddingTop:3}}><button className="btn btnNavy" type="submit" disabled={busy}>{busy?'Saving…':'Save Contact Details'}</button><button className="btn btnOutline" type="button" disabled={busy} onClick={restore}>Restore Default</button></div>
     </form>
