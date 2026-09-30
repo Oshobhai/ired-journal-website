@@ -14,32 +14,26 @@ function PaperIcon(){
   </svg>
 }
 
-function DetailIcon({label,color}:{label:string;color:string}){
-  const common={width:13,height:13,viewBox:'0 0 24 24',fill:'none',stroke:color,strokeWidth:1.8,strokeLinecap:'round' as const,strokeLinejoin:'round' as const,'aria-hidden':true};
-  if(label==='Frequency')return <svg {...common}><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg>;
-  if(label==='Language')return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>;
-  if(label==='Starting Year'||label==='Issue Month'||label==='Publication Date')return <svg {...common}><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>{label==='Publication Date'?<path d="m9 15 2 2 4-4"/>:null}</svg>;
-  if(label==='Publication Format')return <svg {...common}><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h4M9 13h6M9 17h6"/></svg>;
-  if(label==='Subject')return <svg {...common}><path d="m12 3 8 4-8 4-8-4 8-4Z"/><path d="m4 12 8 4 8-4M4 17l8 4 8-4"/></svg>;
-  if(label==='ISSN Status')return <svg {...common}><path d="M7 3h10l4 4v10l-4 4H7l-4-4V7l4-4Z"/><path d="M8 12h8M8 8h5M8 16h5"/></svg>;
-  if(label==='Volume / Issue')return <svg {...common}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg>;
-  if(label==='Paper Submission Last Date')return <svg {...common}><path d="M5 4h14v16H5z"/><path d="M9 2v4M15 2v4M5 9h14"/><path d="M9 14h6M9 17h4"/></svg>;
-  return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>;
-}
-
-function DetailItem({label,value,color,valueColor}:{label:string;value:string;color:string;valueColor?:string}){
-  return <div style={{display:'grid',gridTemplateColumns:'24px minmax(0,1fr)',gap:7,alignItems:'start',padding:'3px 0'}}>
-    <span style={{width:23,height:23,borderRadius:6,display:'grid',placeItems:'center',background:'#fff',border:`1px solid ${color}24`,boxShadow:'0 1px 2px rgba(15,35,50,.05)'}}><DetailIcon label={label} color={color}/></span>
-    <div><strong style={{display:'block',fontSize:8.7,textTransform:'uppercase',letterSpacing:'.055em',color:'#6b7782',marginBottom:1}}>{label}</strong><span style={{fontWeight:700,color:valueColor||color,fontSize:10.5,lineHeight:1.35}}>{value}</span></div>
+function PanelHeading({title,color,calendar=false}:{title:string;color:string;calendar?:boolean}){
+  return <div style={{display:'flex',alignItems:'center',gap:8,fontSize:10,fontWeight:800,letterSpacing:'.075em',textTransform:'uppercase',color,marginBottom:12}}>
+    <span style={{width:24,height:24,borderRadius:5,display:'grid',placeItems:'center',background:`${color}0d`,border:`1px solid ${color}22`}}>
+      {calendar?<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M8 14h3M13 14h3M8 17h3"/></svg>:<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>}
+    </span>
+    <span>{title}</span>
   </div>;
 }
 
-function PanelHeading({title,color,calendar=false}:{title:string;color:string;calendar?:boolean}){
-  return <div style={{display:'flex',alignItems:'center',gap:7,fontSize:9.7,fontWeight:800,letterSpacing:'.075em',textTransform:'uppercase',color,marginBottom:10}}>
-    <span style={{width:25,height:25,borderRadius:6,display:'grid',placeItems:'center',background:'#fff',border:`1px solid ${color}28`}}>
-      {calendar?<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M8 14h3M13 14h3M8 17h3"/></svg>:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>}
-    </span>
-    <span>{title}</span>
+function InfoItem({label,value,valueColor='#203344'}:{label:string;value:string;valueColor?:string}){
+  return <div style={{padding:'1px 0 5px'}}>
+    <div style={{fontSize:8.5,textTransform:'uppercase',letterSpacing:'.065em',color:'#73808c',marginBottom:2,fontWeight:700}}>{label}</div>
+    <div style={{fontSize:10.5,lineHeight:1.35,fontWeight:700,color:valueColor}}>{value}</div>
+  </div>;
+}
+
+function ScheduleItem({label,value,accent}:{label:string;value:string;accent:string}){
+  return <div style={{background:'#fff',border:'1px solid #e2e8ec',borderRadius:5,padding:'8px 9px',minHeight:49}}>
+    <div style={{fontSize:8.2,textTransform:'uppercase',letterSpacing:'.06em',color:'#7a8792',fontWeight:700,marginBottom:3}}>{label}</div>
+    <div style={{fontSize:10.5,lineHeight:1.35,fontWeight:800,color:accent}}>{value}</div>
   </div>;
 }
 
@@ -91,24 +85,24 @@ export default async function Home(){
       <div style={{display:'grid',gap:16,alignContent:'start'}}>
         <article className="journalCard green"><img className="journalLogo" src="/api/brand/green_logo" alt={settings.green_title}/><div className="journalCopy"><h2><JournalTitle kind="green" title={settings.green_title} size={20}/></h2><p>{settings.green_description}</p><Link className="btn btnGreen" href="/green">View GREEN Research Papers →</Link><div className="featureRow"><span>⚖ Peer-reviewed</span><span>▣ Open access</span><span>◉ Multidisciplinary</span></div></div><div className="journalWatermark">▤</div></article>
 
-        <section style={{border:'1px solid #cfe5d6',background:'linear-gradient(180deg,#fbfefc,#f4faf6)',padding:'14px 15px',borderRadius:8,boxShadow:'0 3px 12px rgba(20,132,68,.06)'}}>
+        <section style={{border:'1px solid #d7e5dc',borderLeft:'3px solid #148444',background:'#fbfdfb',padding:'13px 14px',borderRadius:6}}>
           <PanelHeading title="GREEN Journal Particulars" color="#148444"/>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'8px 18px'}}>{[
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,minmax(0,1fr))',gap:'7px 16px'}}>{[
             ['Frequency',settings.green_frequency],
             ['Language',settings.green_language],
             ['Starting Year',String(settings.first_volume_year)],
             ['Publication Format',settings.green_format],
             ['Subject',settings.green_subject],
             ['ISSN Status',greenIssnStatus],
-          ].map(([label,value])=><DetailItem key={label} label={label} value={value} color="#183f2a" valueColor={label==='ISSN Status'&&greenIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#183f2a'}/>)}</div>
-          {greenScheduleVisible?<div style={{borderTop:'1px solid #cfe5d6',marginTop:13,paddingTop:11}}>
+          ].map(([label,value])=><InfoItem key={label} label={label} value={value} valueColor={label==='ISSN Status'&&greenIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#183f2a'}/>)}</div>
+          {greenScheduleVisible?<div style={{borderTop:'1px solid #dbe7df',marginTop:8,paddingTop:11}}>
             <PanelHeading title="Upcoming Issue Schedule" color="#148444" calendar/>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'8px 18px'}}>{[
-              ['Volume / Issue',[settings.green_upcoming_volume?`Volume ${settings.green_upcoming_volume}`:'',settings.green_upcoming_issue?`Issue ${settings.green_upcoming_issue}`:''].filter(Boolean).join(' · ')||'—'],
-              ['Issue Month',formatMonthYear(settings.green_upcoming_month)],
-              ['Publication Date',formatDate(settings.green_upcoming_publication_date)],
-              ['Paper Submission Last Date',formatDate(settings.green_upcoming_submission_deadline)],
-            ].map(([label,value])=><DetailItem key={label} label={label} value={value} color="#183f2a"/>)}</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:7}}>
+              <ScheduleItem label="Volume / Issue" value={[settings.green_upcoming_volume?`Volume ${settings.green_upcoming_volume}`:'',settings.green_upcoming_issue?`Issue ${settings.green_upcoming_issue}`:''].filter(Boolean).join(' · ')||'—'} accent="#183f2a"/>
+              <ScheduleItem label="Issue Month" value={formatMonthYear(settings.green_upcoming_month)} accent="#183f2a"/>
+              <ScheduleItem label="Publication Date" value={formatDate(settings.green_upcoming_publication_date)} accent="#148444"/>
+              <ScheduleItem label="Paper Submission Last Date" value={formatDate(settings.green_upcoming_submission_deadline)} accent="#8a6412"/>
+            </div>
           </div>:null}
         </section>
 
@@ -118,24 +112,24 @@ export default async function Home(){
       <div style={{display:'grid',gap:16,alignContent:'start'}}>
         <article className="journalCard red"><img className="journalLogo redJournalLogo" src="/api/brand/red_logo" alt={settings.red_title}/><div className="journalCopy"><h2><JournalTitle kind="red" title={settings.red_title} size={20}/></h2><p>{settings.red_description}</p><Link className="btn btnRed" href="/red">View RED Publications →</Link><div className="featureRow"><span>▣ Print publication</span><span>▤ Scholarly publications</span><span>▰ Multidisciplinary</span></div></div><div className="journalWatermark">▥</div></article>
 
-        <section style={{border:'1px solid #efd2d3',background:'linear-gradient(180deg,#fffdfd,#fff6f6)',padding:'14px 15px',borderRadius:8,boxShadow:'0 3px 12px rgba(189,32,37,.06)'}}>
+        <section style={{border:'1px solid #eed9da',borderLeft:'3px solid #bd2025',background:'#fffdfd',padding:'13px 14px',borderRadius:6}}>
           <PanelHeading title="RED Journal Particulars" color="#bd2025"/>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'8px 18px'}}>{[
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,minmax(0,1fr))',gap:'7px 16px'}}>{[
             ['Frequency',settings.red_frequency],
             ['Language',settings.red_language],
             ['Starting Year',String(settings.red_starting_year)],
             ['Publication Format',settings.red_format],
             ['Subject',settings.red_subject],
             ['ISSN Status',redIssnStatus],
-          ].map(([label,value])=><DetailItem key={label} label={label} value={value} color="#722226" valueColor={label==='ISSN Status'&&redIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#722226'}/>)}</div>
-          {redScheduleVisible?<div style={{borderTop:'1px solid #efd2d3',marginTop:13,paddingTop:11}}>
+          ].map(([label,value])=><InfoItem key={label} label={label} value={value} valueColor={label==='ISSN Status'&&redIssnStatus==='Pending / Not Assigned'?'#9a6a12':'#722226'}/>)}</div>
+          {redScheduleVisible?<div style={{borderTop:'1px solid #efdede',marginTop:8,paddingTop:11}}>
             <PanelHeading title="Upcoming Issue Schedule" color="#bd2025" calendar/>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'8px 18px'}}>{[
-              ['Volume / Issue',[settings.red_upcoming_volume?`Volume ${settings.red_upcoming_volume}`:'',settings.red_upcoming_issue?`Issue ${settings.red_upcoming_issue}`:''].filter(Boolean).join(' · ')||'—'],
-              ['Issue Month',formatMonthYear(settings.red_upcoming_month)],
-              ['Publication Date',formatDate(settings.red_upcoming_publication_date)],
-              ['Paper Submission Last Date',formatDate(settings.red_upcoming_submission_deadline)],
-            ].map(([label,value])=><DetailItem key={label} label={label} value={value} color="#722226"/>)}</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:7}}>
+              <ScheduleItem label="Volume / Issue" value={[settings.red_upcoming_volume?`Volume ${settings.red_upcoming_volume}`:'',settings.red_upcoming_issue?`Issue ${settings.red_upcoming_issue}`:''].filter(Boolean).join(' · ')||'—'} accent="#722226"/>
+              <ScheduleItem label="Issue Month" value={formatMonthYear(settings.red_upcoming_month)} accent="#722226"/>
+              <ScheduleItem label="Publication Date" value={formatDate(settings.red_upcoming_publication_date)} accent="#bd2025"/>
+              <ScheduleItem label="Paper Submission Last Date" value={formatDate(settings.red_upcoming_submission_deadline)} accent="#8a6412"/>
+            </div>
           </div>:null}
         </section>
 
