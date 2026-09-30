@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {Header,Footer} from '../components';
+import {Header,Footer,JournalTitle} from '../components';
 
 export default function About(){
   return <>
@@ -13,8 +13,10 @@ export default function About(){
         <p>The Institute encourages meaningful research across social, scientific, educational, economic, cultural, and technological areas, with the aim of supporting the academic community and wider society.</p>
 
         <h2>Our Journals</h2>
-        <p><strong>GREEN: The Research Journal</strong> is an international, peer-reviewed, open-access research journal for original and unpublished research papers and scholarly articles across multiple disciplines.</p>
-        <p><strong>RED: The Research Journal e-Journal</strong> is an electronic research journal published by IRED to promote the online dissemination of scholarly and research-based knowledge.</p>
+        <div style={{margin:'10px 0 7px'}}><JournalTitle kind="green" size={18}/></div>
+        <p style={{marginTop:0}}>An international, peer-reviewed, open-access research e-Journal for original and unpublished research papers and scholarly articles across multiple disciplines.</p>
+        <div style={{margin:'14px 0 7px'}}><JournalTitle kind="red" size={18}/></div>
+        <p style={{marginTop:0}}>A print research journal published by IRED to disseminate scholarly and research-based knowledge across multiple academic disciplines.</p>
         <p><Link href="/journal-information" style={{fontWeight:700,color:'#0b5f91'}}>View official Journal Information, Publisher and Publishing Body details →</Link></p>
 
         <h2>Our Vision</h2>
