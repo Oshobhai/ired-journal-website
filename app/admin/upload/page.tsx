@@ -6,7 +6,7 @@ export const dynamic='force-dynamic'
 
 export default async function UploadCenterAdmin(){
   const access=await requireAdmin()
-  return <AdminFrame access={access} active="upload" kicker="Publication Workflow" title="Upload Center" description="Upload GREEN research papers as Draft, generate and check the certificate, then publish the paper and certificate together. RED publication files are managed through the same protected workflow.">
+  return <AdminFrame access={access} active="upload" kicker="Publication Workflow" title="Upload Center" description="Upload new GREEN research papers and RED print publications. Existing records, certificates, publication status and file management are handled in their dedicated GREEN Papers and RED Publications sections.">
     <PublicationManager/>
   </AdminFrame>
 }
