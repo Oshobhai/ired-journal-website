@@ -16,7 +16,7 @@ type Props = {
   children: React.ReactNode
 }
 
-type IconName='overview'|'green'|'red'|'editorial'|'upload'|'settings'|'brand'|'contact'|'access'|'security'
+type IconName='overview'|'green'|'red'|'editorial'|'upload'|'settings'|'brand'|'contact'|'access'|'security'|'activity'
 
 function AdminIcon({name}:{name:IconName}){
   const common={width:14,height:14,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,strokeLinecap:'round' as const,strokeLinejoin:'round' as const,'aria-hidden':true}
@@ -29,6 +29,7 @@ function AdminIcon({name}:{name:IconName}){
   if(name==='brand')return <svg {...common}><rect x="3" y="4" width="18" height="16" rx="1"/><circle cx="9" cy="9" r="2"/><path d="m5 17 4-4 3 3 2-2 5 3"/></svg>
   if(name==='contact')return <svg {...common}><path d="M7.5 4 10 8l-2 2c1.4 3 3.6 5.2 6.6 6.6l2-2 4 2.5-.8 3c-.2.7-.9 1.1-1.6 1-8-.9-14.4-7.3-15.3-15.3-.1-.7.3-1.4 1-1.6z"/></svg>
   if(name==='access')return <svg {...common}><circle cx="8" cy="8" r="3"/><path d="M3 20c.5-4 2.2-6 5-6 1.3 0 2.4.4 3.2 1.1"/><circle cx="17" cy="16" r="3"/><path d="m19.2 13.8 1.8-1.8M20.4 12.6l1 1"/></svg>
+  if(name==='activity')return <svg {...common}><path d="M4 19V9M9 19V5M14 19v-7M19 19V3"/><path d="M3 21h18"/></svg>
   return <svg {...common}><path d="M12 3 5 6v5c0 4.8 2.6 8.1 7 10 4.4-1.9 7-5.2 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg>
 }
 
@@ -47,7 +48,7 @@ export default function AdminFrame({access,active,kicker,title,description,child
       <aside className={styles.side}>
         {isAdmin?<><div className={styles.sideTitle}>Publications</div><nav className={styles.navGroup}><NavItem href="/admin/dashboard" label="Overview" icon="overview" active={active==='dashboard'}/><div className={styles.publicationPair}><NavItem href="/admin/green" label="GREEN Papers" icon="green" active={active==='green'}/><NavItem href="/admin/red" label="RED Publications" icon="red" active={active==='red'}/></div></nav></>:null}
         <div className={styles.sideTitle}>Academic Governance</div><nav className={styles.navGroup}><NavItem href="/admin/editorial-board" label="Editorial Board" icon="editorial" active={active==='editorial-board'}/></nav>
-        {isAdmin?<><div className={styles.sideTitle}>Publication Workflow</div><nav className={styles.navGroup}><NavItem href="/admin/upload" label="Upload Center" icon="upload" active={active==='upload'}/></nav><div className={styles.sideTitle}>Administration</div><nav className={styles.navGroup}><NavItem href="/admin/website-settings" label="Website Settings" icon="settings" active={active==='website-settings'}/><NavItem href="/admin/brand" label="Brand & Logos" icon="brand" active={active==='brand'}/><NavItem href="/admin/contact-settings" label="Contact Details" icon="contact" active={active==='contact-settings'}/><NavItem href="/admin/access" label="Staff Access" icon="access" active={active==='access'}/><NavItem href="/admin/security" label="Security & Storage" icon="security" active={active==='security'}/></nav></>:null}
+        {isAdmin?<><div className={styles.sideTitle}>Publication Workflow</div><nav className={styles.navGroup}><NavItem href="/admin/upload" label="Upload Center" icon="upload" active={active==='upload'}/></nav><div className={styles.sideTitle}>Administration</div><nav className={styles.navGroup}><NavItem href="/admin/activity-log" label="Activity Log" icon="activity" active={active==='activity-log'}/><NavItem href="/admin/website-settings" label="Website Settings" icon="settings" active={active==='website-settings'}/><NavItem href="/admin/brand" label="Brand & Logos" icon="brand" active={active==='brand'}/><NavItem href="/admin/contact-settings" label="Contact Details" icon="contact" active={active==='contact-settings'}/><NavItem href="/admin/access" label="Staff Access" icon="access" active={active==='access'}/><NavItem href="/admin/security" label="Security & Storage" icon="security" active={active==='security'}/></nav></>:null}
         <div className={styles.accountBox}><div className={styles.accountLabel}>Signed in account</div><div className={styles.accountEmail}>{access.user.email}</div><div className={styles.accountRole}>{isAdmin?'Administrator — full control':'Editorial Board Manager — restricted access'}</div></div>
         <div className={styles.sideMotto}>“Knowledge for a Better Tomorrow”</div>
       </aside>
