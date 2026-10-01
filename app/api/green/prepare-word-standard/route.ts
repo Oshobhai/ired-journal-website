@@ -114,39 +114,56 @@ export async function POST(request:Request){
   const stem=safeFileName(originalName.replace(/\.docx$/i,''))
   const processedPath=`${year}/${articleId}-${stem}.docx`
   const supabase=await createClient()
+  const db=supabase as unknown as {from:(table:string)=>any}
 
   try{
-    const [{data:contact},{data:site},{data:issueRows,error:issueError}]=await Promise.all([
+    const [{data:contact},{data:site},{data:currentIssue,error:currentIssueError},{data:issueRows,error:issueError}]=await Promise.all([
       supabase.from('contact_settings').select('green_issn').eq('id',true).maybeSingle(),
       supabase.from('site_settings').select('green_title').eq('id',true).maybeSingle(),
+      db.from('green_issues').select('publication_year,publication_month,volume,issue,status').eq('is_current',true).maybeSingle(),
       supabase.from('green_papers').select('article_id,issue,publication_month').eq('publication_year',year).neq('article_id',articleId),
     ])
+    if(currentIssueError)throw currentIssueError
     if(issueError)throw issueError
 
-    let maxIssue=0
-    let monthIssue=0
-    for(const row of issueRows||[]){
-      const n=Number.parseInt(String(row.issue||''),10)
-      if(Number.isFinite(n)){
-        maxIssue=Math.max(maxIssue,n)
-        if(String(row.publication_month||'').trim().toLowerCase()===month.trim().toLowerCase())monthIssue=Math.max(monthIssue,n)
+    let effectiveMonth=month
+    let effectiveYear=year
+    let effectiveVolume=volume
+    let issue=0
+
+    if(currentIssue){
+      effectiveMonth=String(currentIssue.publication_month||'').trim()
+      effectiveYear=Number(currentIssue.publication_year)
+      effectiveVolume=Number.parseInt(String(currentIssue.volume||''),10)
+      issue=Number.parseInt(String(currentIssue.issue||''),10)
+      if(currentIssue.status!=='open'||!effectiveMonth||!Number.isFinite(effectiveYear)||!Number.isFinite(effectiveVolume)||!Number.isFinite(issue))throw new Error('Current GREEN Issue metadata is incomplete. Fix it in Admin → GREEN Papers → Current Issue.')
+    }else{
+      let maxIssue=0
+      let monthIssue=0
+      for(const row of issueRows||[]){
+        const n=Number.parseInt(String(row.issue||''),10)
+        if(Number.isFinite(n)){
+          maxIssue=Math.max(maxIssue,n)
+          if(String(row.publication_month||'').trim().toLowerCase()===month.trim().toLowerCase())monthIssue=Math.max(monthIssue,n)
+        }
       }
+      issue=monthIssue||Math.max(1,maxIssue+1)
     }
-    const issue=monthIssue||Math.max(1,maxIssue+1)
+
     const issn=contact?.green_issn?.trim()||'Pending'
     const journalTitle=site?.green_title?.trim()||'GREEN: The Research e-Journal'
 
-    const {error:recordUpdateError}=await supabase.from('green_papers').update({issue:String(issue)}).eq('article_id',articleId)
+    const {error:recordUpdateError}=await supabase.from('green_papers').update({publication_month:effectiveMonth,publication_year:effectiveYear,volume:String(effectiveVolume),issue:String(issue)}).eq('article_id',articleId)
     if(recordUpdateError)throw recordUpdateError
 
     const {data:file,error:downloadError}=await supabase.storage.from('green-manuscripts').download(processedPath)
     if(downloadError||!file)throw new Error(downloadError?.message||'Could not open the prepared Word file.')
-    const updated=formatDocx(Buffer.from(await file.arrayBuffer()),articleId,volume,issue,month,year,issn,journalTitle)
+    const updated=formatDocx(Buffer.from(await file.arrayBuffer()),articleId,effectiveVolume,issue,effectiveMonth,effectiveYear,issn,journalTitle)
     const {error:updateError}=await supabase.storage.from('green-manuscripts').update(processedPath,new Blob([updated]),{contentType:DOCX_MIME})
     if(updateError)throw updateError
     const {data:signed,error:signedError}=await supabase.storage.from('green-manuscripts').createSignedUrl(processedPath,3600,{download:`${articleId}.docx`})
     if(signedError)throw signedError
-    return Response.json({...basePayload,issue,downloadUrl:signed?.signedUrl||basePayload.downloadUrl,headerStyle:'ISSN-compliant GREEN journal header',journalTitle,issn})
+    return Response.json({...basePayload,month:effectiveMonth,year:effectiveYear,volume:effectiveVolume,issue,downloadUrl:signed?.signedUrl||basePayload.downloadUrl,headerStyle:'ISSN-compliant GREEN journal header',journalTitle,issn,currentIssue:Boolean(currentIssue)})
   }catch(error){
     await supabase.from('green_papers').delete().eq('article_id',articleId)
     await supabase.storage.from('green-manuscripts').remove([processedPath])
