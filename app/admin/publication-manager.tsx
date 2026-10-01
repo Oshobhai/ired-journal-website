@@ -1,26 +1,7 @@
 'use client'
 
-import { FormEvent, useCallback, useEffect, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import GreenCertificateManager from './green-certificate-manager'
-
-type Publication = {
-  id: string
-  title: string
-  status: 'draft' | 'published' | 'archived'
-  pdf_path: string
-  cover_path?: string | null
-  created_at: string
-  authors?: string | null
-  affiliation?: string | null
-  editors?: string | null
-  publication_year?: number | null
-  publication_month?: string | null
-  volume?: string | null
-  issue?: string | null
-  article_id?: string | null
-  publication_label?: string | null
-}
 
 const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
@@ -30,21 +11,8 @@ function safeFileName(name:string){
 
 export default function PublicationManager(){
   const supabase=createClient()
-  const [green,setGreen]=useState<Publication[]>([])
-  const [red,setRed]=useState<Publication[]>([])
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState('')
-
-  const load=useCallback(async()=>{
-    const [{data:g},{data:r}]=await Promise.all([
-      supabase.from('green_papers').select('id,title,authors,affiliation,status,pdf_path,publication_year,publication_month,volume,issue,article_id,created_at').order('created_at',{ascending:false}),
-      supabase.from('red_books').select('id,title,editors,status,pdf_path,cover_path,publication_year,publication_month,volume,issue,publication_label,created_at').order('created_at',{ascending:false}),
-    ])
-    setGreen((g||[]) as Publication[])
-    setRed((r||[]) as Publication[])
-  },[supabase])
-
-  useEffect(()=>{void load()},[load])
 
   async function uploadGreen(event:FormEvent<HTMLFormElement>){
     event.preventDefault()
@@ -108,9 +76,8 @@ export default function PublicationManager(){
 
       formEl.reset()
       setMessage(certificatePath
-        ? 'GREEN paper and certificate uploaded successfully as Draft. Check the certificate below, then publish the paper and certificate together.'
-        : 'GREEN paper uploaded successfully as Draft. You can upload or generate a certificate below before publishing.')
-      await load()
+        ? 'GREEN paper and certificate uploaded successfully as Draft. Continue management from GREEN Papers.'
+        : 'GREEN paper uploaded successfully as Draft. Continue certificate and publication work from GREEN Papers.')
     }catch(error){
       if(path)await supabase.storage.from('green-papers').remove([path])
       if(certificatePath)await supabase.storage.from('green-certificates').remove([certificatePath])
@@ -131,7 +98,7 @@ export default function PublicationManager(){
       const {data:{user},error:userError}=await supabase.auth.getUser()
       if(userError||!user)throw new Error('Admin session expired. Please sign in again.')
       if(!file||file.type!=='application/pdf')throw new Error('Please select a PDF file.')
-      if(file.size>200*1024*1024)throw new Error('RED book PDF must be 200 MB or less.')
+      if(file.size>200*1024*1024)throw new Error('RED publication PDF must be 200 MB or less.')
 
       if(cover&&cover.size>0){
         if(!['image/jpeg','image/png','image/webp'].includes(cover.type))throw new Error('Cover must be JPG, PNG, or WebP.')
@@ -166,67 +133,13 @@ export default function PublicationManager(){
         created_by:user.id,
       })
       if(insertError)throw insertError
-      formEl.reset();setMessage('RED publication uploaded successfully.');await load()
+      formEl.reset()
+      setMessage('RED publication uploaded successfully. Continue management from RED Publications.')
     }catch(error){
       if(pdfPath)await supabase.storage.from('red-books').remove([pdfPath])
       if(coverPath)await supabase.storage.from('red-book-covers').remove([coverPath])
       setMessage(error instanceof Error?error.message:'RED upload failed.')
     }finally{setBusy(false)}
-  }
-
-  async function repairRedFiles(event:FormEvent<HTMLFormElement>,item:Publication){
-    event.preventDefault()
-    const formEl=event.currentTarget
-    const form=new FormData(formEl)
-    const pdf=form.get('repair_pdf') as File
-    const cover=form.get('repair_cover') as File
-    let newPdfPath='';let newCoverPath=''
-    setBusy(true);setMessage('')
-    try{
-      const hasPdf=pdf&&pdf.size>0
-      const hasCover=cover&&cover.size>0
-      if(!hasPdf&&!hasCover)throw new Error('Select a PDF or cover image first.')
-      if(hasPdf){
-        if(pdf.type!=='application/pdf')throw new Error('RED publication file must be PDF.')
-        newPdfPath=`${new Date().getFullYear()}/${crypto.randomUUID()}-${safeFileName(pdf.name)}`
-        const {error}=await supabase.storage.from('red-books').upload(newPdfPath,pdf,{contentType:'application/pdf',upsert:false});if(error)throw error
-      }
-      if(hasCover){
-        if(!['image/jpeg','image/png','image/webp'].includes(cover.type))throw new Error('Cover must be JPG, PNG, or WebP.')
-        newCoverPath=`${new Date().getFullYear()}/${crypto.randomUUID()}-${safeFileName(cover.name)}`
-        const {error}=await supabase.storage.from('red-book-covers').upload(newCoverPath,cover,{contentType:cover.type,upsert:false});if(error)throw error
-      }
-      const updates:Record<string,string|number|null>={}
-      if(newPdfPath){updates.pdf_path=newPdfPath;updates.pdf_size=pdf.size}
-      if(newCoverPath)updates.cover_path=newCoverPath
-      const {error}=await supabase.from('red_books').update(updates).eq('id',item.id);if(error)throw error
-      if(newPdfPath&&item.pdf_path)await supabase.storage.from('red-books').remove([item.pdf_path])
-      if(newCoverPath&&item.cover_path)await supabase.storage.from('red-book-covers').remove([item.cover_path])
-      formEl.reset();setMessage('RED files updated successfully.');await load()
-    }catch(error){
-      if(newPdfPath)await supabase.storage.from('red-books').remove([newPdfPath])
-      if(newCoverPath)await supabase.storage.from('red-book-covers').remove([newCoverPath])
-      setMessage(error instanceof Error?error.message:'File update failed.')
-    }finally{setBusy(false)}
-  }
-
-  async function setStatus(kind:'green'|'red',item:Publication,status:Publication['status']){
-    setBusy(true);setMessage('')
-    const table=kind==='green'?'green_papers':'red_books'
-    const {error}=await supabase.from(table).update({status,published_at:status==='published'?new Date().toISOString():null}).eq('id',item.id)
-    setMessage(error?error.message:`Status changed to ${status}.`)
-    await load();setBusy(false)
-  }
-
-  async function removeItem(kind:'green'|'red',item:Publication){
-    if(!confirm(`Delete “${item.title}” and its files?`))return
-    setBusy(true);setMessage('')
-    const bucket=kind==='green'?'green-papers':'red-books'
-    const table=kind==='green'?'green_papers':'red_books'
-    if(item.pdf_path)await supabase.storage.from(bucket).remove([item.pdf_path])
-    if(kind==='red'&&item.cover_path)await supabase.storage.from('red-book-covers').remove([item.cover_path])
-    const {error}=await supabase.from(table).delete().eq('id',item.id)
-    setMessage(error?error.message:'Publication deleted.');await load();setBusy(false)
   }
 
   const fieldStyle={width:'100%',padding:'9px 10px',border:'1px solid #ccd5dd',borderRadius:5,marginTop:4,marginBottom:10} as const
@@ -238,7 +151,7 @@ export default function PublicationManager(){
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:18}}>
       <section className="contentCard">
         <h2>Add GREEN Research Paper</h2>
-        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Enter publication details exactly as they appear on the final paper PDF. The paper is saved as Draft first.</p>
+        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Upload a new GREEN paper as Draft. Existing papers are managed from GREEN Papers.</p>
         <form onSubmit={uploadGreen}>
           <label style={labelStyle}>Paper Title<input name="paper_title" required style={fieldStyle}/></label>
           <label style={labelStyle}>Author Name<input name="author_name" required style={fieldStyle}/></label>
@@ -249,18 +162,19 @@ export default function PublicationManager(){
             <label style={labelStyle}>Volume<input name="volume" type="number" min="1" required placeholder="1" style={fieldStyle}/></label>
             <label style={labelStyle}>Issue<input name="issue" type="number" min="1" required placeholder="1" style={fieldStyle}/></label>
           </div>
-          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Manual entry: Month, Year, Volume and Issue are saved exactly as entered. Article ID remains automatic.</div>
+          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Month, Year, Volume and Issue are saved exactly as entered. Article ID remains automatic.</div>
           <label style={labelStyle}>Paper PDF (max 50 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required style={fieldStyle}/></label>
           <label style={labelStyle}>Certificate PDF (optional · max 10 MB)<input name="certificate" type="file" accept="application/pdf,.pdf" style={fieldStyle}/></label>
-          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>You can upload your prepared certificate with the paper. If you do not upload one now, you can upload or generate it in the certificate workflow below before publishing.</div>
+          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Certificate work and publishing are handled from GREEN Papers after upload.</div>
           <button className="btn btnGreen" disabled={busy} type="submit">{busy?'Uploading…':'Upload GREEN Paper'}</button>
         </form>
       </section>
 
       <section className="contentCard">
-        <h2>Add RED Research Book / Volume</h2>
+        <h2>Add RED Print Publication</h2>
+        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Upload a new RED print publication. Existing records are managed from RED Publications.</p>
         <form onSubmit={uploadRed}>
-          <label style={labelStyle}>Book / Volume Cover (JPG, PNG, WebP · max 5 MB)<input name="cover" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" style={fieldStyle}/></label>
+          <label style={labelStyle}>Cover (JPG, PNG, WebP · max 5 MB)<input name="cover" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" style={fieldStyle}/></label>
           <label style={labelStyle}>Title<input name="title" required style={fieldStyle}/></label>
           <label style={labelStyle}>Subtitle<input name="subtitle" style={fieldStyle}/></label>
           <label style={labelStyle}>Editor(s)<input name="editors" style={fieldStyle}/></label>
@@ -277,48 +191,5 @@ export default function PublicationManager(){
         </form>
       </section>
     </div>
-
-    <div id="green-certificate-workflow"><GreenCertificateManager/></div>
-
-    <section className="contentCard">
-      <h2>GREEN Papers</h2>
-      {green.length===0?<p>No papers uploaded yet.</p>:green.map(item=>{
-        const numbering=[item.volume?`Volume ${item.volume}`:null,item.issue?`Issue ${item.issue}`:null,item.publication_month||null,item.publication_year||null].filter(Boolean).join(' · ')
-        return <div key={item.id} style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',padding:'10px 0',borderBottom:'1px solid #e4e9ed'}}>
-          <div style={{minWidth:0}}>
-            <strong>{item.title}</strong>
-            <div style={{fontSize:12,color:'#667',marginTop:3}}>{item.authors||'—'}{item.affiliation?` · ${item.affiliation}`:''}</div>
-            <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:6}}>
-              {item.article_id?<span style={{fontSize:10.5,padding:'3px 6px',background:'#f4f7f9',border:'1px solid #dce4e9'}}>{item.article_id}</span>:null}
-              <span style={{fontSize:10.5,padding:'3px 6px',background:'#f4f7f9',border:'1px solid #dce4e9'}}>{numbering||'Numbering pending'}</span>
-              <span style={{fontSize:10.5,padding:'3px 6px',background:item.status==='published'?'#eef8f2':'#fff8e9',border:'1px solid #dce4e9'}}>{item.status}</span>
-            </div>
-          </div>
-          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={()=>setStatus('green',item,item.status==='published'?'draft':'published')}>{item.status==='published'?'Unpublish':'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={()=>removeItem('green',item)}>Delete</button></div>
-        </div>
-      })}
-    </section>
-
-    <section className="contentCard">
-      <h2>RED Books</h2>
-      {red.length===0?<p>No books uploaded yet.</p>:red.map(item=>{
-        const coverUrl=item.cover_path?supabase.storage.from('red-book-covers').getPublicUrl(item.cover_path).data.publicUrl:null
-        const dateLabel=[item.publication_month,item.publication_year].filter(Boolean).join(' ')||item.publication_label||'Date not set'
-        return <div key={item.id} style={{padding:'12px 0',borderBottom:'1px solid #e4e9ed'}}>
-          <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center'}}>
-            <div style={{display:'flex',gap:10,alignItems:'center'}}>{coverUrl?<img src={coverUrl} alt="" style={{width:46,height:62,objectFit:'cover',borderRadius:3,border:'1px solid #ddd'}}/>:<div style={{width:46,height:62,border:'1px dashed #c8c8c8',borderRadius:3,display:'grid',placeItems:'center',fontSize:9,color:'#777'}}>No cover</div>}<div><strong>{item.title}</strong><div style={{fontSize:12,color:'#667'}}>{item.editors||'Editor not set'} · {dateLabel}{item.volume?` · Volume ${item.volume}`:''}{item.issue?` · Issue ${item.issue}`:''} · {item.status}</div></div></div>
-            <div style={{display:'flex',gap:6,flexWrap:'wrap'}}><button className="btn btnNavy" disabled={busy} onClick={()=>setStatus('red',item,item.status==='published'?'draft':'published')}>{item.status==='published'?'Unpublish':'Publish'}</button><button className="btn btnOutline" disabled={busy} onClick={()=>removeItem('red',item)}>Delete</button></div>
-          </div>
-          <form onSubmit={event=>repairRedFiles(event,item)} style={{marginTop:10,padding:10,background:'#f7f9fa',border:'1px solid #e2e7eb',borderRadius:6}}>
-            <div style={{fontSize:12,fontWeight:700,marginBottom:6}}>Repair / Replace RED files</div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:8,alignItems:'end'}}>
-              <label style={labelStyle}>PDF<input name="repair_pdf" type="file" accept="application/pdf,.pdf" style={{...fieldStyle,marginBottom:0}}/></label>
-              <label style={labelStyle}>Cover image<input name="repair_cover" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" style={{...fieldStyle,marginBottom:0}}/></label>
-              <button className="btn btnRed" disabled={busy} type="submit">{busy?'Working…':'Save Files'}</button>
-            </div>
-          </form>
-        </div>
-      })}
-    </section>
   </div>
 }
