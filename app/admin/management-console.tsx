@@ -89,7 +89,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
       const selectColumns=kind==='green'
         ? 'id,article_id,title,authors,status,pdf_path,certificate_path,certificate_uploaded_at,publication_year,publication_month,volume,issue,doi,published_at,created_at,updated_at'
         : 'id,title,editors,status,pdf_path,cover_path,publication_year,publication_month,volume,issue,issn,published_at,created_at,updated_at'
-      let query=supabase.from(table).select(selectColumns,{count:'exact'})
+      let query:any=supabase.from(table).select(selectColumns,{count:'exact'})
       if(status!=='all')query=query.eq('status',status)
       if(year.trim())query=query.eq('publication_year',Number(year))
       if(month!=='all')query=query.eq('publication_month',month)
@@ -103,7 +103,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
       }
       if(sort==='oldest')query=query.order('created_at',{ascending:true})
       else if(sort==='title')query=query.order('title',{ascending:true})
-      else if(sort==='year')query=query.order('publication_year',{ascending:false,nullsFirst:false}).order('created_at',{ascending:false})
+      else if(sort==='year')query=query.order('publication_year',{ascending:false}).order('created_at',{ascending:false})
       else query=query.order('created_at',{ascending:false})
 
       const from=(page-1)*pageSize
@@ -272,7 +272,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
   const btn = {padding:'7px 10px',border:'1px solid #cbd5df',borderRadius:5,background:'#fff',cursor:'pointer',fontSize:11,fontWeight:700} as const
   const primary = {...btn,background:'#12395c',borderColor:'#12395c',color:'#fff'} as const
   const danger = {...btn,background:'#fff5f5',borderColor:'#efc5c5',color:'#9d2525'} as const
-  const statusOptions:[StatusFilter,string,number][]=[['all','All',statusCounts.total],['draft','Drafts',statusCounts.draft],['published','Published',statusCounts.published],['archived','Archived',statusCounts.archived]]
+  const statusOptions:Array<[StatusFilter,string,number]>=[['all','All',statusCounts.total],['draft','Drafts',statusCounts.draft],['published','Published',statusCounts.published],['archived','Archived',statusCounts.archived]]
 
   return <section id="dashboard" style={{display:'grid',gap:18,marginTop:20}}>
     {showStats ? <div className="stats">
