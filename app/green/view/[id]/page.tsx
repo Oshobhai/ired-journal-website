@@ -48,8 +48,20 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
       <div style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'#14733d',marginBottom:5}}>{paper.article_type||'Research Article'}</div>
       <h1 style={{fontSize:31,maxWidth:980}}>{paper.title}</h1>
       {english?.english_title&&english.english_title!==paper.title?<p style={{fontFamily:'Georgia,serif',fontSize:15,color:'#41586b',margin:'8px 0 0',maxWidth:980}}><strong>English Title:</strong> {english.english_title}</p>:null}
-      <p style={{fontSize:13,color:'#536473',margin:'8px 0 0'}}>{paper.authors}</p>
-      {paper.affiliation?<div style={{marginTop:7,maxWidth:980,paddingTop:7,borderTop:'1px solid #d7e1e7'}}><div style={{fontSize:9.5,textTransform:'uppercase',letterSpacing:'.07em',fontWeight:800,color:'#72808c'}}>Author Affiliation</div><p style={{fontSize:11.5,lineHeight:1.55,color:'#536473',margin:'3px 0 0'}}>{paper.affiliation}</p></div>:null}
+
+      <div style={{display:'flex',alignItems:'flex-start',gap:12,maxWidth:980,marginTop:14,padding:'13px 15px',border:'1px solid #d5e1e7',borderRadius:8,background:'rgba(255,255,255,.62)',boxShadow:'0 1px 2px rgba(12,45,71,.04)'}}>
+        <div aria-hidden="true" style={{width:38,height:38,borderRadius:'50%',display:'grid',placeItems:'center',flex:'0 0 auto',background:'#eef7f2',border:'1px solid #cfe4d7',color:'#14733d'}}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div style={{minWidth:0,flex:1}}>
+          <div style={{fontSize:9.5,textTransform:'uppercase',letterSpacing:'.09em',fontWeight:800,color:'#71808c',marginBottom:3}}>Author{paper.authors.includes(',')||paper.authors.includes(';')?'s':''}</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:14.5,fontWeight:700,lineHeight:1.45,color:'#102f4d'}}>{paper.authors}</div>
+          {paper.affiliation?<div style={{display:'flex',alignItems:'flex-start',gap:7,marginTop:7,color:'#536473'}}>
+            <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{flex:'0 0 auto',marginTop:1}}><path d="M3 21h18"/><path d="M6 21V9l6-4 6 4v12"/><path d="M9 12h1"/><path d="M14 12h1"/><path d="M9 16h1"/><path d="M14 16h1"/></svg>
+            <div style={{fontSize:11.5,lineHeight:1.55}}><span style={{fontSize:9.5,textTransform:'uppercase',letterSpacing:'.07em',fontWeight:800,color:'#7a8792',marginRight:6}}>Affiliation</span>{paper.affiliation}</div>
+          </div>:null}
+        </div>
+      </div>
     </div></section>
     <main className="container" style={{padding:'22px 0 34px'}}>
       <div className="paperDetailGrid" style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) 280px',gap:24,alignItems:'start'}}>
