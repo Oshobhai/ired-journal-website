@@ -3,7 +3,31 @@
 
 alter table public.green_papers
   add column if not exists english_title text,
-  add column if not exists english_abstract text;
+  add column if not exists english_abstract text,
+  add column if not exists pdf_compliance_verified_at timestamptz,
+  add column if not exists pdf_compliance_verified_by uuid references auth.users(id) on delete set null,
+  add column if not exists pdf_compliance_note text;
+
+create or replace function public.reset_green_pdf_compliance_on_change()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.pdf_path is distinct from old.pdf_path
+     and new.pdf_compliance_verified_at is not distinct from old.pdf_compliance_verified_at then
+    new.pdf_compliance_verified_at := null;
+    new.pdf_compliance_verified_by := null;
+    new.pdf_compliance_note := null;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_reset_green_pdf_compliance on public.green_papers;
+create trigger trg_reset_green_pdf_compliance
+before update of pdf_path on public.green_papers
+for each row
+execute function public.reset_green_pdf_compliance_on_change();
 
 -- Publication management is restricted to full admins.
 alter policy admins_can_delete_green_papers on public.green_papers
