@@ -16,10 +16,17 @@ export default async function AdminDashboard(){
     supabase.from('green_papers').select('id',{count:'exact',head:true}).eq('status','draft'),
     supabase.from('red_books').select('id',{count:'exact',head:true}).eq('status','draft'),
   ])
-  const g=green||0,r=red||0,p=(greenPublished||0)+(redPublished||0),d=(greenDraft||0)+(redDraft||0)
+  const g=green||0,r=red||0,p=(greenPublished||0)+(redPublished||0),gd=greenDraft||0,rd=redDraft||0
 
   return <AdminFrame access={access} active="dashboard" kicker="Institutional Control Panel" title="Journal & Research Administration" description="A concise overview of IRED publication activity. Open a dedicated section to manage records, workflows, governance and permissions.">
-    <div className="stats" style={{marginBottom:18}}><div className="stat"><span>Total Publications</span><strong>{g+r}</strong></div><div className="stat"><span>GREEN Papers</span><strong>{g}</strong></div><div className="stat"><span>RED Publications</span><strong>{r}</strong></div><div className="stat"><span>Published</span><strong>{p}</strong></div><div className="stat"><span>Drafts</span><strong>{d}</strong></div><div className="stat"><span>Academic Portal</span><strong>Live</strong></div></div>
+    <div className="stats" style={{marginBottom:18}}>
+      <div className="stat"><span>Total Publications</span><strong>{g+r}</strong></div>
+      <div className="stat"><span>GREEN Papers</span><strong>{g}</strong></div>
+      <div className="stat"><span>RED Publications</span><strong>{r}</strong></div>
+      <div className="stat"><span>Published</span><strong>{p}</strong></div>
+      <Link className="stat" href="/admin/green?status=draft#green-manager" style={{textDecoration:'none'}}><span>GREEN Drafts</span><strong>{gd}</strong></Link>
+      <Link className="stat" href="/admin/red?status=draft#red-manager" style={{textDecoration:'none'}}><span>RED Drafts</span><strong>{rd}</strong></Link>
+    </div>
 
     <section className="contentCard">
       <h2 style={{marginTop:0}}>Publication Management</h2>
@@ -27,7 +34,7 @@ export default async function AdminDashboard(){
         <Link href="/admin/green" style={{border:'1px solid #cfe1d5',borderTop:'4px solid #148444',padding:18,background:'#fbfdfb',minWidth:0}}>
           <div style={{fontSize:9,fontWeight:800,letterSpacing:'.09em',textTransform:'uppercase',color:'#148444'}}>GREEN</div>
           <strong style={{display:'block',fontFamily:'Georgia,serif',color:'#0b2d4e',fontSize:18,marginTop:4}}>GREEN Papers</strong>
-          <span style={{display:'block',fontSize:10.5,lineHeight:1.55,color:'#687783',marginTop:6}}>Manage research papers, metadata, final PDFs, ISSN checks, certificates and publication status.</span>
+          <span style={{display:'block',fontSize:10.5,lineHeight:1.55,color:'#687783',marginTop:6}}>Manage research papers, metadata, final PDFs, certificates, publication status and archives.</span>
         </Link>
         <Link href="/admin/red" style={{border:'1px solid #ead2d4',borderTop:'4px solid #bd2025',padding:18,background:'#fffafa',minWidth:0}}>
           <div style={{fontSize:9,fontWeight:800,letterSpacing:'.09em',textTransform:'uppercase',color:'#bd2025'}}>RED</div>
