@@ -50,6 +50,7 @@ type Props = {
 
 export default function ManagementConsole({initialKind='green',lockedKind,showStats=true,initialStatus='all'}:Props) {
   const supabase = useMemo(()=>createClient(),[])
+  const db = supabase as unknown as { from:(table:string)=>any }
   const [kind, setKind] = useState<Kind>(lockedKind || initialKind)
   const [rows, setRows] = useState<Row[]>([])
   const [total, setTotal] = useState(0)
@@ -89,7 +90,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
       const selectColumns=kind==='green'
         ? 'id,article_id,title,authors,status,pdf_path,certificate_path,certificate_uploaded_at,publication_year,publication_month,volume,issue,doi,published_at,created_at,updated_at'
         : 'id,title,editors,status,pdf_path,cover_path,publication_year,publication_month,volume,issue,issn,published_at,created_at,updated_at'
-      let query:any=supabase.from(table).select(selectColumns,{count:'exact'})
+      let query:any=db.from(table).select(selectColumns,{count:'exact'})
       if(status!=='all')query=query.eq('status',status)
       if(year.trim())query=query.eq('publication_year',Number(year))
       if(month!=='all')query=query.eq('publication_month',month)
@@ -120,17 +121,17 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
       setTotal(nextTotal)
     })()
     return()=>{cancelled=true}
-  },[supabase,kind,search,status,year,month,volume,issue,sort,page,pageSize,refreshTick])
+  },[db,kind,search,status,year,month,volume,issue,sort,page,pageSize,refreshTick])
 
   useEffect(()=>{
     let cancelled=false
     void(async()=>{
       const table=kind==='green'?'green_papers':'red_books'
       const [all,published,draft,archived]=await Promise.all([
-        supabase.from(table).select('id',{count:'exact',head:true}),
-        supabase.from(table).select('id',{count:'exact',head:true}).eq('status','published'),
-        supabase.from(table).select('id',{count:'exact',head:true}).eq('status','draft'),
-        supabase.from(table).select('id',{count:'exact',head:true}).eq('status','archived'),
+        db.from(table).select('id',{count:'exact',head:true}),
+        db.from(table).select('id',{count:'exact',head:true}).eq('status','published'),
+        db.from(table).select('id',{count:'exact',head:true}).eq('status','draft'),
+        db.from(table).select('id',{count:'exact',head:true}).eq('status','archived'),
       ])
       if(cancelled)return
       const error=all.error||published.error||draft.error||archived.error
@@ -138,7 +139,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
       setStatusCounts({total:all.count||0,published:published.count||0,draft:draft.count||0,archived:archived.count||0})
     })()
     return()=>{cancelled=true}
-  },[supabase,kind,refreshTick])
+  },[db,kind,refreshTick])
 
   const totalPages=Math.max(1,Math.ceil(total/pageSize))
   const start=total?((page-1)*pageSize)+1:0
@@ -149,7 +150,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
   async function changeStatus(item: Row, next: Status) {
     setBusy(true); setMessage('')
     const table = kind === 'green' ? 'green_papers' : 'red_books'
-    const { error } = await supabase.from(table).update({ status: next, published_at: next === 'published' ? new Date().toISOString() : null }).eq('id', item.id)
+    const { error } = await db.from(table).update({ status: next, published_at: next === 'published' ? new Date().toISOString() : null }).eq('id', item.id)
     setMessage(error ? error.message : `“${item.title}” changed to ${next}.`)
     setSelected(new Set());refresh();setBusy(false)
   }
@@ -159,7 +160,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
     setBusy(true); setMessage('')
     const table = kind === 'green' ? 'green_papers' : 'red_books'
     const ids = Array.from(selected)
-    const { error } = await supabase.from(table).update({ status: next, published_at: next === 'published' ? new Date().toISOString() : null }).in('id', ids)
+    const { error } = await db.from(table).update({ status: next, published_at: next === 'published' ? new Date().toISOString() : null }).in('id', ids)
     setMessage(error ? error.message : `${ids.length} publication(s) changed to ${next}.`)
     setSelected(new Set());refresh();setBusy(false)
   }
@@ -183,7 +184,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
     if(!item.certificate_path||!confirm(`Remove certificate for “${item.title}”?`))return
     setBusy(true);setMessage('')
     const oldPath=item.certificate_path
-    const {error}=await supabase.from('green_papers').update({certificate_path:null,certificate_uploaded_at:null}).eq('id',item.id)
+    const {error}=await db.from('green_papers').update({certificate_path:null,certificate_uploaded_at:null}).eq('id',item.id)
     if(error){setMessage(error.message);setBusy(false);return}
     await supabase.storage.from('green-certificates').remove([oldPath])
     setMessage('Certificate removed.');refresh();setBusy(false)
@@ -235,7 +236,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
         updates.issn = String(f.get('issn') || '').trim() || null
         updates.publication_label = [updates.publication_month, updates.publication_year].filter(Boolean).join(' ') || null
       }
-      const { error } = await supabase.from(table).update(updates).eq('id', item.id)
+      const { error } = await db.from(table).update(updates).eq('id', item.id)
       if (error) throw error
       if (newPdfPath && item.pdf_path && item.pdf_path !== newPdfPath) await supabase.storage.from('green-papers').remove([item.pdf_path])
       if (newCertificatePath && item.certificate_path && item.certificate_path !== newCertificatePath) await supabase.storage.from('green-certificates').remove([item.certificate_path])
@@ -259,7 +260,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
     if (item.pdf_path) await supabase.storage.from(bucket).remove([item.pdf_path])
     if (kind === 'green' && item.certificate_path) await supabase.storage.from('green-certificates').remove([item.certificate_path])
     if (kind === 'red' && item.cover_path) await supabase.storage.from('red-book-covers').remove([item.cover_path])
-    const { error } = await supabase.from(table).delete().eq('id', item.id)
+    const { error } = await db.from(table).delete().eq('id', item.id)
     setMessage(error ? error.message : 'Publication permanently deleted.')
     setSelected(new Set());refresh();setBusy(false)
   }
