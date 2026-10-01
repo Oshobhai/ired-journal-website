@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -9,10 +9,105 @@ function safeFileName(name:string){
   return name.toLowerCase().replace(/[^a-z0-9._-]+/g,'-').replace(/-+/g,'-')
 }
 
+function cleanSection(value:string){
+  return value.replace(/\s*\n\s*/g,' ').replace(/\s+/g,' ').replace(/^[\s:;,.\-–—]+|[\s:;,.\-–—]+$/g,'').trim()
+}
+
+function findHeading(text:string,pattern:RegExp,from=0){
+  const match=pattern.exec(text.slice(from))
+  if(!match)return null
+  return {start:from+match.index,end:from+match.index+match[0].length}
+}
+
+function parsePdfMetadata(rawText:string){
+  const text=rawText.replace(/\r/g,'\n').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim()
+  const abstractHeading=/(?:^|\n)\s*(?:abstract|summary)\s*[:.\-–—]*/i
+  const keywordsHeading=/(?:^|\n)\s*(?:keywords?|key\s*words?|index\s*terms?)\s*[:.\-–—]*/i
+  const nextSection=/(?:^|\n)\s*(?:(?:1|i)\s*[.)-]?\s*)?(?:introduction|background|methodology|research methodology|materials and methods|objectives?)\s*[:.\-–—]*/i
+
+  let abstract=''
+  const abstractAt=findHeading(text,abstractHeading)
+  const keywordsAt=findHeading(text,keywordsHeading,abstractAt?.end||0)
+  if(abstractAt){
+    const introAt=findHeading(text,nextSection,abstractAt.end)
+    const possibleEnds=[keywordsAt?.start,introAt?.start,abstractAt.end+5000].filter((value):value is number=>typeof value==='number'&&value>abstractAt.end)
+    const end=Math.min(...possibleEnds)
+    abstract=cleanSection(text.slice(abstractAt.end,end)).slice(0,5000)
+  }
+
+  let keywordText=''
+  const keywordStart=keywordsAt||findHeading(text,keywordsHeading)
+  if(keywordStart){
+    const introAt=findHeading(text,nextSection,keywordStart.end)
+    const end=introAt?.start&&introAt.start>keywordStart.end?Math.min(introAt.start,keywordStart.end+1200):Math.min(text.length,keywordStart.end+1200)
+    keywordText=text.slice(keywordStart.end,end).trim()
+  }
+  let keywordParts=keywordText.split(/\s*[,;•·|]\s*/).map(cleanSection).filter(Boolean)
+  if(keywordParts.length<=1&&keywordText.includes('\n'))keywordParts=keywordText.split(/\n+/).map(cleanSection).filter(Boolean)
+  const keywords=[...new Set(keywordParts.filter(item=>item.length<=120).slice(0,20))]
+  return {abstract,keywords,textLength:text.length}
+}
+
+async function extractPdfMetadata(file:File){
+  const pdfjs=await import('pdfjs-dist/webpack.mjs')
+  const bytes=new Uint8Array(await file.arrayBuffer())
+  const loadingTask=pdfjs.getDocument({data:bytes})
+  const pdf=await loadingTask.promise
+  const pages:string[]=[]
+  try{
+    const pageCount=Math.min(pdf.numPages,6)
+    for(let pageNumber=1;pageNumber<=pageCount;pageNumber++){
+      const page=await pdf.getPage(pageNumber)
+      const content=await page.getTextContent()
+      const lines:string[]=[]
+      let line=''
+      for(const rawItem of content.items as unknown as Array<{str?:string;hasEOL?:boolean}>){
+        if(typeof rawItem.str!=='string')continue
+        const piece=rawItem.str.trim()
+        if(piece)line+=`${piece} `
+        if(rawItem.hasEOL){if(line.trim())lines.push(line.trim());line=''}
+      }
+      if(line.trim())lines.push(line.trim())
+      pages.push(lines.join('\n'))
+    }
+  }finally{
+    await pdf.destroy()
+  }
+  return parsePdfMetadata(pages.join('\n'))
+}
+
 export default function PublicationManager(){
   const supabase=createClient()
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState('')
+  const [extracting,setExtracting]=useState(false)
+  const [greenAbstract,setGreenAbstract]=useState('')
+  const [greenKeywords,setGreenKeywords]=useState('')
+  const [extractionNote,setExtractionNote]=useState('')
+
+  async function handleGreenPdf(event:ChangeEvent<HTMLInputElement>){
+    const file=event.target.files?.[0]
+    setGreenAbstract('')
+    setGreenKeywords('')
+    setExtractionNote('')
+    if(!file)return
+    if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf')){setExtractionNote('Please select a PDF file.');return}
+    if(file.size>50*1024*1024){setExtractionNote('PDF is larger than the 50 MB GREEN upload limit.');return}
+    setExtracting(true)
+    setExtractionNote('Reading PDF for Abstract and Keywords…')
+    try{
+      const extracted=await extractPdfMetadata(file)
+      setGreenAbstract(extracted.abstract)
+      setGreenKeywords(extracted.keywords.join(', '))
+      if(extracted.abstract&&extracted.keywords.length)setExtractionNote('Abstract and Keywords were detected from the PDF. Review or edit them before upload.')
+      else if(extracted.abstract)setExtractionNote('Abstract was detected. Keywords were not found; add them manually if needed.')
+      else if(extracted.keywords.length)setExtractionNote('Keywords were detected. Abstract was not found; add it manually if needed.')
+      else if(extracted.textLength)setExtractionNote('PDF text was readable, but Abstract/Keywords headings were not detected. You can enter them manually.')
+      else setExtractionNote('No selectable text was detected. If this is a scanned PDF, enter Abstract and Keywords manually.')
+    }catch(error){
+      setExtractionNote(error instanceof Error?`Could not read PDF metadata: ${error.message}`:'Could not read PDF metadata. Enter Abstract and Keywords manually.')
+    }finally{setExtracting(false)}
+  }
 
   async function uploadGreen(event:FormEvent<HTMLFormElement>){
     event.preventDefault()
@@ -41,6 +136,8 @@ export default function PublicationManager(){
       const publicationYear=Number(form.get('publication_year'))
       const volume=String(form.get('volume')||'').trim()
       const issue=String(form.get('issue')||'').trim()
+      const abstract=String(form.get('abstract')||'').trim()||null
+      const keywords=String(form.get('keywords')||'').split(/[,;\n]+/).map(value=>value.trim()).filter(Boolean).slice(0,20)
       if(!title||!author||!researchScholar)throw new Error('Paper Title, Author Name and Research Scholar are required.')
       if(!months.includes(publicationMonth))throw new Error('Please select the GREEN publication month.')
       if(!Number.isInteger(publicationYear)||publicationYear<1900||publicationYear>2100)throw new Error('Please enter a valid GREEN publication year.')
@@ -60,6 +157,8 @@ export default function PublicationManager(){
         title,
         authors:author,
         affiliation:researchScholar,
+        abstract,
+        keywords,
         publication_month:publicationMonth,
         publication_year:publicationYear,
         volume,
@@ -75,6 +174,9 @@ export default function PublicationManager(){
       if(insertError)throw insertError
 
       formEl.reset()
+      setGreenAbstract('')
+      setGreenKeywords('')
+      setExtractionNote('')
       setMessage(certificatePath
         ? 'GREEN paper and certificate uploaded successfully as Draft. Continue management from GREEN Papers.'
         : 'GREEN paper uploaded successfully as Draft. Continue certificate and publication work from GREEN Papers.')
@@ -151,7 +253,7 @@ export default function PublicationManager(){
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:18}}>
       <section className="contentCard">
         <h2>Add GREEN Research Paper</h2>
-        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Upload a new GREEN paper as Draft. Existing papers are managed from GREEN Papers.</p>
+        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Upload a new GREEN paper as Draft. Abstract and Keywords are read from the PDF when possible, then remain editable for review.</p>
         <form onSubmit={uploadGreen}>
           <label style={labelStyle}>Paper Title<input name="paper_title" required style={fieldStyle}/></label>
           <label style={labelStyle}>Author Name<input name="author_name" required style={fieldStyle}/></label>
@@ -163,10 +265,13 @@ export default function PublicationManager(){
             <label style={labelStyle}>Issue<input name="issue" type="number" min="1" required placeholder="1" style={fieldStyle}/></label>
           </div>
           <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Month, Year, Volume and Issue are saved exactly as entered. Article ID remains automatic.</div>
-          <label style={labelStyle}>Paper PDF (max 50 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required style={fieldStyle}/></label>
+          <label style={labelStyle}>Paper PDF (max 50 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required onChange={handleGreenPdf} style={fieldStyle}/></label>
+          {extractionNote?<div style={{fontSize:10.5,lineHeight:1.5,color:extractionNote.startsWith('Could not')?'#9a3c32':'#526b5d',padding:'8px 10px',background:'#f7faf8',border:'1px solid #dbe7df',margin:'-3px 0 10px'}}>{extractionNote}</div>:null}
+          <label style={labelStyle}>Abstract <span style={{fontWeight:400,color:'#75828d'}}>(auto-filled when detected)</span><textarea name="abstract" value={greenAbstract} onChange={event=>setGreenAbstract(event.target.value)} rows={7} maxLength={10000} placeholder="Abstract will be extracted from a text-based PDF when possible. You may edit it before upload." style={{...fieldStyle,resize:'vertical',lineHeight:1.55}}/></label>
+          <label style={labelStyle}>Keywords <span style={{fontWeight:400,color:'#75828d'}}>(comma-separated)</span><textarea name="keywords" value={greenKeywords} onChange={event=>setGreenKeywords(event.target.value)} rows={2} maxLength={1500} placeholder="Keyword 1, Keyword 2, Keyword 3" style={{...fieldStyle,resize:'vertical',lineHeight:1.5}}/></label>
           <label style={labelStyle}>Certificate PDF (optional · max 10 MB)<input name="certificate" type="file" accept="application/pdf,.pdf" style={fieldStyle}/></label>
-          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Certificate work and publishing are handled from GREEN Papers after upload.</div>
-          <button className="btn btnGreen" disabled={busy} type="submit">{busy?'Uploading…':'Upload GREEN Paper'}</button>
+          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Scanned/image-only PDFs may not expose selectable text. In that case, review and enter Abstract/Keywords manually. Certificate work and publishing are handled from GREEN Papers after upload.</div>
+          <button className="btn btnGreen" disabled={busy||extracting} type="submit">{extracting?'Reading PDF…':busy?'Uploading…':'Upload GREEN Paper'}</button>
         </form>
       </section>
 
