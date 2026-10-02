@@ -84,28 +84,33 @@ export default function PublicationManager(){
   const [greenAbstract,setGreenAbstract]=useState('')
   const [greenKeywords,setGreenKeywords]=useState('')
   const [extractionNote,setExtractionNote]=useState('')
+  const [showManualMetadata,setShowManualMetadata]=useState(false)
 
   async function handleGreenPdf(event:ChangeEvent<HTMLInputElement>){
     const file=event.target.files?.[0]
     setGreenAbstract('')
     setGreenKeywords('')
     setExtractionNote('')
+    setShowManualMetadata(false)
     if(!file)return
-    if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf')){setExtractionNote('Please select a PDF file.');return}
-    if(file.size>50*1024*1024){setExtractionNote('PDF is larger than the 50 MB GREEN upload limit.');return}
+    if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf')){setExtractionNote('Please select a PDF file.');setShowManualMetadata(true);return}
+    if(file.size>50*1024*1024){setExtractionNote('PDF is larger than the 50 MB GREEN upload limit.');setShowManualMetadata(true);return}
     setExtracting(true)
     setExtractionNote('Reading PDF for Abstract and Keywords…')
     try{
       const extracted=await extractPdfMetadata(file)
       setGreenAbstract(extracted.abstract)
       setGreenKeywords(extracted.keywords.join(', '))
-      if(extracted.abstract&&extracted.keywords.length)setExtractionNote('Abstract and Keywords were detected from the PDF. Review or edit them before upload.')
-      else if(extracted.abstract)setExtractionNote('Abstract was detected. Keywords were not found; add them manually if needed.')
-      else if(extracted.keywords.length)setExtractionNote('Keywords were detected. Abstract was not found; add it manually if needed.')
-      else if(extracted.textLength)setExtractionNote('PDF text was readable, but Abstract/Keywords headings were not detected. You can enter them manually.')
-      else setExtractionNote('No selectable text was detected. If this is a scanned PDF, enter Abstract and Keywords manually.')
+      const needsManual=!extracted.abstract||!extracted.keywords.length
+      setShowManualMetadata(needsManual)
+      if(extracted.abstract&&extracted.keywords.length)setExtractionNote('Abstract and Keywords were detected from the PDF and will be saved automatically.')
+      else if(extracted.abstract)setExtractionNote('Abstract was detected. Keywords were not found; add them below if available.')
+      else if(extracted.keywords.length)setExtractionNote('Keywords were detected. Abstract was not found; add it below if available.')
+      else if(extracted.textLength)setExtractionNote('PDF text was readable, but Abstract/Keywords headings were not detected. Enter them below if available.')
+      else setExtractionNote('No selectable text was detected. If this is a scanned PDF, enter Abstract and Keywords below.')
     }catch(error){
-      setExtractionNote(error instanceof Error?`Could not read PDF metadata: ${error.message}`:'Could not read PDF metadata. Enter Abstract and Keywords manually.')
+      setShowManualMetadata(true)
+      setExtractionNote(error instanceof Error?`Could not read PDF metadata: ${error.message}`:'Could not read PDF metadata. Enter Abstract and Keywords below.')
     }finally{setExtracting(false)}
   }
 
@@ -136,8 +141,8 @@ export default function PublicationManager(){
       const publicationYear=Number(form.get('publication_year'))
       const volume=String(form.get('volume')||'').trim()
       const issue=String(form.get('issue')||'').trim()
-      const abstract=String(form.get('abstract')||'').trim()||null
-      const keywords=String(form.get('keywords')||'').split(/[,;\n]+/).map(value=>value.trim()).filter(Boolean).slice(0,20)
+      const abstract=greenAbstract.trim()||null
+      const keywords=greenKeywords.split(/[,;\n]+/).map(value=>value.trim()).filter(Boolean).slice(0,20)
       if(!title||!author||!researchScholar)throw new Error('Paper Title, Author Name and Research Scholar are required.')
       if(!months.includes(publicationMonth))throw new Error('Please select the GREEN publication month.')
       if(!Number.isInteger(publicationYear)||publicationYear<1900||publicationYear>2100)throw new Error('Please enter a valid GREEN publication year.')
@@ -177,6 +182,7 @@ export default function PublicationManager(){
       setGreenAbstract('')
       setGreenKeywords('')
       setExtractionNote('')
+      setShowManualMetadata(false)
       setMessage(certificatePath
         ? 'GREEN paper and certificate uploaded successfully as Draft. Continue management from GREEN Papers.'
         : 'GREEN paper uploaded successfully as Draft. Continue certificate and publication work from GREEN Papers.')
@@ -253,7 +259,7 @@ export default function PublicationManager(){
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:18}}>
       <section className="contentCard">
         <h2>Add GREEN Research Paper</h2>
-        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Upload a new GREEN paper as Draft. Abstract and Keywords are read from the PDF when possible, then remain editable for review.</p>
+        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Upload a new GREEN paper as Draft. Abstract and Keywords are read from the PDF automatically when possible.</p>
         <form onSubmit={uploadGreen}>
           <label style={labelStyle}>Paper Title<input name="paper_title" required style={fieldStyle}/></label>
           <label style={labelStyle}>Author Name<input name="author_name" required style={fieldStyle}/></label>
@@ -267,10 +273,13 @@ export default function PublicationManager(){
           <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Month, Year, Volume and Issue are saved exactly as entered. Article ID remains automatic.</div>
           <label style={labelStyle}>Paper PDF (max 50 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required onChange={handleGreenPdf} style={fieldStyle}/></label>
           {extractionNote?<div style={{fontSize:10.5,lineHeight:1.5,color:extractionNote.startsWith('Could not')?'#9a3c32':'#526b5d',padding:'8px 10px',background:'#f7faf8',border:'1px solid #dbe7df',margin:'-3px 0 10px'}}>{extractionNote}</div>:null}
-          <label style={labelStyle}>Abstract <span style={{fontWeight:400,color:'#75828d'}}>(auto-filled when detected)</span><textarea name="abstract" value={greenAbstract} onChange={event=>setGreenAbstract(event.target.value)} rows={7} maxLength={10000} placeholder="Abstract will be extracted from a text-based PDF when possible. You may edit it before upload." style={{...fieldStyle,resize:'vertical',lineHeight:1.55}}/></label>
-          <label style={labelStyle}>Keywords <span style={{fontWeight:400,color:'#75828d'}}>(comma-separated)</span><textarea name="keywords" value={greenKeywords} onChange={event=>setGreenKeywords(event.target.value)} rows={2} maxLength={1500} placeholder="Keyword 1, Keyword 2, Keyword 3" style={{...fieldStyle,resize:'vertical',lineHeight:1.5}}/></label>
+          {showManualMetadata?<div style={{padding:'12px 12px 2px',border:'1px solid #eadfc5',background:'#fffcf4',marginBottom:10}}>
+            <div style={{fontSize:10.5,fontWeight:700,color:'#765f2f',marginBottom:9}}>PDF metadata needs manual review.</div>
+            <label style={labelStyle}>Abstract <span style={{fontWeight:400,color:'#75828d'}}>(only if available)</span><textarea value={greenAbstract} onChange={event=>setGreenAbstract(event.target.value)} rows={7} maxLength={10000} placeholder="Enter Abstract only if it was not detected from the PDF." style={{...fieldStyle,resize:'vertical',lineHeight:1.55}}/></label>
+            <label style={labelStyle}>Keywords <span style={{fontWeight:400,color:'#75828d'}}>(comma-separated)</span><textarea value={greenKeywords} onChange={event=>setGreenKeywords(event.target.value)} rows={2} maxLength={1500} placeholder="Keyword 1, Keyword 2, Keyword 3" style={{...fieldStyle,resize:'vertical',lineHeight:1.5}}/></label>
+          </div>:null}
           <label style={labelStyle}>Certificate PDF (optional · max 10 MB)<input name="certificate" type="file" accept="application/pdf,.pdf" style={fieldStyle}/></label>
-          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Scanned/image-only PDFs may not expose selectable text. In that case, review and enter Abstract/Keywords manually. Certificate work and publishing are handled from GREEN Papers after upload.</div>
+          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>When PDF text is readable, Abstract and Keywords are saved automatically. Manual fields appear only when extraction is incomplete. Certificate work and publishing are handled from GREEN Papers after upload.</div>
           <button className="btn btnGreen" disabled={busy||extracting} type="submit">{extracting?'Reading PDF…':busy?'Uploading…':'Upload GREEN Paper'}</button>
         </form>
       </section>
