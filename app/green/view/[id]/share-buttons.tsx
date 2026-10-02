@@ -4,6 +4,7 @@ import {useState} from 'react';
 
 export default function ShareButtons({title,authors}:{title:string;authors:string}){
   const [copied,setCopied]=useState(false);
+  const [researchGateCopied,setResearchGateCopied]=useState(false);
 
   function currentUrl(){
     return typeof window==='undefined'?'':window.location.href;
@@ -36,6 +37,19 @@ export default function ShareButtons({title,authors}:{title:string;authors:strin
     window.location.href=`mailto:?subject=${encodeURIComponent(`Research Paper: ${title}`)}&body=${encodeURIComponent(`${text}\n\nView the published paper here:\n${url}`)}`;
   }
 
+  async function openResearchGate(){
+    const url=currentUrl();
+    if(!url)return;
+    window.open('https://www.researchgate.net/','_blank','noopener,noreferrer');
+    try{
+      await navigator.clipboard.writeText(url);
+      setResearchGateCopied(true);
+      window.setTimeout(()=>setResearchGateCopied(false),2200);
+    }catch{
+      window.prompt('Copy this official IRED paper link for ResearchGate:',url);
+    }
+  }
+
   async function nativeShare(){
     const url=currentUrl();
     if(!url)return;
@@ -56,6 +70,7 @@ export default function ShareButtons({title,authors}:{title:string;authors:strin
       <button type="button" onClick={()=>openShare('whatsapp')} style={button}>WhatsApp</button>
       <button type="button" onClick={()=>openShare('email')} style={button}>Email</button>
       <button type="button" onClick={()=>openShare('linkedin')} style={button}>LinkedIn</button>
+      <button type="button" onClick={openResearchGate} title="Copy the official IRED link and open ResearchGate" style={{...button,borderColor:'#5b9bd5',color:'#276796'}}>{researchGateCopied?'ResearchGate · Link Copied':'ResearchGate'}</button>
       <button type="button" onClick={nativeShare} style={{...button,borderColor:'#148444',color:'#126f3a'}}>Share</button>
     </div>
   </section>;
