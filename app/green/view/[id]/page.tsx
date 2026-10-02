@@ -7,6 +7,7 @@ import {getSiteSettings} from '@/lib/site-settings';
 import ShareButtons from './share-buttons';
 
 export const dynamic='force-dynamic';
+// Deployment retry marker: author-card design is unchanged.
 
 export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{
   const {id}=await params;
