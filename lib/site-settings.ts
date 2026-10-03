@@ -60,7 +60,7 @@ export const defaultSiteSettings:SiteSettings={
   green_scope:'Accounting, Archaeology, Biology, Business, Chemistry, Commerce, Economics, Education, Law, Linguistics, Management, Physics, Political Science, Social Work, Arts, Humanities, Sciences, Social Sciences and related academic disciplines.',
   green_editor_in_chief:'Dr. Bhavika Kadikar — Librarian and Assistant Professor, Surendranagar University, Wadhwan',
   green_frequency:'Monthly',
-  green_language:'English, Gujarati',
+  green_language:'English, Gujarati, Hindi',
   green_format:'Online',
   green_subject:'Multidisciplinary',
   green_upcoming_volume:'',
