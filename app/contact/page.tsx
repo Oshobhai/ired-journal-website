@@ -23,7 +23,7 @@ function Icon({name,color='#496071'}:{name:'institution'|'location'|'phone'|'ema
 }
 
 function InfoRow({icon,label,children}:{icon:'institution'|'location'|'phone'|'email',label:string,children:React.ReactNode}){
-  return <div style={{display:'grid',gridTemplateColumns:'28px 150px 1fr',alignItems:'start',gap:10,padding:'8px 0'}}><span style={{paddingTop:1}}><Icon name={icon}/></span><strong style={{fontSize:11.5,color:'#516272'}}>{label}</strong><div style={{fontSize:12,lineHeight:1.6,color:'#31475a'}}>{children}</div></div>;
+  return <div className="contactInfoRow" style={{display:'grid',gridTemplateColumns:'28px 150px 1fr',alignItems:'start',gap:10,padding:'8px 0'}}><span style={{paddingTop:1}}><Icon name={icon}/></span><strong style={{fontSize:11.5,color:'#516272'}}>{label}</strong><div style={{fontSize:12,lineHeight:1.6,color:'#31475a'}}>{children}</div></div>;
 }
 
 export default async function Contact(){
@@ -40,7 +40,7 @@ export default async function Contact(){
       <div style={{display:'flex',alignItems:'center',gap:11}}><span style={{width:36,height:36,border:'1px solid #c9d5de',background:'#fff',display:'grid',placeItems:'center',borderRadius:'50%'}}><Icon name="institution" color="#0b2d4e"/></span><div><h1 style={{fontSize:34,margin:0}}>Contact & Manuscript Submission</h1><p style={{fontFamily:'Georgia,serif',fontSize:13,color:'#607080',margin:'5px 0 0'}}>{settings.publisher_name}</p></div></div>
     </div></section>
 
-    <main className="container" style={{padding:'24px 0 32px'}}>
+    <main className="container contactPage" style={{padding:'24px 0 32px'}}>
       <div style={{maxWidth:1040,margin:'0 auto'}}>
         <section style={{paddingBottom:20,borderBottom:'1px solid #cfd8df'}}>
           <h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:'0 0 8px'}}>Editorial Office</h2>
@@ -52,25 +52,25 @@ export default async function Contact(){
           <InfoRow icon="email" label="Secondary Email"><a href={mailto(contact.secondary_email,'','')} style={{color:'#0c6298',fontWeight:700}}>{contact.secondary_email}</a></InfoRow>
         </section>
 
-        <section style={{padding:'22px 0 18px'}}>
+        <section className="contactSubmissionIntro" style={{padding:'22px 0 18px'}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}><Icon name="paper" color="#0b2d4e"/><h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:0}}>Manuscript Submission by Email</h2></div>
           <p style={{fontSize:12.5,lineHeight:1.7,color:'#445565',margin:'0 0 8px',maxWidth:900}}>Authors should send manuscripts directly to the dedicated IRED journal submission email. Please attach the research paper in <strong>DOCX or PDF format</strong> and include the information listed below for the appropriate publication.</p>
           <p style={{fontSize:11,color:'#6a7885',margin:'0'}}>GREEN submissions are sent to <strong>{IRED_EMAILS.greenSubmission}</strong> and RED submissions are sent to <strong>{IRED_EMAILS.redSubmission}</strong>.</p>
         </section>
 
-        <section style={{borderTop:'2px solid #0b2d4e',borderBottom:'1px solid #cfd8df'}}>
-          <table style={{width:'100%',borderCollapse:'collapse'}}>
+        <section className="contactSubmissionSection" style={{borderTop:'2px solid #0b2d4e',borderBottom:'1px solid #cfd8df'}}>
+          <table className="contactSubmissionTable" style={{width:'100%',borderCollapse:'collapse'}}>
             <thead><tr style={{background:'#f5f7f8'}}>
               <th style={{...th,width:'23%'}}>Publication</th><th style={{...th,width:'32%'}}>Submission Type</th><th style={{...th,width:'30%'}}>Information Required</th><th style={{...th,width:'15%',textAlign:'right'}}>Submission</th>
             </tr></thead>
             <tbody>
-              <tr><td style={td}><JournalTitle kind="green" title={settings.green_title} size={13}/></td><td style={td}>Individual research papers, research articles, review articles, case studies and scholarly contributions.</td><td style={td}>Author name, paper title, mobile number, affiliation / institution and email address.</td><td style={{...td,textAlign:'right'}}><a href={gmailCompose(IRED_EMAILS.greenSubmission,'GREEN Research Paper Submission',greenBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#126f3a',whiteSpace:'nowrap'}}><Icon name="email" color="#126f3a"/> Email Paper →</a><div style={{fontSize:9.5,color:'#6b7a86',marginTop:5,whiteSpace:'nowrap'}}>{IRED_EMAILS.greenSubmission}</div></td></tr>
-              <tr><td style={td}><JournalTitle kind="red" title={settings.red_title} size={13}/></td><td style={td}>Research papers considered for publication in the RED print research journal.</td><td style={td}>Author details, mobile number, email, affiliation, full postal address, city / district, state and PIN code.</td><td style={{...td,textAlign:'right'}}><a href={gmailCompose(IRED_EMAILS.redSubmission,'RED Research Journal Submission',redBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#a61d22',whiteSpace:'nowrap'}}><Icon name="email" color="#a61d22"/> Email Paper →</a><div style={{fontSize:9.5,color:'#7a6b6c',marginTop:5,whiteSpace:'nowrap'}}>{IRED_EMAILS.redSubmission}</div></td></tr>
+              <tr><td data-label="Publication" style={td}><JournalTitle kind="green" title={settings.green_title} size={13}/></td><td data-label="Submission Type" style={td}>Individual research papers, research articles, review articles, case studies and scholarly contributions.</td><td data-label="Information Required" style={td}>Author name, paper title, mobile number, affiliation / institution and email address.</td><td data-label="Submission" style={{...td,textAlign:'right'}}><a href={gmailCompose(IRED_EMAILS.greenSubmission,'GREEN Research Paper Submission',greenBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#126f3a',whiteSpace:'nowrap'}}><Icon name="email" color="#126f3a"/> Email Paper →</a><div style={{fontSize:9.5,color:'#6b7a86',marginTop:5,whiteSpace:'nowrap'}}>{IRED_EMAILS.greenSubmission}</div></td></tr>
+              <tr><td data-label="Publication" style={td}><JournalTitle kind="red" title={settings.red_title} size={13}/></td><td data-label="Submission Type" style={td}>Research papers considered for publication in the RED print research journal.</td><td data-label="Information Required" style={td}>Author details, mobile number, email, affiliation, full postal address, city / district, state and PIN code.</td><td data-label="Submission" style={{...td,textAlign:'right'}}><a href={gmailCompose(IRED_EMAILS.redSubmission,'RED Research Journal Submission',redBody)} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:5,fontWeight:700,color:'#a61d22',whiteSpace:'nowrap'}}><Icon name="email" color="#a61d22"/> Email Paper →</a><div style={{fontSize:9.5,color:'#7a6b6c',marginTop:5,whiteSpace:'nowrap'}}>{IRED_EMAILS.redSubmission}</div></td></tr>
             </tbody>
           </table>
         </section>
 
-        <section style={{paddingTop:20,display:'grid',gridTemplateColumns:'1fr 1fr',gap:36}}>
+        <section className="contactAdviceGrid" style={{paddingTop:20,display:'grid',gridTemplateColumns:'1fr 1fr',gap:36}}>
           <div style={{display:'grid',gridTemplateColumns:'28px 1fr',gap:9}}><Icon name="check" color="#8b6d2f"/><div><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',margin:'0 0 7px'}}>Before Sending</h3><p style={{fontSize:11.5,lineHeight:1.65,color:'#526273',margin:0}}>Please verify the manuscript file, paper title, author name and contact details. For RED submissions, complete postal information is required when a printed copy is to be dispatched.</p></div></div>
           <div style={{display:'grid',gridTemplateColumns:'28px 1fr',gap:9}}><Icon name="thread" color="#8b6d2f"/><div><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',margin:'0 0 7px'}}>Editorial Correspondence</h3><p style={{fontSize:11.5,lineHeight:1.65,color:'#526273',margin:0}}>After submission, please continue correspondence through the same email thread so that review comments, revisions and publication communication remain together.</p></div></div>
         </section>
