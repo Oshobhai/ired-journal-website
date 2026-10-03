@@ -78,7 +78,7 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
         {publicationMeta.map((item,index)=><span key={item} style={{display:'inline-flex',alignItems:'center',fontWeight:index===0?700:500,color:index===0?'#27465e':'#496071'}}>{index>0?<span aria-hidden="true" style={{marginRight:8,color:'#9aa8b2'}}>·</span>:null}{item}</span>)}
       </div>:null}
 
-      {doiHref?<div style={{maxWidth:980,marginTop:7,fontSize:11,lineHeight:1.5,color:'#40596d'}}><strong style={{color:'#27465e'}}>DOI:</strong> <a href={doiHref} target="_blank" rel="noreferrer" style={{color:'#1473a8',textDecoration:'underline',textUnderlineOffset:2,overflowWrap:'anywhere'}}>{doiHref}</a></div>:null}
+      <div style={{maxWidth:980,marginTop:7,fontSize:11,lineHeight:1.5,color:'#40596d'}}><strong style={{color:'#27465e'}}>DOI:</strong> {doiHref?<a href={doiHref} target="_blank" rel="noreferrer" style={{color:'#1473a8',textDecoration:'underline',textUnderlineOffset:2,overflowWrap:'anywhere'}}>{doiHref}</a>:<span style={{color:'#6f7f8c'}}>Not Assigned</span>}</div>
     </div></section>
 
     <main className="container" style={{padding:'22px 0 34px'}}>
