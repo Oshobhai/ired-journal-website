@@ -8,17 +8,31 @@ import ShareButtons from './share-buttons';
 
 export const dynamic='force-dynamic';
 
+function hasGarbledIndicMetadata(abstract:string|null,keywords:string[]|null|undefined){
+  const value=[abstract||'',...(keywords||[])].join(' ');
+  if(!value)return false;
+  if(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\uFFFD]/.test(value))return true;
+  const indic=(value.match(/[\u0900-\u097F\u0A80-\u0AFF]/g)||[]).length;
+  if(indic<20)return false;
+  const suspicious=(value.match(/[#&$<>]/g)||[]).length;
+  const broken=(value.match(/(?:[\u0900-\u097F\u0A80-\u0AFF][0-9#&$?]|[0-9#&$?][\u0900-\u097F\u0A80-\u0AFF])/g)||[]).length;
+  return suspicious>=3||broken>=3;
+}
+
 export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{
   const {id}=await params;
   const [paper,settings,english]=await Promise.all([getPublishedGreenPaperById(id),getSiteSettings(),getGreenEnglishBibliographicById(id)]);
   if(!paper)return {title:'GREEN Paper'};
-  const description=(english?.english_abstract||paper.abstract||`${paper.title} by ${paper.authors}`).slice(0,220);
+  const metadataGarbled=hasGarbledIndicMetadata(paper.abstract,paper.keywords);
+  const cleanAbstract=metadataGarbled?null:paper.abstract;
+  const cleanKeywords=metadataGarbled?[]:(paper.keywords||[]);
+  const description=(english?.english_abstract||cleanAbstract||`${paper.title} by ${paper.authors}`).slice(0,220);
   const authors=paper.authors.split(/,|;|\band\b/i).map(name=>({name:name.trim()})).filter(x=>x.name);
   return {
     title:paper.title,
     description,
     authors,
-    keywords:paper.keywords||[],
+    keywords:cleanKeywords,
     alternates:{canonical:`/green/view/${paper.id}`},
     openGraph:{type:'article',title:english?.english_title||paper.title,description,url:`/green/view/${paper.id}`,publishedTime:paper.published_at||undefined,authors:authors.map(x=>x.name)},
     other:{
@@ -41,6 +55,9 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
   const [paper,settings,english]=await Promise.all([getPublishedGreenPaperById(id),getSiteSettings(),getGreenEnglishBibliographicById(id)]);
   if(!paper){return <><Header/><main className="container" style={{padding:'28px 0'}}><div className="contentCard"><h1>Paper not available</h1><p>This GREEN publication is not currently available.</p><Link className="smallBtn" href="/green">← Back to GREEN Papers</Link></div></main><Footer/></>}
 
+  const metadataGarbled=hasGarbledIndicMetadata(paper.abstract,paper.keywords);
+  const displayKeywords=metadataGarbled?[]:(paper.keywords||[]);
+  const displayAbstract=metadataGarbled?null:paper.abstract;
   const meta=[paper.publication_month,paper.publication_year].filter(Boolean).join(' ');
   const hasEnglish=Boolean(english?.english_title||english?.english_abstract);
   const doiHref=paper.doi?(paper.doi.startsWith('http')?paper.doi:`https://doi.org/${paper.doi.replace(/^doi:\s*/i,'')}`):null;
@@ -86,16 +103,16 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
             <div>{doiHref?<a href={doiHref} target="_blank" rel="noreferrer" style={{color:'#1473a8',textDecoration:'underline',textUnderlineOffset:2,overflowWrap:'anywhere'}}>{doiHref}</a>:<span style={{color:'#7c8993'}}>Not Assigned</span>}</div>
           </div>
 
-          {paper.keywords?.length?<div style={{display:'grid',gridTemplateColumns:'92px minmax(0,1fr)',gap:12,padding:'12px 18px',borderTop:'1px solid #edf1f4'}}>
+          {displayKeywords.length?<div style={{display:'grid',gridTemplateColumns:'92px minmax(0,1fr)',gap:12,padding:'12px 18px',borderTop:'1px solid #edf1f4'}}>
             <strong style={{fontSize:11,color:'#27465e',paddingTop:4}}>Keywords</strong>
-            <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{paper.keywords.map(k=><span key={k} style={{padding:'4px 9px',border:'1px solid #d7e0e6',borderRadius:999,fontSize:10.5,color:'#4f6374',background:'#f8fafb'}}>{k}</span>)}</div>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{displayKeywords.map(k=><span key={k} style={{padding:'4px 9px',border:'1px solid #d7e0e6',borderRadius:999,fontSize:10.5,color:'#4f6374',background:'#f8fafb'}}>{k}</span>)}</div>
           </div>:null}
         </div>
 
-        {paper.abstract?<section style={{marginTop:18,padding:'20px 22px',border:'1px solid #d9e2e8',borderLeft:'4px solid #148444',borderRadius:10,background:'#fff',boxShadow:'0 6px 20px rgba(18,46,70,.04)'}}>
+        {displayAbstract?<section style={{marginTop:18,padding:'20px 22px',border:'1px solid #d9e2e8',borderLeft:'4px solid #148444',borderRadius:10,background:'#fff',boxShadow:'0 6px 20px rgba(18,46,70,.04)'}}>
           <div style={{fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'#148444',marginBottom:5}}>Article Summary</div>
           <h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:'0 0 9px'}}>Abstract</h2>
-          <p style={{fontSize:13,lineHeight:1.8,color:'#40576a',textAlign:'justify',margin:0}}>{paper.abstract}</p>
+          <p style={{fontSize:13,lineHeight:1.8,color:'#40576a',textAlign:'justify',margin:0}}>{displayAbstract}</p>
         </section>:null}
       </div></div>
     </section>
