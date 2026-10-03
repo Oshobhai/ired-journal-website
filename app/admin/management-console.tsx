@@ -21,6 +21,9 @@ type Row = {
   published_at?: string | null
   authors?: string | null
   editors?: string | null
+  affiliation?: string | null
+  abstract?: string | null
+  keywords?: string[] | null
   publication_year?: number | null
   publication_month?: string | null
   volume?: string | null
@@ -96,7 +99,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
     void(async()=>{
       const table=kind==='green'?'green_papers':'red_books'
       const selectColumns=kind==='green'
-        ? 'id,article_id,title,authors,status,pdf_path,certificate_path,certificate_uploaded_at,publication_year,publication_month,volume,issue,doi,published_at,created_at,updated_at'
+        ? 'id,article_id,title,authors,affiliation,abstract,keywords,status,pdf_path,certificate_path,certificate_uploaded_at,publication_year,publication_month,volume,issue,doi,published_at,created_at,updated_at'
         : 'id,title,editors,status,pdf_path,cover_path,publication_year,publication_month,volume,issue,issn,published_at,created_at,updated_at'
       let query:any=db.from(table).select(selectColumns,{count:'exact'})
       if(status!=='all')query=query.eq('status',status)
@@ -205,7 +208,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
     let newPdfPath = ''
     let newCertificatePath = ''
     try {
-      const updates: Record<string, string | number | null> = {
+      const updates: Record<string, string | number | string[] | null> = {
         title: String(f.get('title') || '').trim(),
         publication_year: Number(f.get('publication_year')) || null,
         volume: String(f.get('volume') || '').trim() || null,
@@ -213,6 +216,10 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
       }
       if (kind === 'green') {
         updates.authors = String(f.get('authors') || '').trim()
+        updates.affiliation = String(f.get('affiliation') || '').trim() || null
+        updates.abstract = String(f.get('abstract') || '').trim() || null
+        const keywordValues=String(f.get('keywords') || '').split(/[,;\n]+/).map(value=>value.trim()).filter(Boolean)
+        updates.keywords = Array.from(new Set(keywordValues))
         const doi=normalizeDoi(String(f.get('doi') || ''))
         if(doi && !/^10\.\d{4,9}\/\S+$/i.test(doi))throw new Error('Enter a valid DOI, for example 10.1234/ired.green.2026.0008.')
         updates.doi = doi || null
@@ -368,6 +375,13 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
                   <label style={{display:'grid',gap:4,fontSize:10,fontWeight:800,color:'#31506c'}}>DOI<input name="doi" defaultValue={item.doi || ''} placeholder="10.xxxx/xxxxx or https://doi.org/10.xxxx/xxxxx" autoComplete="off" style={{...control,width:'100%'}}/></label>
                 </div>:null}
                 {kind==='green'?<div style={{fontSize:9.5,color:'#6b7782',marginTop:4}}>When a DOI is assigned later, paste either the DOI itself or the full doi.org URL. The saved value is normalized automatically and appears on the public article page.</div>:null}
+                {kind==='green'?<div style={{display:'grid',gap:8,marginTop:9,padding:10,border:'1px solid #dce4ea',borderRadius:5,background:'#fff'}}>
+                  <div style={{fontSize:10.5,fontWeight:800,color:'#173d60'}}>Article Metadata</div>
+                  <label style={{display:'grid',gap:4,fontSize:10,fontWeight:800,color:'#31506c'}}>Affiliation<textarea name="affiliation" defaultValue={item.affiliation || ''} rows={2} placeholder="Department, institution, city, state/country" style={{...control,width:'100%',resize:'vertical',fontFamily:'inherit',lineHeight:1.45}}/></label>
+                  <label style={{display:'grid',gap:4,fontSize:10,fontWeight:800,color:'#31506c'}}>Keywords<textarea name="keywords" defaultValue={(item.keywords || []).join(', ')} rows={2} placeholder="Machine Learning, Software Defects, Prediction" style={{...control,width:'100%',resize:'vertical',fontFamily:'inherit',lineHeight:1.45}}/></label>
+                  <label style={{display:'grid',gap:4,fontSize:10,fontWeight:800,color:'#31506c'}}>Abstract<textarea name="abstract" defaultValue={item.abstract || ''} rows={7} placeholder="Full article abstract" style={{...control,width:'100%',resize:'vertical',fontFamily:'inherit',lineHeight:1.5}}/></label>
+                  <div style={{fontSize:9.5,color:'#6b7782'}}>Keywords may be separated by commas, semicolons or new lines. Blank fields can be added later, and existing metadata can be corrected here.</div>
+                </div>:null}
                 {kind==='green'?<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginTop:9}}>
                   <div style={{padding:'9px',background:'#f3f8f5',border:'1px solid #d8e8de',borderRadius:5}}><div style={{fontSize:10.5,fontWeight:800,color:'#315a42',marginBottom:5}}>Paper PDF</div><div style={{fontSize:9.5,color:'#6b7c72',marginBottom:6,overflowWrap:'anywhere'}}>Current: {item.pdf_path.split('/').pop() || item.pdf_path}</div><input name="replacement_pdf" type="file" accept="application/pdf,.pdf" style={{...control,width:'100%'}}/><div style={{fontSize:9.5,color:'#77857d',marginTop:4}}>Optional replacement · max 50 MB.</div></div>
                   <div style={{padding:'9px',background:'#f6f8fb',border:'1px solid #dbe3ea',borderRadius:5}}><div style={{fontSize:10.5,fontWeight:800,color:'#31506c',marginBottom:5}}>Certificate PDF</div><div style={{fontSize:9.5,color:'#6b7782',marginBottom:6}}>{item.certificate_path?`Current: ${item.certificate_path.split('/').pop()||'certificate.pdf'}`:'No certificate uploaded yet.'}</div><input name="certificate_pdf" type="file" accept="application/pdf,.pdf" style={{...control,width:'100%'}}/><div style={{fontSize:9.5,color:'#77857d',marginTop:4}}>Upload or replace · max 10 MB.</div>{item.certificate_path?<div style={{display:'flex',gap:5,marginTop:6,flexWrap:'wrap'}}><button type="button" style={btn} onClick={()=>openCertificate(item,false)}>View</button><button type="button" style={btn} onClick={()=>openCertificate(item,true)}>Download</button><button type="button" style={danger} onClick={()=>removeCertificate(item)}>Delete Certificate</button></div>:null}</div>
