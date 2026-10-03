@@ -16,7 +16,7 @@ export default async function GreenAdmin({searchParams}:PageProps){
   const allowedQueues:Queue[]=['all','drafts','final-pdf','certificate-missing','ready']
   const initialView=allowedViews.includes(params.view as View)?params.view as View:'current-issue'
   const initialQueue=allowedQueues.includes(params.queue as Queue)?params.queue as Queue:'all'
-  return <AdminFrame access={access} active="green" kicker="Publication Management" title="GREEN Papers" description="Manage the Current Issue first, with scalable access to all papers, final PDFs, certificates, English metadata, publication status and archives.">
+  return <AdminFrame access={access} active="green" kicker="Publication Management" title="GREEN Papers" description="Manage the Current Issue first, with scalable access to all papers, final PDFs, certificates, English metadata, publication status and archives. When a DOI is assigned later, add it from All Papers → Edit & Files; the public article page updates automatically.">
     <GreenWorkspace initialStatus={initialStatus} initialView={initialView} initialQueue={initialQueue}/>
   </AdminFrame>
 }
