@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 type Status = 'draft' | 'published' | 'archived'
 type StatusFilter = 'all' | Status
 type Kind = 'green' | 'red'
+type AttentionFilter = 'all' | 'needs_attention'
 
 type Row = {
   id: string
@@ -24,6 +25,8 @@ type Row = {
   affiliation?: string | null
   abstract?: string | null
   keywords?: string[] | null
+  english_title?: string | null
+  english_abstract?: string | null
   publication_year?: number | null
   publication_month?: string | null
   volume?: string | null
@@ -52,6 +55,37 @@ function normalizeDoi(value:string){
     .trim()
 }
 
+function needsEnglishSupport(title:string){
+  return /[\u0900-\u0DFF]/.test(title)
+}
+
+function hasGarbledIndicMetadata(item:Row){
+  const value=[item.abstract||'',...(item.keywords||[])].join(' ')
+  if(!value)return false
+  if(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\uFFFD]/.test(value))return true
+  const indic=(value.match(/[\u0900-\u097F\u0A80-\u0AFF]/g)||[]).length
+  if(indic<20)return false
+  const suspicious=(value.match(/[#&$<>]/g)||[]).length
+  const broken=(value.match(/(?:[\u0900-\u097F\u0A80-\u0AFF][0-9#&$?]|[0-9#&$?][\u0900-\u097F\u0A80-\u0AFF])/g)||[]).length
+  return suspicious>=3||broken>=3
+}
+
+function missingGreenFields(item:Row){
+  const missing:string[]=[]
+  if(!item.authors?.trim())missing.push('Author(s)')
+  if(!item.affiliation?.trim())missing.push('Affiliation')
+  if(!item.abstract?.trim())missing.push('Abstract')
+  if(!item.keywords?.length)missing.push('Keywords')
+  if(!item.publication_month?.trim())missing.push('Month')
+  if(!item.publication_year)missing.push('Year')
+  if(!item.volume?.trim())missing.push('Volume')
+  if(!item.issue?.trim())missing.push('Issue')
+  if(!item.certificate_path)missing.push('Certificate')
+  if(needsEnglishSupport(item.title) && (!item.english_title?.trim() || !item.english_abstract?.trim()))missing.push('English Metadata')
+  if(hasGarbledIndicMetadata(item))missing.push('Metadata Review')
+  return missing
+}
+
 type Props = {
   initialKind?: Kind
   lockedKind?: Kind
@@ -69,6 +103,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const [status, setStatusFilter] = useState<StatusFilter>(initialStatus)
+  const [attention,setAttention] = useState<AttentionFilter>('all')
   const [year, setYear] = useState('')
   const [month, setMonth] = useState('all')
   const [volume, setVolume] = useState('')
@@ -84,6 +119,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
   const [refreshTick, setRefreshTick] = useState(0)
 
   useEffect(() => { if (lockedKind) setKind(lockedKind) }, [lockedKind])
+  useEffect(() => { if(kind==='red')setAttention('all') }, [kind])
   useEffect(() => {
     const timer=window.setTimeout(()=>setSearch(safeSearch(searchInput)),300)
     return ()=>window.clearTimeout(timer)
@@ -92,17 +128,18 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
     setPage(1)
     setSelected(new Set())
     setEditing(null)
-  }, [kind, search, status, year, month, volume, issue, sort, pageSize])
+  }, [kind, search, status, attention, year, month, volume, issue, sort, pageSize])
 
   useEffect(()=>{
     let cancelled=false
     void(async()=>{
       const table=kind==='green'?'green_papers':'red_books'
       const selectColumns=kind==='green'
-        ? 'id,article_id,title,authors,affiliation,abstract,keywords,status,pdf_path,certificate_path,certificate_uploaded_at,publication_year,publication_month,volume,issue,doi,published_at,created_at,updated_at'
+        ? 'id,article_id,title,authors,affiliation,abstract,keywords,english_title,english_abstract,status,pdf_path,certificate_path,certificate_uploaded_at,publication_year,publication_month,volume,issue,doi,published_at,created_at,updated_at'
         : 'id,title,editors,status,pdf_path,cover_path,publication_year,publication_month,volume,issue,issn,published_at,created_at,updated_at'
       let query:any=db.from(table).select(selectColumns,{count:'exact'})
       if(status!=='all')query=query.eq('status',status)
+      if(kind==='green'&&attention==='needs_attention')query=query.or('authors.is.null,affiliation.is.null,abstract.is.null,keywords.is.null,keywords.eq.{},publication_month.is.null,publication_year.is.null,volume.is.null,issue.is.null,certificate_path.is.null')
       if(year.trim())query=query.eq('publication_year',Number(year))
       if(month!=='all')query=query.eq('publication_month',month)
       if(volume.trim())query=query.eq('volume',volume.trim())
@@ -132,7 +169,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
       setTotal(nextTotal)
     })()
     return()=>{cancelled=true}
-  },[db,kind,search,status,year,month,volume,issue,sort,page,pageSize,refreshTick])
+  },[db,kind,search,status,attention,year,month,volume,issue,sort,page,pageSize,refreshTick])
 
   useEffect(()=>{
     let cancelled=false
@@ -283,7 +320,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
   }
 
   function resetFilters(){
-    setSearchInput('');setSearch('');setStatusFilter('all');setYear('');setMonth('all');setVolume('');setIssue('');setSort('newest');setPage(1)
+    setSearchInput('');setSearch('');setStatusFilter('all');setAttention('all');setYear('');setMonth('all');setVolume('');setIssue('');setSort('newest');setPage(1)
   }
 
   const control = {padding:'8px 10px',border:'1px solid #cbd5df',borderRadius:5,background:'#fff',fontSize:12,minWidth:0} as const
@@ -306,7 +343,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
       <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'center',flexWrap:'wrap',marginBottom:12}}>
         <div>
           <h2 style={{margin:'0 0 4px'}}>{kind === 'green' ? 'GREEN Papers Manager' : 'RED Publications Manager'}</h2>
-          <div style={{fontSize:12,color:'#687586'}}>{kind==='green'?'Database-side search, filters and pagination. Only the current page is loaded into the browser.':'Database-side search, filters and pagination for RED print publication records.'}</div>
+          <div style={{fontSize:12,color:'#687586'}}>{kind==='green'?'Database-side search, filters and pagination. Missing badges show what still needs attention; DOI Pending is informational and does not block completeness.':'Database-side search, filters and pagination for RED print publication records.'}</div>
         </div>
         {!lockedKind ? <div style={{display:'flex',gap:6}}>
           <button type="button" style={kind==='green'?primary:btn} onClick={()=>setKind('green')}>GREEN Papers</button>
@@ -324,6 +361,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
         <select value={month} onChange={e=>setMonth(e.target.value)} style={control}><option value="all">All months</option>{months.map(m=><option key={m} value={m}>{m}</option>)}</select>
         <input value={volume} onChange={e=>setVolume(e.target.value)} placeholder="Volume" style={control}/>
         <input value={issue} onChange={e=>setIssue(e.target.value)} placeholder="Issue" style={control}/>
+        {kind==='green'?<select value={attention} onChange={e=>setAttention(e.target.value as AttentionFilter)} style={control}><option value="all">All completeness</option><option value="needs_attention">Needs Attention</option></select>:null}
         <select value={sort} onChange={e=>setSort(e.target.value as typeof sort)} style={control}><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="title">Title A–Z</option><option value="year">Year ↓</option></select>
       </div>
 
@@ -342,19 +380,22 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
       </div>
 
       <div style={{overflowX:'auto'}}>
-        <table style={{width:'100%',borderCollapse:'collapse',fontSize:12,minWidth:920}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:12,minWidth:kind==='green'?1100:920}}>
           <thead><tr style={{background:'#f4f7f9',textAlign:'left'}}>
             <th style={{padding:8}}><input type="checkbox" checked={rows.length>0 && rows.every(x=>selected.has(x.id))} onChange={e=>{const n=new Set(selected); rows.forEach(x=>e.target.checked?n.add(x.id):n.delete(x.id)); setSelected(n)}}/></th>
-            {kind==='red'?<th style={{padding:8}}>Cover</th>:null}<th style={{padding:8}}>Title</th><th style={{padding:8}}>{kind==='green'?'Author(s)':'Editor(s)'}</th><th style={{padding:8}}>Date / Issue</th>{kind==='green'?<th style={{padding:8}}>Certificate</th>:null}<th style={{padding:8}}>Status</th><th style={{padding:8}}>Updated</th><th style={{padding:8}}>Actions</th>
+            {kind==='red'?<th style={{padding:8}}>Cover</th>:null}<th style={{padding:8}}>Title</th><th style={{padding:8}}>{kind==='green'?'Author(s)':'Editor(s)'}</th><th style={{padding:8}}>Date / Issue</th>{kind==='green'?<th style={{padding:8}}>Pending / Missing</th>:null}{kind==='green'?<th style={{padding:8}}>Certificate</th>:null}<th style={{padding:8}}>Status</th><th style={{padding:8}}>Updated</th><th style={{padding:8}}>Actions</th>
           </tr></thead>
           <tbody>{rows.map(item => {
             const coverUrl = kind==='red' && item.cover_path ? supabase.storage.from('red-book-covers').getPublicUrl(item.cover_path).data.publicUrl : null
+            const missing=kind==='green'?missingGreenFields(item):[]
+            const doiPending=kind==='green'&&!item.doi?.trim()
             return <tr key={item.id} style={{borderTop:'1px solid #e4e9ed',verticalAlign:'top'}}>
               <td style={{padding:8}}><input type="checkbox" checked={selected.has(item.id)} onChange={e=>{const n=new Set(selected); e.target.checked?n.add(item.id):n.delete(item.id); setSelected(n)}}/></td>
               {kind==='red'?<td style={{padding:8}}>{coverUrl?<img src={coverUrl} alt="" style={{width:36,height:50,objectFit:'cover',border:'1px solid #ddd'}}/>:<span style={{fontSize:10,color:'#9b5b5b'}}>No cover</span>}</td>:null}
               <td style={{padding:8,maxWidth:260}}><strong>{item.title}</strong><div style={{fontSize:10,color:'#7a8792',marginTop:3}}>ID: {kind==='green'&&item.article_id?item.article_id:`${item.id.slice(0,8)}…`}</div>{kind==='green'&&item.doi?<div style={{fontSize:10,color:'#536b7d',marginTop:2}}>DOI: {item.doi}</div>:null}</td>
               <td style={{padding:8}}>{kind==='green' ? item.authors : item.editors || '—'}</td>
               <td style={{padding:8}}>{item.publication_month ? `${item.publication_month} ` : ''}{item.publication_year || '—'}{item.volume ? ` · Vol ${item.volume}` : ''}{item.issue ? ` · Issue ${item.issue}` : ''}</td>
+              {kind==='green'?<td style={{padding:8,minWidth:180}}><div style={{display:'flex',gap:4,flexWrap:'wrap'}}>{missing.length?missing.map(label=><span key={label} style={{padding:'3px 6px',borderRadius:999,background:label==='Metadata Review'?'#fff0f0':'#fff7e7',border:`1px solid ${label==='Metadata Review'?'#efc5c5':'#ead29a'}`,color:label==='Metadata Review'?'#9d2525':'#8a6412',fontSize:9.5,fontWeight:800}}>{label}</span>):<span style={{padding:'3px 7px',borderRadius:999,background:'#eef8f2',border:'1px solid #cfe5d6',color:'#176f3d',fontSize:9.5,fontWeight:800}}>Complete</span>}{doiPending?<span style={{padding:'3px 7px',borderRadius:999,background:'#f4f6f8',border:'1px solid #d8e0e6',color:'#667784',fontSize:9.5,fontWeight:700}}>DOI Pending</span>:null}</div></td>:null}
               {kind==='green'?<td style={{padding:8}}>{item.certificate_path?<span style={{fontSize:10,fontWeight:700,color:'#16723b'}}>Ready</span>:<span style={{fontSize:10,color:'#8a6d2b'}}>Not uploaded</span>}</td>:null}
               <td style={{padding:8}}><span style={{padding:'3px 7px',borderRadius:12,background:item.status==='published'?'#e6f5ec':item.status==='archived'?'#eee':'#fff4db',color:item.status==='published'?'#16723b':item.status==='archived'?'#555':'#8a6112',fontSize:10,fontWeight:700}}>{item.status}</span></td>
               <td style={{padding:8,whiteSpace:'nowrap'}}>{new Date(item.updated_at || item.created_at).toLocaleDateString()}</td>
