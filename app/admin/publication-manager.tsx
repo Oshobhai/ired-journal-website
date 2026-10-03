@@ -124,7 +124,7 @@ export default function PublicationManager(){
       setGreenKeywords(extracted.keywords.join(', '))
       const needsManual=!extracted.abstract||!extracted.keywords.length
       setShowManualMetadata(needsManual)
-      if(extracted.abstract&&extracted.keywords.length)setExtractionNote('Abstract and Keywords were detected from the PDF and will be saved automatically.')
+      if(extracted.abstract&&extracted.keywords.length)setExtractionNote('Abstract and Keywords were detected from the PDF. Review or edit them below before upload if needed.')
       else if(extracted.abstract)setExtractionNote('Abstract was detected. Keywords were not found; add them below if available.')
       else if(extracted.keywords.length)setExtractionNote('Keywords were detected. Abstract was not found; add it below if available.')
       else if(extracted.textLength)setExtractionNote('PDF text was readable, but Abstract/Keywords headings were not detected. Enter them below if available.')
@@ -280,7 +280,7 @@ export default function PublicationManager(){
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:18}}>
       <section className="contentCard">
         <h2>Add GREEN Research Paper</h2>
-        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Upload a new GREEN paper as Draft. Abstract and Keywords are read from the PDF automatically when possible; garbled Hindi/Gujarati extraction is rejected for manual review.</p>
+        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Upload a new GREEN paper as Draft. Abstract and Keywords are read from the PDF automatically when possible, and remain editable before upload.</p>
         <form onSubmit={uploadGreen}>
           <label style={labelStyle}>Paper Title<input name="paper_title" required style={fieldStyle}/></label>
           <label style={labelStyle}>Author Name<input name="author_name" required style={fieldStyle}/></label>
@@ -294,13 +294,13 @@ export default function PublicationManager(){
           <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Month, Year, Volume and Issue are saved exactly as entered. Article ID remains automatic.</div>
           <label style={labelStyle}>Paper PDF (max 50 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required onChange={handleGreenPdf} style={fieldStyle}/></label>
           {extractionNote?<div style={{fontSize:10.5,lineHeight:1.5,color:extractionNote.startsWith('Could not')||extractionNote.includes('garbled')?'#9a3c32':'#526b5d',padding:'8px 10px',background:'#f7faf8',border:'1px solid #dbe7df',margin:'-3px 0 10px'}}>{extractionNote}</div>:null}
-          {showManualMetadata?<div style={{padding:'12px 12px 2px',border:'1px solid #eadfc5',background:'#fffcf4',marginBottom:10}}>
-            <div style={{fontSize:10.5,fontWeight:700,color:'#765f2f',marginBottom:9}}>PDF metadata needs manual review.</div>
-            <label style={labelStyle}>Abstract <span style={{fontWeight:400,color:'#75828d'}}>(only if available)</span><textarea value={greenAbstract} onChange={event=>setGreenAbstract(event.target.value)} rows={7} maxLength={10000} placeholder="Enter Abstract only if it was not detected correctly from the PDF." style={{...fieldStyle,resize:'vertical',lineHeight:1.55}}/></label>
-            <label style={labelStyle}>Keywords <span style={{fontWeight:400,color:'#75828d'}}>(comma-separated)</span><textarea value={greenKeywords} onChange={event=>setGreenKeywords(event.target.value)} rows={2} maxLength={1500} placeholder="Keyword 1, Keyword 2, Keyword 3" style={{...fieldStyle,resize:'vertical',lineHeight:1.5}}/></label>
-          </div>:null}
+          <div style={{padding:'12px 12px 2px',border:`1px solid ${showManualMetadata?'#eadfc5':'#dbe7df'}`,background:showManualMetadata?'#fffcf4':'#f8fbf9',marginBottom:10}}>
+            <div style={{fontSize:10.5,fontWeight:700,color:showManualMetadata?'#765f2f':'#526b5d',marginBottom:9}}>{showManualMetadata?'PDF metadata needs manual review.':'Abstract and Keywords'}</div>
+            <label style={labelStyle}>Abstract <span style={{fontWeight:400,color:'#75828d'}}>(auto-filled when detected · editable)</span><textarea value={greenAbstract} onChange={event=>setGreenAbstract(event.target.value)} rows={7} maxLength={10000} placeholder="Enter or review the paper Abstract." style={{...fieldStyle,resize:'vertical',lineHeight:1.55}}/></label>
+            <label style={labelStyle}>Keywords <span style={{fontWeight:400,color:'#75828d'}}>(comma-separated · editable)</span><textarea value={greenKeywords} onChange={event=>setGreenKeywords(event.target.value)} rows={2} maxLength={1500} placeholder="Keyword 1, Keyword 2, Keyword 3" style={{...fieldStyle,resize:'vertical',lineHeight:1.5}}/></label>
+          </div>
           <label style={labelStyle}>Certificate PDF (optional · max 10 MB)<input name="certificate" type="file" accept="application/pdf,.pdf" style={fieldStyle}/></label>
-          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>When PDF text is readable and clean, Abstract and Keywords are saved automatically. Manual fields appear when extraction is incomplete or text encoding looks corrupted.</div>
+          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Select the PDF to auto-fill Abstract and Keywords when extraction is clean. Review or edit the fields above before uploading. Garbled Hindi/Gujarati extraction is rejected for manual entry.</div>
           <button className="btn btnGreen" disabled={busy||extracting} type="submit">{extracting?'Reading PDF…':busy?'Uploading…':'Upload GREEN Paper'}</button>
         </form>
       </section>
