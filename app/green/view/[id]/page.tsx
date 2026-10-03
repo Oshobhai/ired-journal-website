@@ -42,6 +42,7 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
   if(!paper){return <><Header/><main className="container" style={{padding:'28px 0'}}><div className="contentCard"><h1>Paper not available</h1><p>This GREEN publication is not currently available.</p><Link className="smallBtn" href="/green">← Back to GREEN Papers</Link></div></main><Footer/></>}
   const meta=[paper.publication_month,paper.publication_year].filter(Boolean).join(' ');
   const hasEnglish=Boolean(english?.english_title||english?.english_abstract);
+  const doiHref=paper.doi?(paper.doi.startsWith('http')?paper.doi:`https://doi.org/${paper.doi.replace(/^doi:\s*/i,'')}`):null;
   const publicationMeta=[
     paper.article_id?`Article ID: ${paper.article_id}`:null,
     paper.article_type||'Research Article',
@@ -49,7 +50,6 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
     paper.volume?`Volume ${paper.volume}`:null,
     paper.issue?`Issue ${paper.issue}`:null,
     paper.issn&&paper.issn!=='XXXX-XXXX'?`ISSN: ${paper.issn}`:null,
-    paper.doi?`DOI: ${paper.doi}`:null,
     paper.certificate_path?'Certificate: Available':null,
   ].filter((item):item is string=>Boolean(item));
 
@@ -77,6 +77,8 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
       {publicationMeta.length?<div aria-label="Publication details" style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'5px 8px',maxWidth:980,marginTop:9,padding:'8px 12px',border:'1px solid #d5e1e7',borderRadius:6,background:'rgba(255,255,255,.48)',fontSize:10.5,lineHeight:1.5,color:'#496071'}}>
         {publicationMeta.map((item,index)=><span key={item} style={{display:'inline-flex',alignItems:'center',fontWeight:index===0?700:500,color:index===0?'#27465e':'#496071'}}>{index>0?<span aria-hidden="true" style={{marginRight:8,color:'#9aa8b2'}}>·</span>:null}{item}</span>)}
       </div>:null}
+
+      {doiHref?<div style={{maxWidth:980,marginTop:7,fontSize:11,lineHeight:1.5,color:'#40596d'}}><strong style={{color:'#27465e'}}>DOI:</strong> <a href={doiHref} target="_blank" rel="noreferrer" style={{color:'#1473a8',textDecoration:'underline',textUnderlineOffset:2,overflowWrap:'anywhere'}}>{doiHref}</a></div>:null}
     </div></section>
 
     <main className="container" style={{padding:'22px 0 34px'}}>
