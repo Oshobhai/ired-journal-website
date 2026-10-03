@@ -15,7 +15,7 @@ export async function generateMetadata():Promise<Metadata>{
   const keywords=settings.seo_keywords.split(',').map(x=>x.trim()).filter(Boolean);
   return {
     metadataBase:new URL(siteUrl),
-    title:{default:settings.seo_title,template:`%s | ${settings.institution_short_name}`},
+    title:{default:`${settings.institution_short_name} | Research Journals`,template:`%s | ${settings.institution_short_name}`},
     description:settings.seo_description,
     applicationName:`${settings.institution_short_name} Research Journals`,
     keywords,
