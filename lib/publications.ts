@@ -105,7 +105,7 @@ const redSelect = 'id,title,subtitle,editors,description,theme,publication_year,
 
 export async function getPublishedGreenPapers(limit?: number): Promise<PublicGreenPaper[]> {
   const supabase = await createClient()
-  let query = supabase.from('green_papers').select(greenSelect).eq('status', 'published').order('published_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false })
+  let query = supabase.from('green_papers').select(greenSelect).eq('status', 'published').order('created_at', { ascending: false })
   if (limit) query = query.limit(limit)
   const { data, error } = await query
   if (error || !data) return []
@@ -154,7 +154,7 @@ export async function getPublishedGreenPaperById(id: string): Promise<PublicGree
 
 export async function getPublishedRedBooks(limit?: number): Promise<PublicRedBook[]> {
   const supabase = await createClient()
-  let query = supabase.from('red_books').select(redSelect).eq('status', 'published').order('published_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false })
+  let query = supabase.from('red_books').select(redSelect).eq('status', 'published').order('created_at', { ascending: false })
   if (limit) query = query.limit(limit)
   const { data, error } = await query
   if (error || !data) return []
