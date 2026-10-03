@@ -19,6 +19,18 @@ function findHeading(text:string,pattern:RegExp,from=0){
   return {start:from+match.index,end:from+match.index+match[0].length}
 }
 
+function isLikelyGarbledIndicMetadata(value:string){
+  if(!value)return false
+  if(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\uFFFD]/.test(value))return true
+
+  const indic=(value.match(/[\u0900-\u097F\u0A80-\u0AFF]/g)||[]).length
+  if(indic<20)return false
+
+  const suspiciousSymbols=(value.match(/[#&$<>]/g)||[]).length
+  const brokenTransitions=(value.match(/(?:[\u0900-\u097F\u0A80-\u0AFF][0-9#&$?]|[0-9#&$?][\u0900-\u097F\u0A80-\u0AFF])/g)||[]).length
+  return suspiciousSymbols>=3||brokenTransitions>=3
+}
+
 function parsePdfMetadata(rawText:string){
   const text=rawText.replace(/\r/g,'\n').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim()
   const abstractHeading=/(?:^|\n)\s*(?:abstract|summary)\s*[:.\-–—]*/i
@@ -45,7 +57,9 @@ function parsePdfMetadata(rawText:string){
   let keywordParts=keywordText.split(/\s*[,;•·|]\s*/).map(cleanSection).filter(Boolean)
   if(keywordParts.length<=1&&keywordText.includes('\n'))keywordParts=keywordText.split(/\n+/).map(cleanSection).filter(Boolean)
   const keywords=[...new Set(keywordParts.filter(item=>item.length<=120).slice(0,20))]
-  return {abstract,keywords,textLength:text.length}
+  const metadataText=[abstract,...keywords].join(' ')
+  const garbled=isLikelyGarbledIndicMetadata(metadataText)
+  return {abstract,keywords,textLength:text.length,garbled}
 }
 
 async function extractPdfMetadata(file:File){
@@ -99,6 +113,13 @@ export default function PublicationManager(){
     setExtractionNote('Reading PDF for Abstract and Keywords…')
     try{
       const extracted=await extractPdfMetadata(file)
+      if(extracted.garbled){
+        setGreenAbstract('')
+        setGreenKeywords('')
+        setShowManualMetadata(true)
+        setExtractionNote('PDF text encoding appears garbled for Hindi/Gujarati metadata. Auto-extracted Abstract and Keywords were rejected; enter the correct text below.')
+        return
+      }
       setGreenAbstract(extracted.abstract)
       setGreenKeywords(extracted.keywords.join(', '))
       const needsManual=!extracted.abstract||!extracted.keywords.length
@@ -259,7 +280,7 @@ export default function PublicationManager(){
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:18}}>
       <section className="contentCard">
         <h2>Add GREEN Research Paper</h2>
-        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Upload a new GREEN paper as Draft. Abstract and Keywords are read from the PDF automatically when possible.</p>
+        <p style={{fontSize:12,color:'#687586',marginTop:-4}}>Upload a new GREEN paper as Draft. Abstract and Keywords are read from the PDF automatically when possible; garbled Hindi/Gujarati extraction is rejected for manual review.</p>
         <form onSubmit={uploadGreen}>
           <label style={labelStyle}>Paper Title<input name="paper_title" required style={fieldStyle}/></label>
           <label style={labelStyle}>Author Name<input name="author_name" required style={fieldStyle}/></label>
@@ -272,14 +293,14 @@ export default function PublicationManager(){
           </div>
           <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>Month, Year, Volume and Issue are saved exactly as entered. Article ID remains automatic.</div>
           <label style={labelStyle}>Paper PDF (max 50 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required onChange={handleGreenPdf} style={fieldStyle}/></label>
-          {extractionNote?<div style={{fontSize:10.5,lineHeight:1.5,color:extractionNote.startsWith('Could not')?'#9a3c32':'#526b5d',padding:'8px 10px',background:'#f7faf8',border:'1px solid #dbe7df',margin:'-3px 0 10px'}}>{extractionNote}</div>:null}
+          {extractionNote?<div style={{fontSize:10.5,lineHeight:1.5,color:extractionNote.startsWith('Could not')||extractionNote.includes('garbled')?'#9a3c32':'#526b5d',padding:'8px 10px',background:'#f7faf8',border:'1px solid #dbe7df',margin:'-3px 0 10px'}}>{extractionNote}</div>:null}
           {showManualMetadata?<div style={{padding:'12px 12px 2px',border:'1px solid #eadfc5',background:'#fffcf4',marginBottom:10}}>
             <div style={{fontSize:10.5,fontWeight:700,color:'#765f2f',marginBottom:9}}>PDF metadata needs manual review.</div>
-            <label style={labelStyle}>Abstract <span style={{fontWeight:400,color:'#75828d'}}>(only if available)</span><textarea value={greenAbstract} onChange={event=>setGreenAbstract(event.target.value)} rows={7} maxLength={10000} placeholder="Enter Abstract only if it was not detected from the PDF." style={{...fieldStyle,resize:'vertical',lineHeight:1.55}}/></label>
+            <label style={labelStyle}>Abstract <span style={{fontWeight:400,color:'#75828d'}}>(only if available)</span><textarea value={greenAbstract} onChange={event=>setGreenAbstract(event.target.value)} rows={7} maxLength={10000} placeholder="Enter Abstract only if it was not detected correctly from the PDF." style={{...fieldStyle,resize:'vertical',lineHeight:1.55}}/></label>
             <label style={labelStyle}>Keywords <span style={{fontWeight:400,color:'#75828d'}}>(comma-separated)</span><textarea value={greenKeywords} onChange={event=>setGreenKeywords(event.target.value)} rows={2} maxLength={1500} placeholder="Keyword 1, Keyword 2, Keyword 3" style={{...fieldStyle,resize:'vertical',lineHeight:1.5}}/></label>
           </div>:null}
           <label style={labelStyle}>Certificate PDF (optional · max 10 MB)<input name="certificate" type="file" accept="application/pdf,.pdf" style={fieldStyle}/></label>
-          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>When PDF text is readable, Abstract and Keywords are saved automatically. Manual fields appear only when extraction is incomplete. Certificate work and publishing are handled from GREEN Papers after upload.</div>
+          <div style={{fontSize:10.5,color:'#667b6e',marginTop:-3,marginBottom:10}}>When PDF text is readable and clean, Abstract and Keywords are saved automatically. Manual fields appear when extraction is incomplete or text encoding looks corrupted.</div>
           <button className="btn btnGreen" disabled={busy||extracting} type="submit">{extracting?'Reading PDF…':busy?'Uploading…':'Upload GREEN Paper'}</button>
         </form>
       </section>
