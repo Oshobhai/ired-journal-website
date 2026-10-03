@@ -40,7 +40,8 @@ html,body{max-width:100%;overflow-x:hidden}img{max-width:100%}.mobileNav{display
   .heroArt{display:none!important}
 
   .publicationStrip{padding:12px 0 4px!important}
-  .journalGrid,.latestGrid,.aboutGrid{grid-template-columns:1fr!important;gap:12px!important}
+  .journalGrid,.latestGrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:12px!important}
+  .aboutGrid{grid-template-columns:1fr!important;gap:12px!important}
   .journalCard{grid-template-columns:1fr!important;gap:10px!important;padding:15px!important;min-height:0!important}
   .journalLogo{height:auto!important;max-height:92px!important;max-width:260px!important;justify-self:start}
   .journalCopy h2{font-size:18px!important}
@@ -88,6 +89,10 @@ html,body{max-width:100%;overflow-x:hidden}img{max-width:100%}.mobileNav{display
 
   .redViewerCard{padding:12px!important}
   .redViewerFrame{height:70vh!important;border-radius:3px!important}
+}
+
+@media(max-width:600px){
+  .journalGrid,.latestGrid{grid-template-columns:1fr!important;gap:12px!important}
 }
 
 @media(max-width:480px){
