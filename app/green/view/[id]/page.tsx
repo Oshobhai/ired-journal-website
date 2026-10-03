@@ -111,10 +111,10 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
         <div style={{fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'#73818c',marginBottom:4}}>Article Resources</div>
         <h2 style={{fontFamily:'Georgia,serif',fontSize:22,color:'#0b2d4e',margin:'0 0 13px'}}>Access this Publication</h2>
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-          {paper.download_url?<div style={{padding:'18px',border:'1px solid #d9e2e8',borderRadius:10,background:'#fff',boxShadow:'0 4px 16px rgba(18,46,70,.035)'}}>
+          {(paper.view_url||paper.download_url)?<div style={{padding:'18px',border:'1px solid #d9e2e8',borderRadius:10,background:'#fff',boxShadow:'0 4px 16px rgba(18,46,70,.035)'}}>
             <div style={{display:'flex',gap:11,alignItems:'flex-start'}}>
               <div aria-hidden="true" style={{width:36,height:36,borderRadius:8,display:'grid',placeItems:'center',background:'#eef7f2',color:'#148444',fontWeight:800}}>PDF</div>
-              <div><div style={{fontFamily:'Georgia,serif',fontSize:17,fontWeight:700,color:'#0b2d4e'}}>Article PDF</div><p style={{fontSize:11.5,lineHeight:1.55,color:'#637382',margin:'4px 0 12px'}}>Download the official published version of this research paper.</p><a className="btn btnGreen compact" href={paper.download_url}>Download PDF</a></div>
+              <div><div style={{fontFamily:'Georgia,serif',fontSize:17,fontWeight:700,color:'#0b2d4e'}}>Article PDF</div><p style={{fontSize:11.5,lineHeight:1.55,color:'#637382',margin:'4px 0 12px'}}>View the official published PDF in your browser or download a copy.</p><div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{paper.view_url?<a className="btn btnGreen compact" href={paper.view_url} target="_blank" rel="noreferrer">View PDF</a>:null}{paper.download_url?<a className="btn btnOutline compact" href={paper.download_url}>Download PDF</a>:null}</div></div>
             </div>
           </div>:null}
 
