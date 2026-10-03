@@ -79,14 +79,20 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
       </div>:null}
 
       <div style={{maxWidth:980,marginTop:7,fontSize:11,lineHeight:1.5,color:'#40596d'}}><strong style={{color:'#27465e'}}>DOI:</strong> {doiHref?<a href={doiHref} target="_blank" rel="noreferrer" style={{color:'#1473a8',textDecoration:'underline',textUnderlineOffset:2,overflowWrap:'anywhere'}}>{doiHref}</a>:<span style={{color:'#6f7f8c'}}>Not Assigned</span>}</div>
+
+      {paper.keywords?.length?<div style={{display:'flex',alignItems:'flex-start',gap:8,maxWidth:980,marginTop:9,fontSize:11,lineHeight:1.5,color:'#40596d'}}>
+        <strong style={{color:'#27465e',paddingTop:3,whiteSpace:'nowrap'}}>Keywords:</strong>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{paper.keywords.map(k=><span key={k} style={{padding:'3px 8px',border:'1px solid #ccd9e1',borderRadius:999,fontSize:10.5,color:'#496071',background:'rgba(255,255,255,.58)'}}>{k}</span>)}</div>
+      </div>:null}
+
+      {paper.abstract?<section style={{maxWidth:980,marginTop:10,padding:'11px 13px',border:'1px solid #d5e1e7',borderRadius:6,background:'rgba(255,255,255,.58)'}}>
+        <div style={{fontFamily:'Georgia,serif',fontSize:15,fontWeight:700,color:'#173d60',marginBottom:5}}>Abstract</div>
+        <p style={{fontSize:11.5,lineHeight:1.7,color:'#465a6a',textAlign:'justify',margin:0}}>{paper.abstract}</p>
+      </section>:null}
     </div></section>
 
     <main className="container" style={{padding:'22px 0 34px'}}>
       <article className="contentCard">
-        {paper.abstract?<section style={{marginBottom:20}}><h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:'0 0 8px'}}>Abstract</h2><p style={{fontSize:12.5,lineHeight:1.75,color:'#465a6a',textAlign:'justify',margin:0}}>{paper.abstract}</p></section>:null}
-
-        {paper.keywords?.length?<section style={{paddingTop:15,borderTop:'1px solid #e0e6ea',marginBottom:20}}><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',margin:'0 0 7px'}}>Keywords</h3><div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{paper.keywords.map(k=><span key={k} style={{padding:'4px 8px',border:'1px solid #d8e1e7',borderRadius:999,fontSize:10.5,color:'#536473',background:'#f8fafb'}}>{k}</span>)}</div></section>:null}
-
         {hasEnglish?<section style={{marginBottom:20,padding:'14px 16px',border:'1px solid #d7e4ec',borderLeft:'4px solid #173d60',background:'#f8fafc'}}><div style={{fontSize:9.5,letterSpacing:'.09em',textTransform:'uppercase',fontWeight:800,color:'#526b7e',marginBottom:7}}>English Bibliographic Record</div>{english?.english_title?<div style={{fontSize:12,lineHeight:1.6,color:'#263f58',marginBottom:english.english_abstract?8:0}}><strong>English Title:</strong> {english.english_title}</div>:null}{english?.english_abstract?<div><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',margin:'0 0 6px'}}>English Abstract / Summary</h3><p style={{fontSize:12,lineHeight:1.72,color:'#465a6a',textAlign:'justify',margin:0}}>{english.english_abstract}</p></div>:null}</section>:null}
 
         {(paper.view_url||paper.download_url)?<section style={{marginTop:18,padding:'14px 16px',border:'1px solid #d8e2e8',background:'#f8fafb'}}>
