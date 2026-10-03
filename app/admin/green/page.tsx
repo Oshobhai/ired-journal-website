@@ -18,11 +18,11 @@ export default async function GreenAdmin({searchParams}:PageProps){
   const initialQueue=allowedQueues.includes(params.queue as Queue)?params.queue as Queue:'all'
   return <AdminFrame access={access} active="green" kicker="Publication Management" title="GREEN Papers" description="Manage the Current Issue first, with scalable access to all papers, final PDFs, certificates, English metadata, publication status and archives. When a DOI is assigned later, add it from All Papers → Edit & Files; the public article page updates automatically.">
     <style>{`
-      #green-manager table{display:block!important;width:100%!important;min-width:820px!important}
+      #green-manager table{display:block!important;width:100%!important;min-width:1080px!important}
       #green-manager table thead,#green-manager table tbody{display:block;width:100%}
       #green-manager table thead tr,#green-manager table tbody tr{
         display:grid;width:100%;
-        grid-template-columns:32px minmax(240px,2fr) minmax(170px,1.35fr) minmax(155px,1fr) 90px 82px 92px;
+        grid-template-columns:32px minmax(220px,2fr) minmax(150px,1.25fr) minmax(145px,1fr) minmax(180px,1.35fr) 82px 78px 88px;
         align-items:start
       }
       #green-manager table thead tr>th:last-child{display:none}
