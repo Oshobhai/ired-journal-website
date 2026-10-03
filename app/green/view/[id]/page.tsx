@@ -59,7 +59,7 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
       <div className="container"><div>
         <div style={{marginBottom:9}}><JournalTitle kind="green" title={settings.green_title} size={15}/></div>
         <div style={{display:'inline-flex',alignItems:'center',padding:'4px 8px',borderRadius:999,background:'#eaf5ee',color:'#14733d',fontSize:9.5,letterSpacing:'.09em',textTransform:'uppercase',fontWeight:800}}>{paper.article_type||'Research Article'}</div>
-        <h1 style={{fontSize:34,lineHeight:1.13,maxWidth:1000,margin:'12px 0 0',color:'#0b2d4e',fontFamily:'Georgia,serif'}}>{paper.title}</h1>
+        <h1 style={{fontSize:'clamp(24px,2.6vw,30px)',lineHeight:1.18,maxWidth:1080,margin:'12px 0 0',color:'#0b2d4e',fontFamily:'Georgia,serif'}}>{paper.title}</h1>
         {english?.english_title&&english.english_title!==paper.title?<p style={{fontFamily:'Georgia,serif',fontSize:15,color:'#516578',margin:'9px 0 0',maxWidth:980,lineHeight:1.5}}><strong>English Title:</strong> {english.english_title}</p>:null}
 
         <div style={{marginTop:20,border:'1px solid #d9e2e8',borderRadius:12,background:'#fff',boxShadow:'0 8px 24px rgba(18,46,70,.05)',overflow:'hidden'}}>
