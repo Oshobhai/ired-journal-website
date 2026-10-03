@@ -1,0 +1,34 @@
+/* Keep the GREEN and RED homepage columns visually aligned on desktop/tablet. */
+@media (min-width:601px){
+  .journalGrid{
+    grid-template-rows:auto auto auto;
+    align-items:stretch;
+  }
+  .journalGrid>div{
+    display:grid!important;
+    grid-row:1 / span 3;
+    grid-template-rows:subgrid;
+    gap:16px!important;
+    align-content:stretch!important;
+    min-width:0;
+  }
+  .journalGrid>div>*{
+    min-height:0;
+  }
+  .journalGrid>div>article,
+  .journalGrid>div>section,
+  .journalGrid>div>div{
+    height:100%;
+  }
+  .journalGrid>div>div:last-child{
+    display:flex;
+    flex-direction:column;
+  }
+  .journalGrid>div>div:last-child .listPanel{
+    flex:1;
+  }
+}
+
+@media (min-width:601px) and (max-width:760px){
+  .journalGrid>div{gap:12px!important}
+}
