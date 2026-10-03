@@ -4,6 +4,7 @@ import './green-paper.css';
 import './mobile.css';
 import './contact-mobile.css';
 import './home-journal-balance.css';
+import './public-page-width.css';
 import type { Metadata } from 'next';
 import {getSiteSettings} from '@/lib/site-settings';
 
