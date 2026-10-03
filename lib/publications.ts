@@ -134,7 +134,6 @@ export async function getGreenArchive(options?: { q?: string; year?: number | nu
 
   const { data, error, count } = await query
     .order('publication_year', { ascending: false, nullsFirst: false })
-    .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .range(from, to)
 
@@ -183,7 +182,6 @@ export async function getRedArchive(options?: { q?: string; year?: number | null
 
   const { data, error, count } = await query
     .order('publication_year', { ascending: false, nullsFirst: false })
-    .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .range(from, to)
 
