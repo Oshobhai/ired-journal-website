@@ -41,6 +41,14 @@ function safeSearch(value:string){
   return value.replace(/[%_,()'\"]/g,' ').replace(/\s+/g,' ').trim()
 }
 
+function normalizeDoi(value:string){
+  return value
+    .trim()
+    .replace(/^doi:\s*/i,'')
+    .replace(/^https?:\/\/(?:dx\.)?doi\.org\//i,'')
+    .trim()
+}
+
 type Props = {
   initialKind?: Kind
   lockedKind?: Kind
@@ -205,7 +213,9 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
       }
       if (kind === 'green') {
         updates.authors = String(f.get('authors') || '').trim()
-        updates.doi = String(f.get('doi') || '').trim() || null
+        const doi=normalizeDoi(String(f.get('doi') || ''))
+        if(doi && !/^10\.\d{4,9}\/\S+$/i.test(doi))throw new Error('Enter a valid DOI, for example 10.1234/ired.green.2026.0008.')
+        updates.doi = doi || null
         updates.publication_month = String(f.get('publication_month') || '').trim() || null
         const yearFolder = Number(updates.publication_year) || item.publication_year || new Date().getFullYear()
 
@@ -335,7 +345,7 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
             return <tr key={item.id} style={{borderTop:'1px solid #e4e9ed',verticalAlign:'top'}}>
               <td style={{padding:8}}><input type="checkbox" checked={selected.has(item.id)} onChange={e=>{const n=new Set(selected); e.target.checked?n.add(item.id):n.delete(item.id); setSelected(n)}}/></td>
               {kind==='red'?<td style={{padding:8}}>{coverUrl?<img src={coverUrl} alt="" style={{width:36,height:50,objectFit:'cover',border:'1px solid #ddd'}}/>:<span style={{fontSize:10,color:'#9b5b5b'}}>No cover</span>}</td>:null}
-              <td style={{padding:8,maxWidth:260}}><strong>{item.title}</strong><div style={{fontSize:10,color:'#7a8792',marginTop:3}}>ID: {kind==='green'&&item.article_id?item.article_id:`${item.id.slice(0,8)}…`}</div></td>
+              <td style={{padding:8,maxWidth:260}}><strong>{item.title}</strong><div style={{fontSize:10,color:'#7a8792',marginTop:3}}>ID: {kind==='green'&&item.article_id?item.article_id:`${item.id.slice(0,8)}…`}</div>{kind==='green'&&item.doi?<div style={{fontSize:10,color:'#536b7d',marginTop:2}}>DOI: {item.doi}</div>:null}</td>
               <td style={{padding:8}}>{kind==='green' ? item.authors : item.editors || '—'}</td>
               <td style={{padding:8}}>{item.publication_month ? `${item.publication_month} ` : ''}{item.publication_year || '—'}{item.volume ? ` · Vol ${item.volume}` : ''}{item.issue ? ` · Issue ${item.issue}` : ''}</td>
               {kind==='green'?<td style={{padding:8}}>{item.certificate_path?<span style={{fontSize:10,fontWeight:700,color:'#16723b'}}>Ready</span>:<span style={{fontSize:10,color:'#8a6d2b'}}>Not uploaded</span>}</td>:null}
@@ -352,8 +362,12 @@ export default function ManagementConsole({initialKind='green',lockedKind,showSt
               {editing===item.id ? <form onSubmit={e=>saveEdit(e,item)} style={{marginTop:8,padding:10,border:'1px solid #dce4ea',borderRadius:5,background:'#fafcfd',minWidth:420}}>
                 <div style={{fontSize:11,fontWeight:800,color:'#173d60',marginBottom:7}}>{kind==='green'?'Paper details':'Publication details'}</div>
                 <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr',gap:6}}><input name="title" defaultValue={item.title} required style={control}/><input name="publication_year" type="number" defaultValue={item.publication_year || ''} placeholder="Year" style={control}/><input name="volume" defaultValue={item.volume || ''} placeholder="Volume" style={control}/></div>
-                <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr',gap:6,marginTop:6}}>{kind==='green'?<input name="authors" defaultValue={item.authors || ''} placeholder="Authors" style={control}/>:<input name="editors" defaultValue={item.editors || ''} placeholder="Editors" style={control}/>}<input name="issue" defaultValue={item.issue || ''} placeholder="Issue" style={control}/>{kind==='green'?<input name="doi" defaultValue={item.doi || ''} placeholder="DOI" style={control}/>:<select name="publication_month" defaultValue={item.publication_month || ''} style={control}><option value="">Month</option>{months.map(m=><option key={m}>{m}</option>)}</select>}</div>
-                {kind==='green'?<div style={{marginTop:6}}><select name="publication_month" defaultValue={item.publication_month || ''} style={{...control,width:'100%'}}><option value="">Publication month</option>{months.map(m=><option key={m}>{m}</option>)}</select></div>:null}
+                <div style={{display:'grid',gridTemplateColumns:kind==='green'?'2fr 1fr':'2fr 1fr 1fr',gap:6,marginTop:6}}>{kind==='green'?<input name="authors" defaultValue={item.authors || ''} placeholder="Authors" style={control}/>:<input name="editors" defaultValue={item.editors || ''} placeholder="Editors" style={control}/>}<input name="issue" defaultValue={item.issue || ''} placeholder="Issue" style={control}/>{kind==='red'?<select name="publication_month" defaultValue={item.publication_month || ''} style={control}><option value="">Month</option>{months.map(m=><option key={m}>{m}</option>)}</select>:null}</div>
+                {kind==='green'?<div style={{display:'grid',gridTemplateColumns:'minmax(150px,1fr) minmax(260px,2fr)',gap:8,marginTop:8}}>
+                  <label style={{display:'grid',gap:4,fontSize:10,fontWeight:800,color:'#315a42'}}>Publication Month<select name="publication_month" defaultValue={item.publication_month || ''} style={{...control,width:'100%'}}><option value="">Select month</option>{months.map(m=><option key={m}>{m}</option>)}</select></label>
+                  <label style={{display:'grid',gap:4,fontSize:10,fontWeight:800,color:'#31506c'}}>DOI<input name="doi" defaultValue={item.doi || ''} placeholder="10.xxxx/xxxxx or https://doi.org/10.xxxx/xxxxx" autoComplete="off" style={{...control,width:'100%'}}/></label>
+                </div>:null}
+                {kind==='green'?<div style={{fontSize:9.5,color:'#6b7782',marginTop:4}}>When a DOI is assigned later, paste either the DOI itself or the full doi.org URL. The saved value is normalized automatically and appears on the public article page.</div>:null}
                 {kind==='green'?<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginTop:9}}>
                   <div style={{padding:'9px',background:'#f3f8f5',border:'1px solid #d8e8de',borderRadius:5}}><div style={{fontSize:10.5,fontWeight:800,color:'#315a42',marginBottom:5}}>Paper PDF</div><div style={{fontSize:9.5,color:'#6b7c72',marginBottom:6,overflowWrap:'anywhere'}}>Current: {item.pdf_path.split('/').pop() || item.pdf_path}</div><input name="replacement_pdf" type="file" accept="application/pdf,.pdf" style={{...control,width:'100%'}}/><div style={{fontSize:9.5,color:'#77857d',marginTop:4}}>Optional replacement · max 50 MB.</div></div>
                   <div style={{padding:'9px',background:'#f6f8fb',border:'1px solid #dbe3ea',borderRadius:5}}><div style={{fontSize:10.5,fontWeight:800,color:'#31506c',marginBottom:5}}>Certificate PDF</div><div style={{fontSize:9.5,color:'#6b7782',marginBottom:6}}>{item.certificate_path?`Current: ${item.certificate_path.split('/').pop()||'certificate.pdf'}`:'No certificate uploaded yet.'}</div><input name="certificate_pdf" type="file" accept="application/pdf,.pdf" style={{...control,width:'100%'}}/><div style={{fontSize:9.5,color:'#77857d',marginTop:4}}>Upload or replace · max 10 MB.</div>{item.certificate_path?<div style={{display:'flex',gap:5,marginTop:6,flexWrap:'wrap'}}><button type="button" style={btn} onClick={()=>openCertificate(item,false)}>View</button><button type="button" style={btn} onClick={()=>openCertificate(item,true)}>Download</button><button type="button" style={danger} onClick={()=>removeCertificate(item)}>Delete Certificate</button></div>:null}</div>
