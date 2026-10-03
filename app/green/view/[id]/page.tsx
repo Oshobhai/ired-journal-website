@@ -56,7 +56,7 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
 
   return <><Header/>
     <section style={{background:'#f4f7f9',borderBottom:'1px solid #dbe3e8',padding:'34px 0 30px'}}>
-      <div className="container"><div style={{maxWidth:1040,margin:'0 auto'}}>
+      <div className="container"><div>
         <div style={{marginBottom:9}}><JournalTitle kind="green" title={settings.green_title} size={15}/></div>
         <div style={{display:'inline-flex',alignItems:'center',padding:'4px 8px',borderRadius:999,background:'#eaf5ee',color:'#14733d',fontSize:9.5,letterSpacing:'.09em',textTransform:'uppercase',fontWeight:800}}>{paper.article_type||'Research Article'}</div>
         <h1 style={{fontSize:34,lineHeight:1.13,maxWidth:1000,margin:'12px 0 0',color:'#0b2d4e',fontFamily:'Georgia,serif'}}>{paper.title}</h1>
@@ -100,7 +100,7 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
       </div></div>
     </section>
 
-    <main style={{background:'#fff'}}><div className="container" style={{padding:'28px 0 40px'}}><article style={{maxWidth:1040,margin:'0 auto'}}>
+    <main style={{background:'#fff'}}><div className="container" style={{padding:'28px 0 40px'}}><article>
       {hasEnglish?<section style={{padding:'18px 20px',border:'1px solid #d9e2e8',borderRadius:10,background:'#fbfcfd',marginBottom:20}}>
         <div style={{fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'#526b7e',marginBottom:8}}>English Bibliographic Record</div>
         {english?.english_title?<div style={{fontSize:12.5,lineHeight:1.65,color:'#263f58',marginBottom:english.english_abstract?10:0}}><strong>English Title:</strong> {english.english_title}</div>:null}
