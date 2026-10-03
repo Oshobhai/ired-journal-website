@@ -60,18 +60,19 @@ export default function ShareButtons({title,authors}:{title:string;authors:strin
     }
   }
 
-  const button={border:'1px solid #d5dee5',background:'#fff',color:'#27465e',padding:'7px 9px',borderRadius:5,fontSize:10.5,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:5} as const;
+  const button={border:'1px solid #d7e0e6',background:'#fff',color:'#27465e',padding:'8px 11px',borderRadius:6,fontSize:10.5,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',justifyContent:'center',minHeight:34} as const;
 
-  return <section style={{marginTop:18,paddingTop:15,borderTop:'1px solid #e1e7eb'}}>
-    <div style={{fontFamily:'Georgia,serif',fontSize:17,fontWeight:700,color:'#0b2d4e',marginBottom:4}}>Share this Paper</div>
-    <p style={{fontSize:10.5,lineHeight:1.55,color:'#6a7986',margin:'0 0 10px'}}>Share the official IRED publication page instead of sending an unofficial copy.</p>
-    <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-      <button type="button" onClick={copyLink} style={button}>🔗 {copied?'Link Copied':'Copy Link'}</button>
+  return <section>
+    <div style={{fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:800,color:'#73818c',marginBottom:4}}>Share & Reference</div>
+    <div style={{fontFamily:'Georgia,serif',fontSize:18,fontWeight:700,color:'#0b2d4e',marginBottom:4}}>Share this Paper</div>
+    <p style={{fontSize:11,lineHeight:1.6,color:'#667684',margin:'0 0 12px'}}>Use the official IRED article page when sharing or referencing this publication.</p>
+    <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>
+      <button type="button" onClick={copyLink} style={button}>{copied?'Link Copied':'Copy Link'}</button>
       <button type="button" onClick={()=>openShare('whatsapp')} style={button}>WhatsApp</button>
       <button type="button" onClick={()=>openShare('email')} style={button}>Email</button>
       <button type="button" onClick={()=>openShare('linkedin')} style={button}>LinkedIn</button>
-      <button type="button" onClick={openResearchGate} title="Copy the official IRED link and open ResearchGate" style={{...button,borderColor:'#5b9bd5',color:'#276796'}}>{researchGateCopied?'ResearchGate · Link Copied':'ResearchGate'}</button>
-      <button type="button" onClick={nativeShare} style={{...button,borderColor:'#148444',color:'#126f3a'}}>Share</button>
+      <button type="button" onClick={openResearchGate} title="Copy the official IRED link and open ResearchGate" style={{...button,borderColor:'#b8d1e5',color:'#276796'}}>{researchGateCopied?'ResearchGate · Link Copied':'ResearchGate'}</button>
+      <button type="button" onClick={nativeShare} style={{...button,borderColor:'#abd4bb',color:'#126f3a',background:'#f5fbf7'}}>Share</button>
     </div>
   </section>;
 }
