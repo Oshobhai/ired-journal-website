@@ -1,0 +1,8 @@
+/* Keep key public content pages aligned with the standard site container width. */
+main.container > div[style*="1100px"],
+main.container > div[style*="1080px"],
+main.container > div[style*="1120px"],
+main.contactPage > div[style*="1040px"]{
+  max-width:none!important;
+  width:100%!important;
+}
