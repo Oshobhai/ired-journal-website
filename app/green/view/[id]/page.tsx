@@ -7,7 +7,6 @@ import {getSiteSettings} from '@/lib/site-settings';
 import ShareButtons from './share-buttons';
 
 export const dynamic='force-dynamic';
-// Deployment retry marker: author-card design is unchanged.
 
 export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{
   const {id}=await params;
@@ -43,6 +42,17 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
   if(!paper){return <><Header/><main className="container" style={{padding:'28px 0'}}><div className="contentCard"><h1>Paper not available</h1><p>This GREEN publication is not currently available.</p><Link className="smallBtn" href="/green">← Back to GREEN Papers</Link></div></main><Footer/></>}
   const meta=[paper.publication_month,paper.publication_year].filter(Boolean).join(' ');
   const hasEnglish=Boolean(english?.english_title||english?.english_abstract);
+  const publicationMeta=[
+    paper.article_id?`Article ID: ${paper.article_id}`:null,
+    paper.article_type||'Research Article',
+    meta||null,
+    paper.volume?`Volume ${paper.volume}`:null,
+    paper.issue?`Issue ${paper.issue}`:null,
+    paper.issn&&paper.issn!=='XXXX-XXXX'?`ISSN: ${paper.issn}`:null,
+    paper.doi?`DOI: ${paper.doi}`:null,
+    paper.certificate_path?'Certificate: Available':null,
+  ].filter((item):item is string=>Boolean(item));
+
   return <><Header/>
     <section className="pageHero"><div className="container">
       <div style={{marginBottom:7}}><JournalTitle kind="green" title={settings.green_title} size={15}/></div>
@@ -63,32 +73,31 @@ export default async function GreenPaperDetail({params}:{params:Promise<{id:stri
           </div>:null}
         </div>
       </div>
+
+      {publicationMeta.length?<div aria-label="Publication details" style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'5px 8px',maxWidth:980,marginTop:9,padding:'8px 12px',border:'1px solid #d5e1e7',borderRadius:6,background:'rgba(255,255,255,.48)',fontSize:10.5,lineHeight:1.5,color:'#496071'}}>
+        {publicationMeta.map((item,index)=><span key={item} style={{display:'inline-flex',alignItems:'center',fontWeight:index===0?700:500,color:index===0?'#27465e':'#496071'}}>{index>0?<span aria-hidden="true" style={{marginRight:8,color:'#9aa8b2'}}>·</span>:null}{item}</span>)}
+      </div>:null}
     </div></section>
+
     <main className="container" style={{padding:'22px 0 34px'}}>
-      <div className="paperDetailGrid" style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) 280px',gap:24,alignItems:'start'}}>
-        <article className="contentCard">
-          {paper.abstract?<section style={{marginBottom:20}}><h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:'0 0 8px'}}>Abstract</h2><p style={{fontSize:12.5,lineHeight:1.75,color:'#465a6a',textAlign:'justify',margin:0}}>{paper.abstract}</p></section>:null}
+      <article className="contentCard">
+        {paper.abstract?<section style={{marginBottom:20}}><h2 style={{fontFamily:'Georgia,serif',fontSize:21,color:'#0b2d4e',margin:'0 0 8px'}}>Abstract</h2><p style={{fontSize:12.5,lineHeight:1.75,color:'#465a6a',textAlign:'justify',margin:0}}>{paper.abstract}</p></section>:null}
 
-          {paper.keywords?.length?<section style={{paddingTop:15,borderTop:'1px solid #e0e6ea',marginBottom:20}}><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',margin:'0 0 7px'}}>Keywords</h3><div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{paper.keywords.map(k=><span key={k} style={{padding:'4px 8px',border:'1px solid #d8e1e7',borderRadius:999,fontSize:10.5,color:'#536473',background:'#f8fafb'}}>{k}</span>)}</div></section>:null}
+        {paper.keywords?.length?<section style={{paddingTop:15,borderTop:'1px solid #e0e6ea',marginBottom:20}}><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',margin:'0 0 7px'}}>Keywords</h3><div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{paper.keywords.map(k=><span key={k} style={{padding:'4px 8px',border:'1px solid #d8e1e7',borderRadius:999,fontSize:10.5,color:'#536473',background:'#f8fafb'}}>{k}</span>)}</div></section>:null}
 
-          {hasEnglish?<section style={{marginBottom:20,padding:'14px 16px',border:'1px solid #d7e4ec',borderLeft:'4px solid #173d60',background:'#f8fafc'}}><div style={{fontSize:9.5,letterSpacing:'.09em',textTransform:'uppercase',fontWeight:800,color:'#526b7e',marginBottom:7}}>English Bibliographic Record</div>{english?.english_title?<div style={{fontSize:12,lineHeight:1.6,color:'#263f58',marginBottom:english.english_abstract?8:0}}><strong>English Title:</strong> {english.english_title}</div>:null}{english?.english_abstract?<div><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',margin:'0 0 6px'}}>English Abstract / Summary</h3><p style={{fontSize:12,lineHeight:1.72,color:'#465a6a',textAlign:'justify',margin:0}}>{english.english_abstract}</p></div>:null}</section>:null}
+        {hasEnglish?<section style={{marginBottom:20,padding:'14px 16px',border:'1px solid #d7e4ec',borderLeft:'4px solid #173d60',background:'#f8fafc'}}><div style={{fontSize:9.5,letterSpacing:'.09em',textTransform:'uppercase',fontWeight:800,color:'#526b7e',marginBottom:7}}>English Bibliographic Record</div>{english?.english_title?<div style={{fontSize:12,lineHeight:1.6,color:'#263f58',marginBottom:english.english_abstract?8:0}}><strong>English Title:</strong> {english.english_title}</div>:null}{english?.english_abstract?<div><h3 style={{fontFamily:'Georgia,serif',fontSize:17,color:'#0b2d4e',margin:'0 0 6px'}}>English Abstract / Summary</h3><p style={{fontSize:12,lineHeight:1.72,color:'#465a6a',textAlign:'justify',margin:0}}>{english.english_abstract}</p></div>:null}</section>:null}
 
-          {(paper.view_url||paper.download_url)?<section style={{marginTop:18,padding:'14px 16px',border:'1px solid #d8e2e8',background:'#f8fafb'}}>
-            <div style={{fontSize:10,letterSpacing:'.08em',textTransform:'uppercase',fontWeight:800,color:'#173d60'}}>Article PDF</div>
-            <p style={{fontSize:11.5,color:'#526577',margin:'5px 0 10px'}}>Read the complete published paper below. Scroll inside the viewer to move through the PDF.</p>
-            {paper.view_url?<div style={{overflow:'hidden',border:'1px solid #cfd9e0',borderRadius:4,background:'#fff'}}><iframe src={`${paper.view_url}#toolbar=1&navpanes=0&scrollbar=1&view=FitH`} title={`${paper.title} PDF`} style={{display:'block',width:'100%',height:'72vh',minHeight:560,maxHeight:760,border:0,background:'#fff'}}/></div>:<div style={{padding:'14px',border:'1px dashed #cfd9e0',background:'#fff',fontSize:11.5,color:'#526577'}}>Embedded PDF preview is unavailable for this paper.</div>}
-            {paper.download_url?<div style={{marginTop:12}}><a className="btn btnGreen compact" href={paper.download_url}>Download PDF</a></div>:null}
-          </section>:null}
+        {(paper.view_url||paper.download_url)?<section style={{marginTop:18,padding:'14px 16px',border:'1px solid #d8e2e8',background:'#f8fafb'}}>
+          <div style={{fontSize:10,letterSpacing:'.08em',textTransform:'uppercase',fontWeight:800,color:'#173d60'}}>Article PDF</div>
+          <p style={{fontSize:11.5,color:'#526577',margin:'5px 0 10px'}}>Read the complete published paper below. Scroll inside the viewer to move through the PDF.</p>
+          {paper.view_url?<div style={{overflow:'hidden',border:'1px solid #cfd9e0',borderRadius:4,background:'#fff'}}><iframe src={`${paper.view_url}#toolbar=1&navpanes=0&scrollbar=1&view=FitH`} title={`${paper.title} PDF`} style={{display:'block',width:'100%',height:'72vh',minHeight:560,maxHeight:760,border:0,background:'#fff'}}/></div>:<div style={{padding:'14px',border:'1px dashed #cfd9e0',background:'#fff',fontSize:11.5,color:'#526577'}}>Embedded PDF preview is unavailable for this paper.</div>}
+          {paper.download_url?<div style={{marginTop:12}}><a className="btn btnGreen compact" href={paper.download_url}>Download PDF</a></div>:null}
+        </section>:null}
 
-          {paper.certificate_path?<section style={{marginTop:18,padding:'14px 16px',border:'1px solid #cee5d6',background:'#f5fbf7'}}><div style={{fontSize:10,letterSpacing:'.08em',textTransform:'uppercase',fontWeight:800,color:'#14733d'}}>Publication Certificate</div><p style={{fontSize:11.5,color:'#526577',margin:'5px 0 10px'}}>A certificate is available for this published GREEN research paper.</p><div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{paper.certificate_view_url?<a className="btn btnGreen compact" href={paper.certificate_view_url} target="_blank" rel="noreferrer">View Certificate</a>:null}{paper.certificate_download_url?<a className="btn btnOutline compact" href={paper.certificate_download_url}>Download Certificate</a>:null}</div></section>:null}
+        {paper.certificate_path?<section style={{marginTop:18,padding:'14px 16px',border:'1px solid #cee5d6',background:'#f5fbf7'}}><div style={{fontSize:10,letterSpacing:'.08em',textTransform:'uppercase',fontWeight:800,color:'#14733d'}}>Publication Certificate</div><p style={{fontSize:11.5,color:'#526577',margin:'5px 0 10px'}}>A certificate is available for this published GREEN research paper.</p><div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{paper.certificate_view_url?<a className="btn btnGreen compact" href={paper.certificate_view_url} target="_blank" rel="noreferrer">View Certificate</a>:null}{paper.certificate_download_url?<a className="btn btnOutline compact" href={paper.certificate_download_url}>Download Certificate</a>:null}</div></section>:null}
 
-          <ShareButtons title={paper.title} authors={paper.authors}/>
-        </article>
-        <aside className="contentCard paperDetailAside" style={{padding:16}}>
-          <h2 style={{fontFamily:'Georgia,serif',fontSize:18,color:'#0b2d4e',margin:'0 0 12px'}}>Publication Details</h2>
-          {[['Article ID',paper.article_id],['Article Type',paper.article_type],['Published',meta],['Volume',paper.volume],['Issue',paper.issue],['ISSN',paper.issn&&paper.issn!=='XXXX-XXXX'?paper.issn:null],['DOI',paper.doi],['English Bibliographic Record',hasEnglish?'Available':null],['Certificate',paper.certificate_path?'Available':null]].map(([k,v])=>v?<div key={k} style={{padding:'8px 0',borderTop:'1px solid #edf1f4'}}><div style={{fontSize:9.5,textTransform:'uppercase',letterSpacing:'.07em',fontWeight:800,color:'#7a8792'}}>{k}</div><div style={{fontSize:11.5,lineHeight:1.5,color:'#344b5d',marginTop:3,overflowWrap:'anywhere'}}>{v}</div></div>:null)}
-          <div style={{display:'grid',gap:7,marginTop:13}}><Link className="smallBtn" href="/green">← Back to GREEN Papers</Link></div>
-        </aside>
-      </div>
+        <ShareButtons title={paper.title} authors={paper.authors}/>
+        <div style={{marginTop:16}}><Link className="smallBtn" href="/green">← Back to GREEN Papers</Link></div>
+      </article>
     </main><Footer/></>;
 }
