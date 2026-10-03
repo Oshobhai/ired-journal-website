@@ -139,9 +139,11 @@ export async function getGreenArchive(options?: { q?: string; year?: number | nu
 
   if (error || !data) return { papers: [], total: 0, page, pageSize, totalPages: 0 }
 
-  const papers = await Promise.all(data.map(attachGreenUrls))
   const total = count || 0
-  return { papers, total, page, pageSize, totalPages: Math.ceil(total / pageSize) }
+  const totalPages = Math.ceil(total / pageSize)
+  if (totalPages > 0 && page > totalPages) return getGreenArchive({ ...options, page: totalPages, pageSize })
+  const papers = await Promise.all(data.map(attachGreenUrls))
+  return { papers, total, page, pageSize, totalPages }
 }
 
 export async function getPublishedGreenPaperById(id: string): Promise<PublicGreenPaper | null> {
@@ -187,13 +189,15 @@ export async function getRedArchive(options?: { q?: string; year?: number | null
 
   if (error || !data) return { publications: [], total: 0, page, pageSize, totalPages: 0 }
 
+  const total = count || 0
+  const totalPages = Math.ceil(total / pageSize)
+  if (totalPages > 0 && page > totalPages) return getRedArchive({ ...options, page: totalPages, pageSize })
   const publications = data.map((book) => ({
     ...book,
     cover_url: book.cover_path ? supabase.storage.from('red-book-covers').getPublicUrl(book.cover_path).data.publicUrl : null,
     view_url: `/red/view/${book.id}`,
   })) as PublicRedBook[]
-  const total = count || 0
-  return { publications, total, page, pageSize, totalPages: Math.ceil(total / pageSize) }
+  return { publications, total, page, pageSize, totalPages }
 }
 
 export async function getPublishedRedBookById(id: string): Promise<PublicRedBook | null> {
