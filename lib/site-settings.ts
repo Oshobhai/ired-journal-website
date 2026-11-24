@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 
 export type SiteSettings={
@@ -95,7 +96,7 @@ export const defaultSiteSettings:SiteSettings={
   seo_keywords:'IRED, Institute of Research Education and Development, GREEN: The Research e-Journal, RED: The Research Journal, peer-reviewed journal, open-access journal, research journal, academic publications',
 }
 
-export async function getSiteSettings():Promise<SiteSettings>{
+async function loadSiteSettings():Promise<SiteSettings>{
   try{
     const supabase=await createClient()
     const {data,error}=await supabase.from('site_settings').select('*').eq('id',true).maybeSingle()
@@ -108,3 +109,5 @@ export async function getSiteSettings():Promise<SiteSettings>{
     return out
   }catch{return defaultSiteSettings}
 }
+
+export const getSiteSettings=cache(loadSiteSettings)
