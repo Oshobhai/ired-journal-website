@@ -88,6 +88,24 @@ async function signedUrls(bucket: string, path: string) {
   return { view_url: view?.signedUrl ?? null, download_url: download?.signedUrl ?? null }
 }
 
+async function batchSignedUrls(bucket:string,paths:string[]){
+  const uniquePaths=Array.from(new Set(paths.filter(Boolean)))
+  const result=new Map<string,{view_url:string|null;download_url:string|null}>()
+  if(!uniquePaths.length)return result
+  const supabase=await createClient()
+  const [{data:view},{data:download}]=await Promise.all([
+    supabase.storage.from(bucket).createSignedUrls(uniquePaths,600),
+    supabase.storage.from(bucket).createSignedUrls(uniquePaths,600,{download:true}),
+  ])
+  uniquePaths.forEach((path,index)=>{
+    result.set(path,{
+      view_url:view?.[index]?.signedUrl??null,
+      download_url:download?.[index]?.signedUrl??null,
+    })
+  })
+  return result
+}
+
 async function attachGreenUrls(paper:any):Promise<PublicGreenPaper>{
   const pdf=await signedUrls('green-papers',paper.pdf_path)
   let certificate_view_url:string|null=null
@@ -100,6 +118,26 @@ async function attachGreenUrls(paper:any):Promise<PublicGreenPaper>{
   return {...paper,...pdf,certificate_view_url,certificate_download_url} as PublicGreenPaper
 }
 
+async function attachGreenUrlsBatch(papers:any[]):Promise<PublicGreenPaper[]>{
+  if(!papers.length)return []
+  const pdfPaths=papers.map(p=>p.pdf_path).filter(Boolean)
+  const certificatePaths=papers.map(p=>p.certificate_path).filter(Boolean)
+  const [pdfUrls,certificateUrls]=await Promise.all([
+    batchSignedUrls('green-papers',pdfPaths),
+    batchSignedUrls('green-certificates',certificatePaths),
+  ])
+  return papers.map((paper)=>{
+    const pdf=pdfUrls.get(paper.pdf_path)||{view_url:null,download_url:null}
+    const certificate=paper.certificate_path?certificateUrls.get(paper.certificate_path):null
+    return {
+      ...paper,
+      ...pdf,
+      certificate_view_url:certificate?.view_url??null,
+      certificate_download_url:certificate?.download_url??null,
+    } as PublicGreenPaper
+  })
+}
+
 const greenSelect = 'id,title,authors,affiliation,author_email,abstract,keywords,article_id,article_type,publication_year,publication_month,volume,issue,issn,doi,pdf_path,certificate_path,certificate_uploaded_at,published_at'
 const redSelect = 'id,title,subtitle,editors,description,theme,publication_year,publication_month,volume,issue,issn,publication_label,isbn,cover_path,pdf_path,published_at'
 
@@ -109,7 +147,7 @@ export async function getPublishedGreenPapers(limit?: number): Promise<PublicGre
   if (limit) query = query.limit(limit)
   const { data, error } = await query
   if (error || !data) return []
-  return Promise.all(data.map(attachGreenUrls))
+  return attachGreenUrlsBatch(data)
 }
 
 export async function getGreenArchive(options?: { q?: string; year?: number | null; page?: number; pageSize?: number }): Promise<GreenArchiveResult> {
@@ -142,7 +180,7 @@ export async function getGreenArchive(options?: { q?: string; year?: number | nu
   const total = count || 0
   const totalPages = Math.ceil(total / pageSize)
   if (totalPages > 0 && page > totalPages) return getGreenArchive({ ...options, page: totalPages, pageSize })
-  const papers = await Promise.all(data.map(attachGreenUrls))
+  const papers = await attachGreenUrlsBatch(data)
   return { papers, total, page, pageSize, totalPages }
 }
 
