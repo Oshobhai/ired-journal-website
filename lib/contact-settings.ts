@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 
 export const IRED_EMAILS={
@@ -28,7 +29,7 @@ export const defaultContactSettings:ContactSettings={
   red_eissn:'Pending',
 }
 
-export async function getContactSettings():Promise<ContactSettings>{
+async function loadContactSettings():Promise<ContactSettings>{
   try{
     const supabase=await createClient()
     const {data,error}=await supabase.from('contact_settings').select('phone_primary,phone_secondary,email,secondary_email,registration_no,green_issn,red_eissn').eq('id',true).maybeSingle()
@@ -44,3 +45,5 @@ export async function getContactSettings():Promise<ContactSettings>{
     }
   }catch{return defaultContactSettings}
 }
+
+export const getContactSettings=cache(loadContactSettings)
